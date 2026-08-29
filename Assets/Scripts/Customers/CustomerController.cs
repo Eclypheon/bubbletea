@@ -130,7 +130,7 @@ namespace BubbleTeaShop
             leaveRoutine = StartCoroutine(LeaveAfterDelay(evaluation, 2.5f));
         }
 
-        public void ForceSkipCustomer()
+        public void ForceSkipCustomer(Action onFinished = null)
         {
             if (leaveRoutine != null)
             {
@@ -140,12 +140,79 @@ namespace BubbleTeaShop
 
             if (isWaiting)
             {
-                // Customer was skipped before being served -> record as 0 sales/tips
+                isWaiting = false;
                 DayManager.Instance?.RecordCustomerServed(0f, 0f);
-                OnCustomerLeftAngry?.Invoke(this);
-            }
+                string angryLine = GetAngrySkipLine(activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowReaction(angryLine, 1);
+                }
 
+                leaveRoutine = StartCoroutine(AngrySkipRoutine(onFinished));
+            }
+            else
+            {
+                DismissCustomer();
+                onFinished?.Invoke();
+            }
+        }
+
+        private IEnumerator AngrySkipRoutine(Action onFinished)
+        {
+            yield return new WaitForSeconds(1.5f);
             DismissCustomer();
+            OnCustomerLeftAngry?.Invoke(this);
+            onFinished?.Invoke();
+        }
+
+        private string GetAngrySkipLine(CustomerArchetype archetype)
+        {
+            string[] lines = archetype switch
+            {
+                CustomerArchetype.Adhd => new string[]
+                {
+                    "Hey! You're ringing the bell on me?! I was literally about to pay! Never coming back here!",
+                    "Wait, did you just skip my turn?! Unbelievable, 1-star review on Yelp!",
+                    "I waited in line for 20 minutes for THIS?! I'm taking my business elsewhere!"
+                },
+                CustomerArchetype.Autism => new string[]
+                {
+                    "Skipping someone mid-order violates basic queuing etiquette. I will never visit this establishment again.",
+                    "This is completely unacceptable service. My routine is ruined forever!",
+                    "You didn't even attempt my order. I am boycotting this shop!"
+                },
+                CustomerArchetype.Anxiety => new string[]
+                {
+                    "I-is it because I took too long to speak?! I knew this was a mistake... I'm never coming back!",
+                    "Oh no... did I do something wrong?! Fine, I'll just leave and never show my face here again!",
+                    "I can't believe you just dismissed me like that... my social anxiety was right about this place!"
+                },
+                CustomerArchetype.Tourettes => new string[]
+                {
+                    "HEY! WOW! You didn't even make my drink! Worst boba shop in town, I'M OUTTA HERE!",
+                    "DON'T RING THAT BELL AT ME! Zero stars, never stepping foot in this joint again!",
+                    "Rude!! You just lost your best customer! Keep your tea!"
+                },
+                CustomerArchetype.Dyscalculia => new string[]
+                {
+                    "I spent 10 minutes counting my coins for you to just kick me out?! I'm never returning!",
+                    "Ringing the bell before I can even pay?! The math on your customer service is ZERO!",
+                    "Forget it! I'm taking my money to the coffee shop next door!"
+                },
+                CustomerArchetype.Dyslexia => new string[]
+                {
+                    "I was just trying to read your menu board! You didn't have to kick me out, I'm never coming back!",
+                    "Rude! Not everyone can read your fancy tea names in 2 seconds! Never returning!",
+                    "Worst service ever! I'll tell everyone to avoid this place!"
+                },
+                _ => new string[]
+                {
+                    "Hey! You're skipping me?! Never coming back to this shop!",
+                    "Rude! I'm taking my business elsewhere!"
+                }
+            };
+
+            return lines[UnityEngine.Random.Range(0, lines.Length)];
         }
 
         private string GetReactionLine(int stars)

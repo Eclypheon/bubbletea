@@ -60,16 +60,22 @@ namespace BubbleTeaShop
             {
                 if (customerController.IsActive)
                 {
-                    // Customer was waiting and unserved -> force skip them with 0 sales/tips
-                    customerController.ForceSkipCustomer();
+                    // Customer was waiting and unserved -> trigger angry skip reaction, then spawn next
+                    customerController.ForceSkipCustomer(() => SpawnNextInQueue());
+                    return true;
                 }
                 else
                 {
-                    // Customer was already served and in departure animation -> dismiss immediately
+                    // Customer was already in departure animation -> dismiss immediately and bring next
                     customerController.DismissCustomer();
                 }
             }
 
+            return SpawnNextInQueue();
+        }
+
+        private bool SpawnNextInQueue()
+        {
             if (dailyCustomerQueue.Count == 0)
             {
                 Debug.Log("No more customers in line today!");
