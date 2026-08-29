@@ -10,31 +10,61 @@ namespace BubbleTeaShop
         [SerializeField] private Button iceButton;
         [SerializeField] private TextMeshProUGUI iceLevelText;
 
-        private int[] iceLevels = new int[] { 0, 30, 50, 100 };
-        private int currentLevelIndex = 0;
-
         private void Start()
         {
             if (iceButton != null)
             {
-                iceButton.onClick.AddListener(CycleIce);
+                iceButton.onClick.AddListener(AddIce);
             }
+
+            if (CupStation.Instance != null)
+            {
+                CupStation.Instance.OnCupUpdated += UpdateDisplay;
+            }
+
             UpdateDisplay();
         }
 
-        public void CycleIce()
+        private void OnDestroy()
         {
-            currentLevelIndex = (currentLevelIndex + 1) % iceLevels.Length;
-            int targetIce = iceLevels[currentLevelIndex];
-            CupStation.Instance?.SetIce(targetIce);
+            if (CupStation.Instance != null)
+            {
+                CupStation.Instance.OnCupUpdated -= UpdateDisplay;
+            }
+        }
+
+        public void AddIce()
+        {
+            if (CupStation.Instance == null || !CupStation.Instance.CurrentCup.hasCup) return;
+            if (CupStation.Instance.CurrentCup.isSealed) return;
+
+            int currentIce = CupStation.Instance.CurrentCup.icePercent;
+
+            if (currentIce < 50)
+            {
+                CupStation.Instance.SetIce(50);
+            }
+            else if (currentIce < 100)
+            {
+                CupStation.Instance.SetIce(100);
+            }
+            else
+            {
+                Debug.LogWarning("Cup already has maximum 100% ice! Trash the cup to remake if you wanted less ice.");
+            }
+
             UpdateDisplay();
         }
 
-        private void UpdateDisplay()
+        public void UpdateDisplay()
         {
             if (iceLevelText != null)
             {
-                iceLevelText.text = $"Ice: {iceLevels[currentLevelIndex]}%";
+                int currentIce = CupStation.Instance != null && CupStation.Instance.CurrentCup.hasCup
+                    ? CupStation.Instance.CurrentCup.icePercent
+                    : 0;
+
+                iceLevelText.text = $"Ice: {currentIce}%";
             }
         }
     }

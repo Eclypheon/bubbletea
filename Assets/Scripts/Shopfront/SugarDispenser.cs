@@ -1,81 +1,97 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BubbleTeaShop
 {
-    public class SugarDispenser : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+    public class SugarDispenser : MonoBehaviour
     {
-        [Header("Manual Mode Elements")]
-        [SerializeField] private GameObject manualContainer;
-        [SerializeField] private Slider sugarFillSlider;
-        [SerializeField] private TextMeshProUGUI sugarPercentText;
-        [SerializeField] private float fillSpeed = 50f; // % per second
+        [Header("Single Incremental Button Mode")]
+        [Tooltip("Clicking this adds sugar upward (e.g. 0% -> 25% -> 50% -> 75% -> 100%)")]
+        [SerializeField] private Button addSugarButton;
+        [SerializeField] private TextMeshProUGUI sugarLevelText;
+        [SerializeField] private int sugarStepPercent = 25; // +25% per click
 
-        [Header("Digital Upgrade Elements")]
-        [SerializeField] private GameObject digitalContainer;
+        [Header("Preset Buttons Mode (Optional)")]
         [SerializeField] private Button btn0;
         [SerializeField] private Button btn25;
         [SerializeField] private Button btn50;
         [SerializeField] private Button btn75;
         [SerializeField] private Button btn100;
 
-        private bool isHolding = false;
-        private float currentSugarAmount = 0f;
-
         private void Start()
         {
-            if (btn0 != null) btn0.onClick.AddListener(() => SetDigitalSugar(0));
-            if (btn25 != null) btn25.onClick.AddListener(() => SetDigitalSugar(25));
-            if (btn50 != null) btn50.onClick.AddListener(() => SetDigitalSugar(50));
-            if (btn75 != null) btn75.onClick.AddListener(() => SetDigitalSugar(75));
-            if (btn100 != null) btn100.onClick.AddListener(() => SetDigitalSugar(100));
+            if (addSugarButton != null)
+            {
+                addSugarButton.onClick.AddListener(AddSugar);
+            }
 
-            UpdateUpgradeMode();
+            if (btn0 != null) btn0.onClick.AddListener(() => SetSugar(0));
+            if (btn25 != null) btn25.onClick.AddListener(() => SetSugar(25));
+            if (btn50 != null) btn50.onClick.AddListener(() => SetSugar(50));
+            if (btn75 != null) btn75.onClick.AddListener(() => SetSugar(75));
+            if (btn100 != null) btn100.onClick.AddListener(() => SetSugar(100));
+
+            if (CupStation.Instance != null)
+            {
+                CupStation.Instance.OnCupUpdated += UpdateDisplay;
+            }
+
+            UpdateDisplay();
         }
 
-        private void Update()
+        private void OnDestroy()
         {
-            if (isHolding)
+            if (CupStation.Instance != null)
             {
-                currentSugarAmount += fillSpeed * Time.deltaTime;
-                if (currentSugarAmount > 100f) currentSugarAmount = 100f;
-                UpdateManualDisplay();
+                CupStation.Instance.OnCupUpdated -= UpdateDisplay;
             }
+        }
+
+        public void AddSugar()
+        {
+            if (CupStation.Instance == null || !CupStation.Instance.CurrentCup.hasCup) return;
+            if (CupStation.Instance.CurrentCup.isSealed) return;
+
+            int currentSugar = CupStation.Instance.CurrentCup.sweetnessPercent;
+
+            if (currentSugar < 100)
+            {
+                int newSugar = Mathf.Min(100, currentSugar + sugarStepPercent);
+                CupStation.Instance.SetSugar(newSugar);
+            }
+            else
+            {
+                Debug.LogWarning("Cup already has maximum 100% sugar! Trash the cup to remake if you wanted less sugar.");
+            }
+
+            UpdateDisplay();
+        }
+
+        public void SetSugar(int percent)
+        {
+            if (CupStation.Instance == null || !CupStation.Instance.CurrentCup.hasCup) return;
+            if (CupStation.Instance.CurrentCup.isSealed) return;
+
+            CupStation.Instance.SetSugar(percent);
+            UpdateDisplay();
         }
 
         public void UpdateUpgradeMode()
         {
-            bool hasDigital = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.DigitalSugarMeter);
-            if (manualContainer != null) manualContainer.SetActive(!hasDigital);
-            if (digitalContainer != null) digitalContainer.SetActive(hasDigital);
+            UpdateDisplay();
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public void UpdateDisplay()
         {
-            isHolding = true;
-        }
+            if (sugarLevelText != null)
+            {
+                int currentSugar = CupStation.Instance != null && CupStation.Instance.CurrentCup.hasCup
+                    ? CupStation.Instance.CurrentCup.sweetnessPercent
+                    : 0;
 
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            isHolding = false;
-            int finalPercent = Mathf.RoundToInt(currentSugarAmount);
-            CupStation.Instance?.SetSugar(finalPercent);
-            currentSugarAmount = 0f;
-            UpdateManualDisplay();
-        }
-
-        private void SetDigitalSugar(int percent)
-        {
-            CupStation.Instance?.SetSugar(percent);
-        }
-
-        private void UpdateManualDisplay()
-        {
-            if (sugarFillSlider != null) sugarFillSlider.value = currentSugarAmount / 100f;
-            if (sugarPercentText != null) sugarPercentText.text = $"{Mathf.RoundToInt(currentSugarAmount)}%";
+                sugarLevelText.text = $"Sugar: {currentSugar}%";
+            }
         }
     }
 }

@@ -30,6 +30,8 @@ namespace BubbleTeaShop
         [SerializeField] private BubbleTeaCup currentCup = new BubbleTeaCup();
         public BubbleTeaCup CurrentCup => currentCup;
 
+        public event Action OnCupUpdated;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -199,6 +201,8 @@ namespace BubbleTeaShop
                 string sealStr = currentCup.isSealed ? " [SEALED]" : " [OPEN]";
                 cupStatusText.text = $"{teaStr}{milkStr} (Sugar: {currentCup.sweetnessPercent}% | Ice: {currentCup.icePercent}%)\nToppings: {topStr}{sealStr}";
             }
+
+            OnCupUpdated?.Invoke();
         }
 
         private Color GetTeaColor(TeaBase tea)
