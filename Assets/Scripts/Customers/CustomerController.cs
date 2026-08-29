@@ -23,6 +23,16 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite tourettesSprite;
         [SerializeField] private Sprite dyscalculiaSprite;
         [SerializeField] private Sprite dyslexiaSprite;
+
+        [Header("Departure Timers (Seconds)")]
+        [Tooltip("How long a customer stays after receiving their drink")]
+        [SerializeField] private float servedReactionDuration = 2.5f;
+
+        [Tooltip("How long an unserved customer speaks their angry line before leaving when skipped by the bell")]
+        [SerializeField] private float skippedReactionDuration = 1.5f;
+
+        [Tooltip("How long an unserved customer speaks their angry line before leaving when their patience runs out")]
+        [SerializeField] private float timeoutReactionDuration = 2.0f;
         
         private DrinkOrder activeOrder;
         private float maxPatience = 45f;
@@ -127,7 +137,7 @@ namespace BubbleTeaShop
                 speechBubble.ShowReaction(reactionLine, evaluation.stars);
             }
 
-            leaveRoutine = StartCoroutine(LeaveAfterDelay(evaluation, 2.5f));
+            leaveRoutine = StartCoroutine(LeaveAfterDelay(evaluation, servedReactionDuration));
         }
 
         public void ForceSkipCustomer(Action onFinished = null)
@@ -159,7 +169,7 @@ namespace BubbleTeaShop
 
         private IEnumerator AngrySkipRoutine(Action onFinished)
         {
-            yield return new WaitForSeconds(1.5f);
+            yield return new WaitForSeconds(skippedReactionDuration);
             DismissCustomer();
             OnCustomerLeftAngry?.Invoke(this);
             onFinished?.Invoke();
@@ -239,7 +249,7 @@ namespace BubbleTeaShop
 
         private IEnumerator LeaveAngryRoutine()
         {
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(timeoutReactionDuration);
             DismissCustomer();
             OnCustomerLeftAngry?.Invoke(this);
         }
