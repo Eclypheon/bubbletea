@@ -28,10 +28,12 @@ namespace BubbleTeaShop
         private float maxPatience = 45f;
         private float currentPatience = 45f;
         private bool isWaiting = false;
+        private Coroutine leaveRoutine;
 
         public DrinkOrder ActiveOrder => activeOrder;
         public float PatiencePercent => Mathf.Clamp01(currentPatience / maxPatience);
         public bool IsActive => isWaiting;
+        public bool IsPresent => gameObject.activeSelf;
 
         public event Action<CustomerController, EvaluationResult> OnCustomerServed;
         public event Action<CustomerController> OnCustomerLeftAngry;
@@ -56,6 +58,13 @@ namespace BubbleTeaShop
 
         public void SpawnCustomer(DrinkOrder order, float patience)
         {
+            // Cancel any ongoing departure routine from a previous customer
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
             activeOrder = order;
             maxPatience = patience;
             
@@ -100,6 +109,8 @@ namespace BubbleTeaShop
             if (!isWaiting) return;
             isWaiting = false;
 
+            if (leaveRoutine != null) StopCoroutine(leaveRoutine);
+
             EvaluationResult evaluation = cup.Evaluate(activeOrder, PatiencePercent);
             EconomyManager.Instance?.AddCash(evaluation.earnedMoney, $"Drink Sale ({activeOrder.archetype})");
             
@@ -116,7 +127,25 @@ namespace BubbleTeaShop
                 speechBubble.ShowReaction(reactionLine, evaluation.stars);
             }
 
-            StartCoroutine(LeaveAfterDelay(evaluation, 2.5f));
+            leaveRoutine = StartCoroutine(LeaveAfterDelay(evaluation, 2.5f));
+        }
+
+        public void ForceSkipCustomer()
+        {
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
+            if (isWaiting)
+            {
+                // Customer was skipped before being served -> record as 0 sales/tips
+                DayManager.Instance?.RecordCustomerServed(0f, 0f);
+                OnCustomerLeftAngry?.Invoke(this);
+            }
+
+            DismissCustomer();
         }
 
         private string GetReactionLine(int stars)
@@ -131,11 +160,14 @@ namespace BubbleTeaShop
         private void HandleCustomerTimeout()
         {
             isWaiting = false;
+            DayManager.Instance?.RecordCustomerServed(0f, 0f);
             if (speechBubble != null)
             {
                 speechBubble.ShowReaction("Took too long! I'm leaving!", 1);
             }
-            StartCoroutine(LeaveAngryRoutine());
+
+            if (leaveRoutine != null) StopCoroutine(leaveRoutine);
+            leaveRoutine = StartCoroutine(LeaveAngryRoutine());
         }
 
         private IEnumerator LeaveAngryRoutine()
@@ -154,6 +186,12 @@ namespace BubbleTeaShop
 
         public void DismissCustomer()
         {
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
             isWaiting = false;
             if (speechBubble != null) speechBubble.HideBubbleInstant();
             gameObject.SetActive(false);

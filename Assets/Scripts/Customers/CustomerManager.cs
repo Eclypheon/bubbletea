@@ -56,16 +56,24 @@ namespace BubbleTeaShop
 
         public bool TryCallNextCustomer()
         {
-            if (HasCustomerAtWindow)
+            if (customerController != null && customerController.IsPresent)
             {
-                Debug.Log("Customer already at the counter window!");
-                return false;
+                if (customerController.IsActive)
+                {
+                    // Customer was waiting and unserved -> force skip them with 0 sales/tips
+                    customerController.ForceSkipCustomer();
+                }
+                else
+                {
+                    // Customer was already served and in departure animation -> dismiss immediately
+                    customerController.DismissCustomer();
+                }
             }
 
             if (dailyCustomerQueue.Count == 0)
             {
                 Debug.Log("No more customers in line today!");
-                OnAllDailyCustomersFinished?.Invoke();
+                CheckRemainingCustomers();
                 return false;
             }
 
@@ -91,7 +99,6 @@ namespace BubbleTeaShop
 
         private void HandleCustomerFinishedAngry(CustomerController customer)
         {
-            DayManager.Instance.RecordCustomerServed(0f, 0f);
             CheckRemainingCustomers();
         }
 
