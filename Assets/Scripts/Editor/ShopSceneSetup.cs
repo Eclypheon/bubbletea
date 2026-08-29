@@ -120,21 +120,12 @@ namespace BubbleTeaShop.Editor
 
             GameObject dialogTextObj = CreateUIElement("DialogueText", bubbleObj.transform);
             RectTransform dlgRect = dialogTextObj.GetComponent<RectTransform>();
-            dlgRect.anchoredPosition = new Vector2(0, 35);
-            dlgRect.sizeDelta = new Vector2(370, 90);
+            dlgRect.anchoredPosition = Vector2.zero;
+            dlgRect.sizeDelta = new Vector2(370, 160);
             var dlgTmp = dialogTextObj.AddComponent<TextMeshProUGUI>();
-            dlgTmp.fontSize = 18;
+            dlgTmp.fontSize = 19;
             dlgTmp.color = new Color(0.15f, 0.15f, 0.15f);
             dlgTmp.alignment = TextAlignmentOptions.Center;
-
-            GameObject recipeTextObj = CreateUIElement("RecipeSummaryText", bubbleObj.transform);
-            RectTransform recRect = recipeTextObj.GetComponent<RectTransform>();
-            recRect.anchoredPosition = new Vector2(0, -45);
-            recRect.sizeDelta = new Vector2(370, 70);
-            var recTmp = recipeTextObj.AddComponent<TextMeshProUGUI>();
-            recTmp.fontSize = 16;
-            recTmp.color = new Color(0.1f, 0.35f, 0.1f);
-            recTmp.alignment = TextAlignmentOptions.Center;
 
             // Wire CustomerController
             var custController = customerObj.AddComponent<CustomerController>();
@@ -150,7 +141,6 @@ namespace BubbleTeaShop.Editor
 
             SetSerializedProperty(speechUI, "canvasGroup", bubbleGroup);
             SetSerializedProperty(speechUI, "dialogueText", dlgTmp);
-            SetSerializedProperty(speechUI, "recipeSummaryText", recTmp);
             SetSerializedProperty(custMgr, "customerController", custController);
 
             // Shutter

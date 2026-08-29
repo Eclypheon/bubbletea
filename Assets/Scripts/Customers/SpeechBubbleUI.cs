@@ -11,7 +11,6 @@ namespace BubbleTeaShop
         [Header("UI Elements")]
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private TextMeshProUGUI dialogueText;
-        [SerializeField] private TextMeshProUGUI recipeSummaryText;
         [SerializeField] private RectTransform bubbleContainer;
 
         private Coroutine fadeRoutine;
@@ -27,7 +26,6 @@ namespace BubbleTeaShop
             if (canvasGroup == null) return;
             
             if (dialogueText != null) dialogueText.text = $"\"{order.dialogueText}\"";
-            if (recipeSummaryText != null) recipeSummaryText.text = "";
 
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
             fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.25f));
@@ -36,8 +34,10 @@ namespace BubbleTeaShop
         public void ShowReaction(string reactionText, int stars)
         {
             string starString = new string('★', stars) + new string('☆', 5 - stars);
-            if (dialogueText != null) dialogueText.text = $"\"{reactionText}\"";
-            if (recipeSummaryText != null) recipeSummaryText.text = $"<color=#FFD700><size=120%>{starString}</size></color>";
+            if (dialogueText != null)
+            {
+                dialogueText.text = $"\"{reactionText}\"\n\n<color=#FFD700><size=125%>{starString}</size></color>";
+            }
 
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
             fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.2f));
