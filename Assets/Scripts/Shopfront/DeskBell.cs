@@ -30,9 +30,16 @@ namespace BubbleTeaShop
             punchRoutine = StartCoroutine(PunchBellAnimation());
 
             // Play sound
-            if (bellAudioSource != null && bellSound != null)
+            if (bellSound != null)
             {
-                bellAudioSource.PlayOneShot(bellSound);
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(bellSound);
+                }
+                else if (bellAudioSource != null)
+                {
+                    bellAudioSource.PlayOneShot(bellSound);
+                }
             }
 
             // Call next customer if shutter is open

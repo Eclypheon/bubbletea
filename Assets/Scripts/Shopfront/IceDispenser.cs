@@ -10,6 +10,9 @@ namespace BubbleTeaShop
         [SerializeField] private Button iceButton;
         [SerializeField] private TextMeshProUGUI iceLevelText;
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip iceDispenseSound;
+
         private void Start()
         {
             if (iceButton != null)
@@ -43,10 +46,12 @@ namespace BubbleTeaShop
             if (currentIce < 50)
             {
                 CupStation.Instance.SetIce(50);
+                if (iceDispenseSound != null) AudioManager.Instance?.PlaySFX(iceDispenseSound);
             }
             else if (currentIce < 100)
             {
                 CupStation.Instance.SetIce(100);
+                if (iceDispenseSound != null) AudioManager.Instance?.PlaySFX(iceDispenseSound);
             }
             else
             {

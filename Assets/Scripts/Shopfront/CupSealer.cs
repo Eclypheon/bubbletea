@@ -12,6 +12,9 @@ namespace BubbleTeaShop
         [SerializeField] private Button sealButton;
         [SerializeField] private RectTransform pressHeadTransform;
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip sealSound;
+
         private bool isSealing = false;
         private Coroutine highlightRoutine;
 
@@ -60,6 +63,7 @@ namespace BubbleTeaShop
             {
                 // Instant seal
                 CupStation.Instance?.SealCup();
+                if (sealSound != null) AudioManager.Instance?.PlaySFX(sealSound);
                 HUDController.Instance?.ShowNotification("🧋 Cup sealed! Ready to serve.", 1.5f);
             }
             else
@@ -110,6 +114,7 @@ namespace BubbleTeaShop
             yield return new WaitForSeconds(0.35f);
 
             CupStation.Instance?.SealCup();
+            if (sealSound != null) AudioManager.Instance?.PlaySFX(sealSound);
             HUDController.Instance?.ShowNotification("🧋 Cup sealed! Ready to serve.", 1.5f);
 
             yield return new WaitForSeconds(0.15f);

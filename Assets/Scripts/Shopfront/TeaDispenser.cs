@@ -9,6 +9,9 @@ namespace BubbleTeaShop
         [SerializeField] private TeaBase teaType = TeaBase.BlackTea;
         [SerializeField] private Button dispenseButton;
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip teaPourSound;
+
         private void Start()
         {
             if (dispenseButton != null)
@@ -26,6 +29,11 @@ namespace BubbleTeaShop
                     Debug.LogWarning($"Out of {teaType}! Buy more at the night market.");
                     return;
                 }
+            }
+
+            if (teaPourSound != null)
+            {
+                AudioManager.Instance?.PlaySFX(teaPourSound);
             }
 
             CupStation.Instance?.AddTea(teaType);

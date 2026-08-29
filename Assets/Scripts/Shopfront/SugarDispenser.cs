@@ -12,6 +12,9 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI sugarLevelText;
         [SerializeField] private int sugarStepPercent = 25; // +25% per click
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip sugarDispenseSound;
+
         [Header("Preset Buttons Mode (Optional)")]
         [SerializeField] private Button btn0;
         [SerializeField] private Button btn25;
@@ -59,6 +62,7 @@ namespace BubbleTeaShop
             {
                 int newSugar = Mathf.Min(100, currentSugar + sugarStepPercent);
                 CupStation.Instance.SetSugar(newSugar);
+                if (sugarDispenseSound != null) AudioManager.Instance?.PlaySFX(sugarDispenseSound);
             }
             else
             {
@@ -74,6 +78,7 @@ namespace BubbleTeaShop
             if (CupStation.Instance.CurrentCup.isSealed) return;
 
             CupStation.Instance.SetSugar(percent);
+            if (sugarDispenseSound != null) AudioManager.Instance?.PlaySFX(sugarDispenseSound);
             UpdateDisplay();
         }
 
@@ -90,7 +95,7 @@ namespace BubbleTeaShop
                     ? CupStation.Instance.CurrentCup.sweetnessPercent
                     : 0;
 
-                sugarLevelText.text = $"Sugar: {currentSugar}%";
+                sugarLevelText.text = $"{currentSugar}%";
             }
         }
     }

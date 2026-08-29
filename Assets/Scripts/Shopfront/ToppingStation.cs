@@ -9,6 +9,9 @@ namespace BubbleTeaShop
         [SerializeField] private ToppingType toppingType = ToppingType.TapiocaPearls;
         [SerializeField] private Button scoopButton;
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip scoopSound;
+
         private void Start()
         {
             if (scoopButton != null)
@@ -26,6 +29,11 @@ namespace BubbleTeaShop
                     Debug.LogWarning($"Out of {toppingType}! Harvest pearls or buy at market.");
                     return;
                 }
+            }
+
+            if (scoopSound != null)
+            {
+                AudioManager.Instance?.PlaySFX(scoopSound);
             }
 
             CupStation.Instance?.AddTopping(toppingType);

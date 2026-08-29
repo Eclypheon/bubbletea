@@ -9,6 +9,9 @@ namespace BubbleTeaShop
         [SerializeField] private MilkType milkType = MilkType.FreshMilk;
         [SerializeField] private Button dispenseButton;
 
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip milkPourSound;
+
         private void Start()
         {
             if (dispenseButton != null)
@@ -26,6 +29,11 @@ namespace BubbleTeaShop
                     Debug.LogWarning($"Out of {milkType}!");
                     return;
                 }
+            }
+
+            if (milkPourSound != null)
+            {
+                AudioManager.Instance?.PlaySFX(milkPourSound);
             }
 
             CupStation.Instance?.AddMilk(milkType);
