@@ -62,11 +62,11 @@ namespace BubbleTeaShop
             }
         }
 
-        private void UpdateCustomerCountDisplay(int served, int total)
+        private void UpdateCustomerCountDisplay(int current, int total)
         {
             if (customerCountText != null)
             {
-                customerCountText.text = $"Customers: {served}/{total}";
+                customerCountText.text = $"Customer: {current}/{total}";
             }
         }
 

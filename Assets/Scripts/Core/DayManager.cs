@@ -14,6 +14,7 @@ namespace BubbleTeaShop
 
         [Header("Runtime Daily Stats")]
         [SerializeField] private int totalCustomersToday;
+        [SerializeField] private int currentCustomerIndex;
         [SerializeField] private int customersServedToday;
         [SerializeField] private int customersSkippedToday;
         [SerializeField] private float dailySalesTotal;
@@ -21,6 +22,7 @@ namespace BubbleTeaShop
 
         public int CurrentDay => currentDay;
         public int TotalCustomersToday => totalCustomersToday;
+        public int CurrentCustomerIndex => currentCustomerIndex;
         public int CustomersServedToday => customersServedToday;
         public int CustomersSkippedToday => customersSkippedToday;
         public int ProcessedCustomersToday => customersServedToday + customersSkippedToday;
@@ -31,7 +33,7 @@ namespace BubbleTeaShop
 
         public event Action<int> OnDayStarted;
         public event Action<int, float, float> OnDayCompleted; // day, sales, tips
-        public event Action<int, int> OnCustomerProgressUpdated; // served, total
+        public event Action<int, int> OnCustomerProgressUpdated; // currentCustomerIndex, total
 
         private void Awake()
         {
@@ -45,6 +47,7 @@ namespace BubbleTeaShop
 
         public void StartNewDay()
         {
+            currentCustomerIndex = 0;
             customersServedToday = 0;
             customersSkippedToday = 0;
             dailySalesTotal = 0f;
@@ -58,7 +61,13 @@ namespace BubbleTeaShop
             totalCustomersToday = UnityEngine.Random.Range(min, max + 1);
             
             OnDayStarted?.Invoke(currentDay);
-            OnCustomerProgressUpdated?.Invoke(customersServedToday, totalCustomersToday);
+            OnCustomerProgressUpdated?.Invoke(currentCustomerIndex, totalCustomersToday);
+        }
+
+        public void AdvanceCustomerIndex()
+        {
+            currentCustomerIndex++;
+            OnCustomerProgressUpdated?.Invoke(currentCustomerIndex, totalCustomersToday);
         }
 
         public void RecordCustomerServed(float sales, float tip)
@@ -66,13 +75,11 @@ namespace BubbleTeaShop
             customersServedToday++;
             dailySalesTotal += sales;
             dailyTipsTotal += tip;
-            OnCustomerProgressUpdated?.Invoke(customersServedToday, totalCustomersToday);
         }
 
         public void RecordCustomerSkipped()
         {
             customersSkippedToday++;
-            OnCustomerProgressUpdated?.Invoke(customersServedToday, totalCustomersToday);
         }
 
         public void CompleteDay()

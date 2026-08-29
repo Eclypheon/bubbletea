@@ -85,6 +85,7 @@ namespace BubbleTeaShop
 
             DrinkOrder nextOrder = dailyCustomerQueue.Dequeue();
             float patience = GetPatienceForArchetype(nextOrder.archetype);
+            DayManager.Instance?.AdvanceCustomerIndex();
             customerController.SpawnCustomer(nextOrder, patience);
             OnCustomerArrived?.Invoke(nextOrder);
             return true;
