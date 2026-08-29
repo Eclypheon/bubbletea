@@ -5,12 +5,26 @@ namespace BubbleTeaShop
 {
     public class HUDController : MonoBehaviour
     {
+        public static HUDController Instance { get; private set; }
+
         [Header("Top Bar Elements")]
         [SerializeField] private TextMeshProUGUI dayText;
         [SerializeField] private TextMeshProUGUI cashText;
         [SerializeField] private TextMeshProUGUI rentTimerText;
         [SerializeField] private TextMeshProUGUI customerCountText;
         [SerializeField] private TextMeshProUGUI statusHintText;
+
+        private Coroutine notificationRoutine;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -53,6 +67,23 @@ namespace BubbleTeaShop
             if (customerCountText != null)
             {
                 customerCountText.text = $"Customers: {served}/{total}";
+            }
+        }
+
+        public void ShowNotification(string message, float duration = 2.5f)
+        {
+            if (statusHintText == null) return;
+            if (notificationRoutine != null) StopCoroutine(notificationRoutine);
+            notificationRoutine = StartCoroutine(NotificationRoutine(message, duration));
+        }
+
+        private System.Collections.IEnumerator NotificationRoutine(string message, float duration)
+        {
+            statusHintText.text = $"<color=#FF5555><b>{message}</b></color>";
+            yield return new WaitForSeconds(duration);
+            if (GameManager.Instance != null)
+            {
+                UpdateStateHint(GameManager.Instance.CurrentState);
             }
         }
 
