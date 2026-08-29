@@ -21,10 +21,15 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject strawObject;
 
         [Header("Action Buttons")]
+        [Tooltip("Optional - New cups are automatically spawned, but this can be assigned if desired")]
         [SerializeField] private Button newCupButton;
         [SerializeField] private Button trashCupButton;
         [SerializeField] private Button serveCupButton;
         [SerializeField] private TextMeshProUGUI cupStatusText;
+
+        [Header("Audio (Optional)")]
+        [SerializeField] private AudioClip trashSound;
+        [SerializeField] private AudioClip serveSound;
 
         [Header("Runtime Cup")]
         [SerializeField] private BubbleTeaCup currentCup = new BubbleTeaCup();
@@ -68,6 +73,11 @@ namespace BubbleTeaShop
 
         public void TrashCup()
         {
+            if (trashSound != null)
+            {
+                AudioManager.Instance?.PlaySFX(trashSound);
+            }
+
             currentCup.hasCup = false;
             currentCup.Reset();
             UpdateVisuals();
@@ -150,6 +160,7 @@ namespace BubbleTeaShop
             if (CustomerManager.Instance != null && CustomerManager.Instance.HasCustomerAtWindow)
             {
                 CustomerManager.Instance.ServeCurrentCustomer(currentCup);
+                if (serveSound != null) AudioManager.Instance?.PlaySFX(serveSound);
                 currentCup.hasCup = false;
                 UpdateVisuals();
                 // Prepare next empty cup
