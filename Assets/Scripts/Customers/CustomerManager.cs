@@ -8,8 +8,27 @@ namespace BubbleTeaShop
     {
         public static CustomerManager Instance { get; private set; }
 
-        [Header("References")]
+        [Header("Customer Controller")]
         [SerializeField] private CustomerController customerController;
+
+        [Header("Archetype Patience Durations (Seconds)")]
+        [Tooltip("Patience duration in seconds for ADHD customer")]
+        [SerializeField] private float adhdPatience = 30f;
+
+        [Tooltip("Patience duration in seconds for Autism customer")]
+        [SerializeField] private float autismPatience = 45f;
+
+        [Tooltip("Patience duration in seconds for Anxiety customer")]
+        [SerializeField] private float anxietyPatience = 55f;
+
+        [Tooltip("Patience duration in seconds for Tourettes customer")]
+        [SerializeField] private float tourettesPatience = 35f;
+
+        [Tooltip("Patience duration in seconds for Dyscalculia customer")]
+        [SerializeField] private float dyscalculiaPatience = 60f;
+
+        [Tooltip("Patience duration in seconds for Dyslexia customer")]
+        [SerializeField] private float dyslexiaPatience = 50f;
 
         private Queue<DrinkOrder> dailyCustomerQueue = new Queue<DrinkOrder>();
         public bool HasCustomerAtWindow => customerController != null && customerController.IsActive;
@@ -118,16 +137,16 @@ namespace BubbleTeaShop
             }
         }
 
-        private float GetPatienceForArchetype(CustomerArchetype archetype)
+        public float GetPatienceForArchetype(CustomerArchetype archetype)
         {
             return archetype switch
             {
-                CustomerArchetype.Adhd => 30f,
-                CustomerArchetype.Autism => 45f,
-                CustomerArchetype.Anxiety => 55f,
-                CustomerArchetype.Tourettes => 35f,
-                CustomerArchetype.Dyscalculia => 60f,
-                CustomerArchetype.Dyslexia => 50f,
+                CustomerArchetype.Adhd => adhdPatience,
+                CustomerArchetype.Autism => autismPatience,
+                CustomerArchetype.Anxiety => anxietyPatience,
+                CustomerArchetype.Tourettes => tourettesPatience,
+                CustomerArchetype.Dyscalculia => dyscalculiaPatience,
+                CustomerArchetype.Dyslexia => dyslexiaPatience,
                 _ => 40f
             };
         }
