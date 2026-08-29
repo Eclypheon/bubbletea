@@ -169,7 +169,6 @@ namespace BubbleTeaShop
 
             if (currentDay >= 15) // Week 3+ (Rare & Foraged)
             {
-                availableTeas.Add(TeaBase.MatchaTea);
                 availableTeas.Add(TeaBase.WildMountainTea);
                 availableMilks.Add(MilkType.CoconutMilk);
                 availableToppings.Add(ToppingType.GoldenHoneyPearls);

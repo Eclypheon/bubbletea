@@ -240,7 +240,6 @@ namespace BubbleTeaShop
                 TeaBase.OolongTea => new Color(0.75f, 0.45f, 0.18f, 0.9f),
                 TeaBase.ThaiTea => new Color(0.95f, 0.45f, 0.1f, 0.95f),
                 TeaBase.TaroTea => new Color(0.7f, 0.5f, 0.85f, 0.95f),
-                TeaBase.MatchaTea => new Color(0.35f, 0.65f, 0.25f, 0.95f),
                 TeaBase.WildMountainTea => new Color(0.85f, 0.65f, 0.25f, 0.95f),
                 _ => Color.white
             };

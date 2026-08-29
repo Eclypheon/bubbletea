@@ -272,7 +272,6 @@ namespace BubbleTeaShop.Editor
             CreateTeaButton(rightStation.transform, "Oolong", TeaBase.OolongTea, new Vector2(-80, 25));
             CreateTeaButton(rightStation.transform, "Thai Tea", TeaBase.ThaiTea, new Vector2(40, 25));
             CreateTeaButton(rightStation.transform, "Taro", TeaBase.TaroTea, new Vector2(-80, -30));
-            CreateTeaButton(rightStation.transform, "Matcha", TeaBase.MatchaTea, new Vector2(40, -30));
 
             // Topping Stations
             CreateToppingButton(rightStation.transform, "Boba", ToppingType.TapiocaPearls, new Vector2(-80, -90));

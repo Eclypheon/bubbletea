@@ -40,7 +40,6 @@ namespace BubbleTeaShop
             marketCatalog.Add(new MarketItem { stockKey = "Tea_OolongTea", displayName = "High Mountain Oolong", price = 14.00f, bundleQuantity = 8 });
             marketCatalog.Add(new MarketItem { stockKey = "Tea_ThaiTea", displayName = "Thai Spiced Tea", price = 12.00f, bundleQuantity = 8 });
             marketCatalog.Add(new MarketItem { stockKey = "Tea_TaroTea", displayName = "Sweet Taro Powder", price = 12.00f, bundleQuantity = 8 });
-            marketCatalog.Add(new MarketItem { stockKey = "Tea_MatchaTea", displayName = "Ceremonial Matcha", price = 16.00f, bundleQuantity = 8 });
             marketCatalog.Add(new MarketItem { stockKey = "Milk_FreshMilk", displayName = "Fresh Whole Milk", price = 6.00f, bundleQuantity = 8 });
             marketCatalog.Add(new MarketItem { stockKey = "Milk_OatMilk", displayName = "Barista Oat Milk", price = 8.00f, bundleQuantity = 8 });
             marketCatalog.Add(new MarketItem { stockKey = "Topping_TapiocaPearls", displayName = "Raw Tapioca Pearls", price = 7.50f, bundleQuantity = 10 });

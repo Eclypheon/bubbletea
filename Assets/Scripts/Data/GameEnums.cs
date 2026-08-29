@@ -23,7 +23,6 @@ namespace BubbleTeaShop
         OolongTea,
         ThaiTea,
         TaroTea,
-        MatchaTea,
         WildMountainTea
     }
 
