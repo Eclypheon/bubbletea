@@ -221,39 +221,41 @@ namespace BubbleTeaShop
             order.basePrice = 5.00f + (order.targetMilk != MilkType.None ? 0.75f : 0f) + (order.targetToppings.Count * 0.75f);
 
             // 3. Generate personality-rich dialogue referencing their exact order
-            string milkDesc = order.targetMilk != MilkType.None ? $" w/ {order.targetMilk}" : "";
-            string toppingDesc = order.targetToppings.Count > 0 ? string.Join(" & ", order.targetToppings) : "no toppings";
+            string teaName = order.GetFormattedTea();
+            string milkName = order.GetFormattedMilk();
+            string milkDesc = !string.IsNullOrEmpty(milkName) ? $" with {milkName}" : "";
+            string toppingDesc = order.GetFormattedToppings();
 
             switch (archetype)
             {
                 case CustomerArchetype.Adhd:
                     order.customerName = "ADHD Creature";
-                    order.dialogueText = $"Quick, quick! Can I get a {order.targetTea}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar, {order.targetIcePercent}% ice, thanks!";
+                    order.dialogueText = $"Quick, quick! Can I get a {teaName}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar, {order.targetIcePercent}% ice, thanks!";
                     break;
 
                 case CustomerArchetype.Autism:
                     order.customerName = "Autism Creature";
-                    order.dialogueText = $"Hello. I would like a {order.targetTea}{milkDesc} with {toppingDesc}. Exactly {order.targetSweetnessPercent}% sweetness and {order.targetIcePercent}% ice, please.";
+                    order.dialogueText = $"Hello. I would like a {teaName}{milkDesc} with {toppingDesc}. Exactly {order.targetSweetnessPercent}% sweetness and {order.targetIcePercent}% ice, please.";
                     break;
 
                 case CustomerArchetype.Anxiety:
                     order.customerName = "Anxiety Creature";
-                    order.dialogueText = $"U-um... hello! Could I please have a {order.targetTea}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar and {order.targetIcePercent}% ice if that's okay...";
+                    order.dialogueText = $"U-um... hello! Could I please have a {teaName}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar and {order.targetIcePercent}% ice if that's okay...";
                     break;
 
                 case CustomerArchetype.Tourettes:
                     order.customerName = "Tourettes Creature";
-                    order.dialogueText = $"GIVE ME A {order.targetTea}{milkDesc} WITH {toppingDesc}!! {order.targetSweetnessPercent}% SWEET, {order.targetIcePercent}% ICE, LET'S GO!";
+                    order.dialogueText = $"GIVE ME A {teaName.ToUpper()}{milkDesc.ToUpper()} WITH {toppingDesc.ToUpper()}!! {order.targetSweetnessPercent}% SWEET, {order.targetIcePercent}% ICE, LET'S GO!";
                     break;
 
                 case CustomerArchetype.Dyscalculia:
                     order.customerName = "Dyscalculia Creature";
-                    order.dialogueText = $"I counted my coins! I want a {order.targetTea}{milkDesc} with {toppingDesc}! {order.targetSweetnessPercent}% sweetness and {order.targetIcePercent}% ice, please!";
+                    order.dialogueText = $"I counted my coins! I want a {teaName}{milkDesc} with {toppingDesc}! {order.targetSweetnessPercent}% sweetness and {order.targetIcePercent}% ice, please!";
                     break;
 
                 case CustomerArchetype.Dyslexia:
                     order.customerName = "Dyslexia Creature";
-                    order.dialogueText = $"Hi! I finally read the menu! Can I get a {order.targetTea}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar, {order.targetIcePercent}% ice please!";
+                    order.dialogueText = $"Hi! I finally read the menu! Can I get a {teaName}{milkDesc} with {toppingDesc}? {order.targetSweetnessPercent}% sugar, {order.targetIcePercent}% ice please!";
                     break;
             }
 
