@@ -15,16 +15,19 @@ namespace BubbleTeaShop
         [Header("Runtime Daily Stats")]
         [SerializeField] private int totalCustomersToday;
         [SerializeField] private int customersServedToday;
+        [SerializeField] private int customersSkippedToday;
         [SerializeField] private float dailySalesTotal;
         [SerializeField] private float dailyTipsTotal;
 
         public int CurrentDay => currentDay;
         public int TotalCustomersToday => totalCustomersToday;
         public int CustomersServedToday => customersServedToday;
-        public int CustomersRemainingToday => Mathf.Max(0, totalCustomersToday - customersServedToday);
+        public int CustomersSkippedToday => customersSkippedToday;
+        public int ProcessedCustomersToday => customersServedToday + customersSkippedToday;
+        public int CustomersRemainingToday => Mathf.Max(0, totalCustomersToday - ProcessedCustomersToday);
         public float DailySalesTotal => dailySalesTotal;
         public float DailyTipsTotal => dailyTipsTotal;
-        public bool IsDayFinished => customersServedToday >= totalCustomersToday;
+        public bool IsDayFinished => ProcessedCustomersToday >= totalCustomersToday;
 
         public event Action<int> OnDayStarted;
         public event Action<int, float, float> OnDayCompleted; // day, sales, tips
@@ -43,6 +46,7 @@ namespace BubbleTeaShop
         public void StartNewDay()
         {
             customersServedToday = 0;
+            customersSkippedToday = 0;
             dailySalesTotal = 0f;
             dailyTipsTotal = 0f;
 
@@ -62,6 +66,12 @@ namespace BubbleTeaShop
             customersServedToday++;
             dailySalesTotal += sales;
             dailyTipsTotal += tip;
+            OnCustomerProgressUpdated?.Invoke(customersServedToday, totalCustomersToday);
+        }
+
+        public void RecordCustomerSkipped()
+        {
+            customersSkippedToday++;
             OnCustomerProgressUpdated?.Invoke(customersServedToday, totalCustomersToday);
         }
 

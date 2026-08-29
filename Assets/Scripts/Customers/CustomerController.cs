@@ -26,13 +26,13 @@ namespace BubbleTeaShop
 
         [Header("Departure Timers (Seconds)")]
         [Tooltip("How long a customer stays after receiving their drink")]
-        [SerializeField] private float servedReactionDuration = 2.5f;
+        [SerializeField] private float servedReactionDuration = 4f;
 
         [Tooltip("How long an unserved customer speaks their angry line before leaving when skipped by the bell")]
-        [SerializeField] private float skippedReactionDuration = 1.5f;
+        [SerializeField] private float skippedReactionDuration = 4f;
 
         [Tooltip("How long an unserved customer speaks their angry line before leaving when their patience runs out")]
-        [SerializeField] private float timeoutReactionDuration = 2.0f;
+        [SerializeField] private float timeoutReactionDuration = 4f;
         
         private DrinkOrder activeOrder;
         private float maxPatience = 45f;
@@ -151,7 +151,7 @@ namespace BubbleTeaShop
             if (isWaiting)
             {
                 isWaiting = false;
-                DayManager.Instance?.RecordCustomerServed(0f, 0f);
+                DayManager.Instance?.RecordCustomerSkipped();
                 string angryLine = GetAngrySkipLine(activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
                 if (speechBubble != null)
                 {
@@ -237,7 +237,7 @@ namespace BubbleTeaShop
         private void HandleCustomerTimeout()
         {
             isWaiting = false;
-            DayManager.Instance?.RecordCustomerServed(0f, 0f);
+            DayManager.Instance?.RecordCustomerSkipped();
             if (speechBubble != null)
             {
                 speechBubble.ShowReaction("Took too long! I'm leaving!", 1);
