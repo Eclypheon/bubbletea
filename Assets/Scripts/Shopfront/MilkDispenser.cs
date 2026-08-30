@@ -12,63 +12,13 @@ namespace BubbleTeaShop
         [Header("Audio (Optional)")]
         [SerializeField] private AudioClip milkPourSound;
 
+        public MilkType Type => milkType;
+
         private void Start()
         {
             if (dispenseButton != null)
             {
                 dispenseButton.onClick.AddListener(DispenseMilk);
-            }
-            UpdateVisibility();
-        }
-
-        private void Update()
-        {
-            UpdateVisibility();
-        }
-
-        private void OnEnable()
-        {
-            UpdateVisibility();
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.OnInventoryUpdated += UpdateVisibility;
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.OnInventoryUpdated -= UpdateVisibility;
-            }
-        }
-
-        public void UpdateVisibility()
-        {
-            if (milkType == MilkType.FreshMilk)
-            {
-                // Fresh milk is always available on countertop
-                SetVisible(true);
-                return;
-            }
-
-            int stock = InventoryManager.Instance != null ? InventoryManager.Instance.GetMilkStock(milkType) : 0;
-            bool isDayUnlocked = DayManager.Instance != null && DayManager.Instance.CurrentDay > 2;
-
-            bool isVisible = stock > 0 || isDayUnlocked;
-            SetVisible(isVisible);
-        }
-
-        private void SetVisible(bool isVisible)
-        {
-            if (dispenseButton != null)
-            {
-                dispenseButton.gameObject.SetActive(isVisible);
-            }
-            else
-            {
-                var graphics = GetComponentsInChildren<Graphic>(true);
-                foreach (var g in graphics) g.enabled = isVisible;
             }
         }
 
