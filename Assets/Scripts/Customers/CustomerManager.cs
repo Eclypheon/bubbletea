@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -114,12 +115,18 @@ namespace BubbleTeaShop
             return true;
         }
 
+        private Coroutine rentArrivalRoutine;
+
         public void ServeCurrentCustomer(BubbleTeaCup cup)
         {
             if (HasCustomerAtWindow)
             {
                 customerController.ReceiveDrink(cup);
-                CheckRemainingCustomers();
+                // If more customers remain in queue, allow ringing bell while current customer leaves
+                if (dailyCustomerQueue.Count > 0)
+                {
+                    GameManager.Instance?.SetState(GameState.ShopOpen);
+                }
             }
         }
 
@@ -135,7 +142,10 @@ namespace BubbleTeaShop
 
         public void CheckRemainingCustomers()
         {
-            if (dailyCustomerQueue.Count == 0 && !HasCustomerAtWindow)
+            // Only check end of day after the current customer has completely departed
+            bool customerStillPresent = customerController != null && customerController.IsPresent;
+
+            if (dailyCustomerQueue.Count == 0 && !customerStillPresent)
             {
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                 bool isRentDay = (currentDay % 7 == 0);
@@ -143,22 +153,29 @@ namespace BubbleTeaShop
                 if (isRentDay && !rentEncounterTriggeredToday && RentCollectorController.Instance != null)
                 {
                     rentEncounterTriggeredToday = true;
-                    RentCollectorController.Instance.TriggerRentEncounter(currentDay, () =>
-                    {
-                        GameManager.Instance?.SetState(GameState.ShopClosing);
-                        OnAllDailyCustomersFinished?.Invoke();
-                    });
+                    if (rentArrivalRoutine != null) StopCoroutine(rentArrivalRoutine);
+                    rentArrivalRoutine = StartCoroutine(DelayedRentArrivalRoutine(0.6f, currentDay));
                 }
-                else
+                else if (!isRentDay || rentEncounterTriggeredToday)
                 {
                     GameManager.Instance?.SetState(GameState.ShopClosing);
                     OnAllDailyCustomersFinished?.Invoke();
                 }
             }
-            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing)
+            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing && (RentCollectorController.Instance == null || !RentCollectorController.Instance.IsEncounterActive))
             {
                 GameManager.Instance?.SetState(GameState.ShopOpen);
             }
+        }
+
+        private IEnumerator DelayedRentArrivalRoutine(float delay, int dayNumber)
+        {
+            yield return new WaitForSeconds(delay);
+            RentCollectorController.Instance?.TriggerRentEncounter(dayNumber, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
         }
 
         public float GetPatienceForArchetype(CustomerArchetype archetype)

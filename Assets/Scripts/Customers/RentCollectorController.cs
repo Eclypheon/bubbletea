@@ -60,13 +60,65 @@ namespace BubbleTeaShop
                 return;
             }
             _instance = this;
+            AutoDiscoverReferences();
             HideInstant();
         }
 
         private void Start()
         {
+            AutoDiscoverReferences();
             if (payRentButton != null) payRentButton.onClick.AddListener(OnPayRentClicked);
             if (skipRentButton != null) skipRentButton.onClick.AddListener(OnSkipRentClicked);
+        }
+
+        private void AutoDiscoverReferences()
+        {
+            if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>() ?? GetComponentInChildren<CanvasGroup>(true);
+            if (collectorRoot == null) collectorRoot = gameObject;
+
+            if (rentBubbleObject == null)
+            {
+                Transform bubbleTr = transform.Find("RentBubble") ?? transform.Find("Bubble") ?? transform.Find("SpeechBubble");
+                if (bubbleTr != null) rentBubbleObject = bubbleTr.gameObject;
+            }
+
+            if (landlordImage == null)
+            {
+                var imgs = GetComponentsInChildren<Image>(true);
+                foreach (var img in imgs)
+                {
+                    if (img.gameObject.name.ToLower().Contains("avatar") || img.gameObject.name.ToLower().Contains("landlord"))
+                    {
+                        landlordImage = img;
+                        break;
+                    }
+                }
+            }
+
+            if (collectorNameText == null || dialogueText == null || rentAmountText == null || payRentButtonText == null || skipRentButtonText == null)
+            {
+                var tmps = GetComponentsInChildren<TextMeshProUGUI>(true);
+                foreach (var tmp in tmps)
+                {
+                    string n = tmp.gameObject.name.ToLower();
+                    if (n.Contains("name") && collectorNameText == null) collectorNameText = tmp;
+                    else if (n.Contains("dialog") && dialogueText == null) dialogueText = tmp;
+                    else if (n.Contains("amount") && rentAmountText == null) rentAmountText = tmp;
+                    else if (n.Contains("pay") && payRentButtonText == null) payRentButtonText = tmp;
+                    else if ((n.Contains("skip") || n.Contains("exten")) && skipRentButtonText == null) skipRentButtonText = tmp;
+                }
+            }
+
+            if (payRentButton == null || skipRentButton == null)
+            {
+                var btns = GetComponentsInChildren<Button>(true);
+                foreach (var btn in btns)
+                {
+                    string n = btn.gameObject.name.ToLower();
+                    if (n.Contains("pay") && payRentButton == null) payRentButton = btn;
+                    else if ((n.Contains("skip") || n.Contains("exten")) && skipRentButton == null) skipRentButton = btn;
+                }
+            }
         }
 
         public void HideInstant()
@@ -89,9 +141,17 @@ namespace BubbleTeaShop
             onEncounterFinished = onComplete;
             isEncounterActive = true;
 
+            AutoDiscoverReferences();
+
             gameObject.SetActive(true);
+            transform.SetAsLastSibling(); // Ensure Landlord renders in front of counter and shutters
+
             if (collectorRoot != null) collectorRoot.SetActive(true);
-            if (rentBubbleObject != null) rentBubbleObject.SetActive(true);
+            if (rentBubbleObject != null)
+            {
+                rentBubbleObject.SetActive(true);
+                rentBubbleObject.transform.SetAsLastSibling();
+            }
 
             if (landlordImage != null)
             {
