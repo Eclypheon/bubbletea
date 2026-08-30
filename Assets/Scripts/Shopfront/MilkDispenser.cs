@@ -21,6 +21,11 @@ namespace BubbleTeaShop
             UpdateVisibility();
         }
 
+        private void Update()
+        {
+            UpdateVisibility();
+        }
+
         private void OnEnable()
         {
             UpdateVisibility();
@@ -43,21 +48,27 @@ namespace BubbleTeaShop
             if (milkType == MilkType.FreshMilk)
             {
                 // Fresh milk is always available on countertop
+                SetVisible(true);
                 return;
             }
 
-            // Oat Milk, Coconut Milk, and Condensed Milk unlock with the Premium Milk Dispenser
-            bool isUnlocked = (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser)
-                           || (DayManager.Instance != null && DayManager.Instance.CurrentDay >= 3);
+            int stock = InventoryManager.Instance != null ? InventoryManager.Instance.GetMilkStock(milkType) : 0;
+            bool isDayUnlocked = DayManager.Instance != null && DayManager.Instance.CurrentDay > 2;
 
+            bool isVisible = stock > 0 || isDayUnlocked;
+            SetVisible(isVisible);
+        }
+
+        private void SetVisible(bool isVisible)
+        {
             if (dispenseButton != null)
             {
-                dispenseButton.gameObject.SetActive(isUnlocked);
+                dispenseButton.gameObject.SetActive(isVisible);
             }
             else
             {
                 var graphics = GetComponentsInChildren<Graphic>(true);
-                foreach (var g in graphics) g.enabled = isUnlocked;
+                foreach (var g in graphics) g.enabled = isVisible;
             }
         }
 

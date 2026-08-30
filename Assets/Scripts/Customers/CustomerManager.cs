@@ -279,30 +279,25 @@ namespace BubbleTeaShop
             {
                 // Day 3+: Progressive ingredient availability based on progression
                 List<TeaBase> availableTeas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea, TeaBase.OolongTea, TeaBase.ThaiTea, TeaBase.TaroTea };
-                List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk };
+                List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk, MilkType.OatMilk };
                 List<int> availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
                 List<int> availableIce = new List<int> { 0, 50, 100 };
                 List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
                 int maxToppings = 1;
 
-                if (currentDay >= 4) // Mid-Week 1
-                {
-                    availableMilks.Add(MilkType.OatMilk);
-                    availableToppings.Add(ToppingType.CoconutJelly);
-                }
-
                 if (currentDay >= 8) // Week 2+
                 {
-                    availableMilks.Add(MilkType.CondensedMilk);
+                    availableMilks.Add(MilkType.CoconutMilk);
                     availableToppings.Add(ToppingType.EggPudding);
-                    availableToppings.Add(ToppingType.CheeseFoam);
+                    availableToppings.Add(ToppingType.CoconutJelly);
                     maxToppings = 2;
                 }
 
                 if (currentDay >= 15) // Week 3+ (Rare & Foraged)
                 {
                     availableTeas.Add(TeaBase.WildMountainTea);
-                    availableMilks.Add(MilkType.CoconutMilk);
+                    availableMilks.Add(MilkType.CondensedMilk);
+                    availableToppings.Add(ToppingType.CheeseFoam);
                     availableToppings.Add(ToppingType.GoldenHoneyPearls);
                 }
 
