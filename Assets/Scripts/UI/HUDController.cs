@@ -38,6 +38,7 @@ namespace BubbleTeaShop
             {
                 DayManager.Instance.OnDayStarted += UpdateDayDisplay;
                 DayManager.Instance.OnCustomerProgressUpdated += UpdateCustomerCountDisplay;
+                UpdateDayDisplay(DayManager.Instance.CurrentDay);
             }
 
             if (GameManager.Instance != null)
@@ -58,7 +59,8 @@ namespace BubbleTeaShop
             if (rentTimerText != null && EconomyManager.Instance != null)
             {
                 int daysLeft = EconomyManager.Instance.GetDaysUntilRent(day);
-                rentTimerText.text = daysLeft == 0 ? "Rent Due: TONIGHT" : $"Rent in: {daysLeft}d";
+                float rentAmount = EconomyManager.Instance.GetTotalRentDue(day);
+                rentTimerText.text = daysLeft == 0 ? $"Rent Due: TONIGHT (${rentAmount:F0})" : $"Rent in: {daysLeft}d (${rentAmount:F0})";
             }
         }
 
