@@ -208,7 +208,7 @@ namespace BubbleTeaShop
 
             int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
-            // 1. Day 1 Dopamine Funnel vs Progressive Day 2+ Difficulty
+            // 1. Day Progression: Day 1 & Day 2 Funnel vs Progressive Day 3+ Difficulty
             if (currentDay == 1)
             {
                 // Day 1: Any type of tea, optional fresh milk, with or without Tapioca Pearls, and polarized 0% or 100% sugar and ice
@@ -221,28 +221,38 @@ namespace BubbleTeaShop
                     ? new List<ToppingType> { ToppingType.TapiocaPearls }
                     : new List<ToppingType>();
             }
+            else if (currentDay == 2)
+            {
+                // Day 2: Introduces subtle sugar (25%, 50%, 75%) and ice (50%) customizations with tea, fresh milk, and tapioca
+                List<TeaBase> day2Teas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea, TeaBase.OolongTea, TeaBase.ThaiTea, TeaBase.TaroTea };
+                order.targetTea = day2Teas[UnityEngine.Random.Range(0, day2Teas.Count)];
+                order.targetMilk = (UnityEngine.Random.value > 0.4f) ? MilkType.FreshMilk : MilkType.None;
+                List<int> day2Sweetness = new List<int> { 0, 25, 50, 75, 100 };
+                List<int> day2Ice = new List<int> { 0, 50, 100 };
+                order.targetSweetnessPercent = day2Sweetness[UnityEngine.Random.Range(0, day2Sweetness.Count)];
+                order.targetIcePercent = day2Ice[UnityEngine.Random.Range(0, day2Ice.Count)];
+                order.targetToppings = (UnityEngine.Random.value > 0.4f)
+                    ? new List<ToppingType> { ToppingType.TapiocaPearls }
+                    : new List<ToppingType>();
+            }
             else
             {
-                // Day 2+: Progressive ingredient availability based on progression
-                List<TeaBase> availableTeas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea };
+                // Day 3+: Progressive ingredient availability based on progression
+                List<TeaBase> availableTeas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea, TeaBase.OolongTea, TeaBase.ThaiTea, TeaBase.TaroTea };
                 List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk };
-                List<int> availableSweetness = new List<int> { 0, 50, 100 };
+                List<int> availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
                 List<int> availableIce = new List<int> { 0, 50, 100 };
                 List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
                 int maxToppings = 1;
 
                 if (currentDay >= 4) // Mid-Week 1
                 {
-                    availableTeas.Add(TeaBase.OolongTea);
                     availableMilks.Add(MilkType.OatMilk);
-                    availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
                     availableToppings.Add(ToppingType.CoconutJelly);
                 }
 
                 if (currentDay >= 8) // Week 2+
                 {
-                    availableTeas.Add(TeaBase.ThaiTea);
-                    availableTeas.Add(TeaBase.TaroTea);
                     availableMilks.Add(MilkType.CondensedMilk);
                     availableToppings.Add(ToppingType.EggPudding);
                     availableToppings.Add(ToppingType.CheeseFoam);
