@@ -211,12 +211,15 @@ namespace BubbleTeaShop
             // 1. Day 1 Dopamine Funnel vs Progressive Day 2+ Difficulty
             if (currentDay == 1)
             {
-                // Day 1: Simple, highly satisfying classic milk teas with Tapioca Pearls and polarized 0%/100% options
-                order.targetTea = (UnityEngine.Random.value > 0.5f) ? TeaBase.BlackTea : TeaBase.GreenTea;
-                order.targetMilk = MilkType.FreshMilk;
+                // Day 1: Any type of tea, optional fresh milk, with or without Tapioca Pearls, and polarized 0% or 100% sugar and ice
+                List<TeaBase> day1Teas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea, TeaBase.OolongTea, TeaBase.ThaiTea, TeaBase.TaroTea };
+                order.targetTea = day1Teas[UnityEngine.Random.Range(0, day1Teas.Count)];
+                order.targetMilk = (UnityEngine.Random.value > 0.4f) ? MilkType.FreshMilk : MilkType.None;
                 order.targetSweetnessPercent = (UnityEngine.Random.value > 0.5f) ? 100 : 0;
                 order.targetIcePercent = (UnityEngine.Random.value > 0.5f) ? 100 : 0;
-                order.targetToppings = new List<ToppingType> { ToppingType.TapiocaPearls };
+                order.targetToppings = (UnityEngine.Random.value > 0.4f)
+                    ? new List<ToppingType> { ToppingType.TapiocaPearls }
+                    : new List<ToppingType>();
             }
             else
             {
