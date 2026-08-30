@@ -180,7 +180,7 @@ namespace BubbleTeaShop
             float spacingY = 16f;
 
             float cardWidth = (totalWidth - (paddingX * 2) - (spacingX * (cols - 1))) / cols;
-            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 76f, 100f);
+            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 90f, 120f);
 
             float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
             float startY = totalHeight * 0.5f - paddingY - (cardHeight * 0.5f);
@@ -207,7 +207,7 @@ namespace BubbleTeaShop
                 img.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
 
                 // Left: Ingredient Icon
-                float leftOffset = 10f;
+                float leftOffset = 14f;
                 if (itemIcon != null)
                 {
                     GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -216,26 +216,26 @@ namespace BubbleTeaShop
                     iconRt.anchorMin = new Vector2(0, 0.5f);
                     iconRt.anchorMax = new Vector2(0, 0.5f);
                     iconRt.pivot = new Vector2(0, 0.5f);
-                    float iconSize = Mathf.Min(cardHeight - 16f, 54f);
+                    float iconSize = Mathf.Min(cardHeight - 16f, 68f);
                     iconRt.sizeDelta = new Vector2(iconSize, iconSize);
-                    iconRt.anchoredPosition = new Vector2(10, 0);
+                    iconRt.anchoredPosition = new Vector2(12, 0);
 
                     var iconImg = iconObj.GetComponent<Image>();
                     iconImg.sprite = itemIcon;
                     iconImg.preserveAspect = true;
-                    leftOffset = iconSize + 18f;
+                    leftOffset = iconSize + 24f;
                 }
 
-                // Right: Dedicated Buy Button (Generous width to fit text without wrapping)
-                float buyButtonWidth = 86f;
+                // Right: Dedicated Buy Button (Generous width to fit large text without wrapping)
+                float buyButtonWidth = 120f;
                 GameObject buyBtnObj = new GameObject("BuyButton", typeof(RectTransform), typeof(Image), typeof(Button));
                 buyBtnObj.transform.SetParent(cardObj.transform, false);
                 var buyRt = buyBtnObj.GetComponent<RectTransform>();
                 buyRt.anchorMin = new Vector2(1, 0.5f);
                 buyRt.anchorMax = new Vector2(1, 0.5f);
                 buyRt.pivot = new Vector2(1, 0.5f);
-                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 16f);
-                buyRt.anchoredPosition = new Vector2(-10, 0);
+                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 18f);
+                buyRt.anchoredPosition = new Vector2(-12, 0);
 
                 var buyImg = buyBtnObj.GetComponent<Image>();
                 buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.35f, 0.35f, 0.35f, 0.65f);
@@ -248,15 +248,15 @@ namespace BubbleTeaShop
                 var buyTextRt = buyTextObj.GetComponent<RectTransform>();
                 buyTextRt.anchorMin = Vector2.zero;
                 buyTextRt.anchorMax = Vector2.one;
-                buyTextRt.offsetMin = new Vector2(2, 2);
-                buyTextRt.offsetMax = new Vector2(-2, -2);
+                buyTextRt.offsetMin = new Vector2(4, 2);
+                buyTextRt.offsetMax = new Vector2(-4, -2);
 
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
-                buyTmp.fontSize = 12.5f;
+                buyTmp.fontSize = 20f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
                 buyTmp.enableWordWrapping = false;
-                buyTmp.lineSpacing = -15f;
-                buyTmp.text = $"<b>BUY</b>\n${item.price:F2}";
+                buyTmp.lineSpacing = -10f;
+                buyTmp.text = $"<b>BUY</b>\n<size=17>${item.price:F2}</size>";
 
                 // Middle: Info Text (Item Name + Pack Quantity + In Store count)
                 GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -265,14 +265,14 @@ namespace BubbleTeaShop
                 infoRt.anchorMin = new Vector2(0, 0);
                 infoRt.anchorMax = new Vector2(1, 1);
                 infoRt.offsetMin = new Vector2(leftOffset, 4);
-                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 18f), -4);
+                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 20f), -4);
 
                 var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
-                infoTmp.fontSize = 13f;
+                infoTmp.fontSize = 22f;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 infoTmp.enableWordWrapping = true;
                 infoTmp.text = $"<b>{item.displayName}</b>\n" +
-                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Store: {FormatStockCount(currentStock)}";
+                               $"<size=17><color=#BDC3C7>Pack of {item.bundleQuantity}</color>  |  In Store: {FormatStockCount(currentStock)}</size>";
 
                 buyBtn.onClick.AddListener(() =>
                 {

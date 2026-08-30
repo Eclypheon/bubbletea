@@ -456,6 +456,13 @@ namespace BubbleTeaShop
             {
                 payRentButton.gameObject.SetActive(true);
                 payRentButton.interactable = canAfford;
+                var cg = payRentButton.GetComponentInParent<CanvasGroup>();
+                if (cg != null)
+                {
+                    cg.alpha = 1f;
+                    cg.interactable = true;
+                    cg.blocksRaycasts = true;
+                }
                 if (payRentButtonText != null)
                 {
                     payRentButtonText.text = canAfford ? $"Pay Rent (${totalRent:F2})" : $"Can't Afford (${totalRent:F2})";
@@ -466,6 +473,13 @@ namespace BubbleTeaShop
             {
                 skipRentButton.gameObject.SetActive(true);
                 skipRentButton.interactable = true;
+                var cg = skipRentButton.GetComponentInParent<CanvasGroup>();
+                if (cg != null)
+                {
+                    cg.alpha = 1f;
+                    cg.interactable = true;
+                    cg.blocksRaycasts = true;
+                }
                 if (skipRentButtonText != null)
                 {
                     skipRentButtonText.text = canSkip ? "Ask for Extension (1 left)" : "Can't Pay (Face Eviction)";
