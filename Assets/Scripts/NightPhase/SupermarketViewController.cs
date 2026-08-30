@@ -138,6 +138,12 @@ namespace BubbleTeaShop
             OnSupermarketClosed?.Invoke();
         }
 
+        private string FormatStockCount(int count)
+        {
+            string colorHex = count == 0 ? "#FF4444" : (count <= 6 ? "#F1C40F" : "#2ECC71");
+            return $"<color={colorHex}>x {count:D2}</color>";
+        }
+
         public void UpdateSupermarketDisplay(int dayNumber = -1)
         {
             if (dayNumber <= 0 && DayManager.Instance != null)
@@ -252,7 +258,7 @@ namespace BubbleTeaShop
                 buyTmp.lineSpacing = -15f;
                 buyTmp.text = $"<b>BUY</b>\n${item.price:F2}";
 
-                // Middle: Info Text (Item Name + Pack Quantity + In Bag count)
+                // Middle: Info Text (Item Name + Pack Quantity + In Store count)
                 GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
                 infoTextObj.transform.SetParent(cardObj.transform, false);
                 var infoRt = infoTextObj.GetComponent<RectTransform>();
@@ -266,7 +272,7 @@ namespace BubbleTeaShop
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 infoTmp.enableWordWrapping = true;
                 infoTmp.text = $"<b>{item.displayName}</b>\n" +
-                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Bag: <color=#F1C40F>x {currentStock:D2}</color>";
+                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Store: {FormatStockCount(currentStock)}";
 
                 buyBtn.onClick.AddListener(() =>
                 {

@@ -144,6 +144,12 @@ namespace BubbleTeaShop
             }
         }
 
+        private string FormatStockCount(int count)
+        {
+            string colorHex = count == 0 ? "#FF4444" : (count <= 6 ? "#F1C40F" : "#2ECC71");
+            return $"<color={colorHex}>x {count:D2}</color>";
+        }
+
         public void UpdateInventoryDisplay()
         {
             if (EconomyManager.Instance != null && cashBalanceText != null)
@@ -174,13 +180,13 @@ namespace BubbleTeaShop
                 ("Topping_GoldenHoneyPearls", "Golden Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))
             };
 
-            // Update Fallback Texts (Clean ASCII)
+            // Update Fallback Texts (Clean ASCII with Color Coding)
             if (milkStockText != null)
             {
                 string text = "<b>MILKS</b>\n";
                 foreach (var m in milks)
                 {
-                    text += $"• {m.name}  <color=#F1C40F>x {m.count:D2}</color>\n";
+                    text += $"• {m.name}  {FormatStockCount(m.count)}\n";
                 }
                 milkStockText.text = text.TrimEnd();
             }
@@ -190,7 +196,7 @@ namespace BubbleTeaShop
                 string text = "<b>TOPPINGS</b>\n";
                 foreach (var t in toppings)
                 {
-                    text += $"• {t.name}  <color=#F1C40F>x {t.count:D2}</color>\n";
+                    text += $"• {t.name}  {FormatStockCount(t.count)}\n";
                 }
                 toppingStockText.text = text.TrimEnd();
             }
@@ -344,7 +350,7 @@ namespace BubbleTeaShop
                 countTextRt.offsetMax = Vector2.zero;
 
                 var countTmp = countTextObj.GetComponent<TextMeshProUGUI>();
-                countTmp.text = $"<color=#F1C40F>x {item.count:D2}</color>";
+                countTmp.text = FormatStockCount(item.count);
                 countTmp.fontSize = 13;
                 countTmp.alignment = TextAlignmentOptions.Center;
                 countTmp.enableWordWrapping = false;
