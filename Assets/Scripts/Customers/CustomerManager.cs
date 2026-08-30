@@ -205,6 +205,11 @@ namespace BubbleTeaShop
                     if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
                     mentorArrivalRoutine = StartCoroutine(DelayedDay2MentorArrivalRoutine(0.6f));
                 }
+                else if (currentDay == 5 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay5Briefing && customerController != null)
+                {
+                    if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
+                    mentorArrivalRoutine = StartCoroutine(DelayedDay5MentorArrivalRoutine(0.6f));
+                }
                 else if (isRentDay && !rentEncounterTriggeredToday && customerController != null)
                 {
                     rentEncounterTriggeredToday = true;
@@ -227,6 +232,16 @@ namespace BubbleTeaShop
         {
             yield return new WaitForSeconds(delay);
             MentorController.Instance?.TriggerDay2NightBriefing(customerController, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
+        }
+
+        private IEnumerator DelayedDay5MentorArrivalRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            MentorController.Instance?.TriggerDay5NightBriefing(customerController, () =>
             {
                 GameManager.Instance?.SetState(GameState.ShopClosing);
                 OnAllDailyCustomersFinished?.Invoke();

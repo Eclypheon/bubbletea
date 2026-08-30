@@ -32,6 +32,26 @@ namespace BubbleTeaShop
         [SerializeField] private Button forageMountainBtn;
         [SerializeField] private TextMeshProUGUI foragingLogText;
 
+        public static NightPhaseManager Instance { get; private set; }
+
+        public enum NightActivityType { None, Market, Foraging }
+
+        [Header("Night Activity Limits")]
+        [SerializeField] private NightActivityType performedActivityTonight = NightActivityType.None;
+
+        public NightActivityType PerformedActivityTonight => performedActivityTonight;
+        public bool HasPerformedNightActivityTonight => performedActivityTonight != NightActivityType.None;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
+
         private void Start()
         {
             if (tabMarketButton != null) tabMarketButton.onClick.AddListener(() => SwitchTab(0));
@@ -53,6 +73,16 @@ namespace BubbleTeaShop
                 };
             }
 
+            if (SupermarketViewController.Instance != null)
+            {
+                SupermarketViewController.Instance.OnSupermarketClosed += () =>
+                {
+                    int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                    UpdateTabsState(day);
+                    UpdateForagingButtons(day);
+                };
+            }
+
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnStateChanged += HandleStateChanged;
@@ -63,6 +93,15 @@ namespace BubbleTeaShop
 
         private int lastDeductedDay = 0;
 
+        public void RecordActivity(NightActivityType activity)
+        {
+            performedActivityTonight = activity;
+            DayManager.Instance?.RecordNightActivity();
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            UpdateTabsState(day);
+            UpdateForagingButtons(day);
+        }
+
         private void HandleStateChanged(GameState state)
         {
             bool isNight = (state == GameState.NightPhase);
@@ -70,6 +109,7 @@ namespace BubbleTeaShop
 
             if (isNight)
             {
+                performedActivityTonight = NightActivityType.None;
                 int completedDay = DayManager.Instance != null ? DayManager.Instance.LastCompletedDay : 1;
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
@@ -88,24 +128,55 @@ namespace BubbleTeaShop
             }
         }
 
-        private void UpdateTabsState(int day)
+        public void UpdateTabsState(int day)
         {
             // 1. Market Tab: Unlocks on Day 2
             bool marketUnlocked = (day >= 2);
             if (tabMarketButton != null)
             {
-                tabMarketButton.interactable = marketUnlocked;
                 var t = tabMarketButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = marketUnlocked ? "Wholesale Market" : "Market (Day 2)";
+                if (!marketUnlocked)
+                {
+                    tabMarketButton.interactable = false;
+                    if (t != null) t.text = "Market (Day 2)";
+                }
+                else if (performedActivityTonight == NightActivityType.Foraging)
+                {
+                    tabMarketButton.interactable = false;
+                    if (t != null) t.text = "Market (Exhausted)";
+                }
+                else
+                {
+                    tabMarketButton.interactable = true;
+                    if (t != null) t.text = "Wholesale Market";
+                }
             }
 
             // 2. Foraging Tab: Unlocks on Day 5
             bool foragingUnlocked = (day >= 5);
             if (tabForagingButton != null)
             {
-                tabForagingButton.interactable = foragingUnlocked;
                 var t = tabForagingButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = foragingUnlocked ? "Foraging Expedition" : "Foraging (Day 5)";
+                if (!foragingUnlocked)
+                {
+                    tabForagingButton.interactable = false;
+                    if (t != null) t.text = "Foraging (Day 5)";
+                }
+                else if (performedActivityTonight == NightActivityType.Market)
+                {
+                    tabForagingButton.interactable = false;
+                    if (t != null) t.text = "Foraging (Exhausted)";
+                }
+                else if (performedActivityTonight == NightActivityType.Foraging)
+                {
+                    tabForagingButton.interactable = true;
+                    if (t != null) t.text = "Foraging (Completed)";
+                }
+                else
+                {
+                    tabForagingButton.interactable = true;
+                    if (t != null) t.text = "Foraging Expedition";
+                }
             }
 
             // 3. Upgrades Tab: Unlocks on Day 8 (Week 2)
@@ -118,37 +189,50 @@ namespace BubbleTeaShop
             }
         }
 
-        private void UpdateForagingButtons(int day)
+        public void UpdateForagingButtons(int day)
         {
             if (ForagingManager.Instance == null) return;
+
+            bool canForageTonight = (performedActivityTonight != NightActivityType.Market && !ForagingManager.Instance.HasForagedTonight);
 
             if (forageBambooBtn != null)
             {
                 bool u = ForagingManager.Instance.IsZoneUnlocked("BambooGrove", day);
-                forageBambooBtn.interactable = u;
+                forageBambooBtn.interactable = u && canForageTonight;
                 var t = forageBambooBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = u ? "Bamboo Grove" : "Bamboo Grove (Day 5)";
+                if (t != null) t.text = u ? (canForageTonight ? "Bamboo Grove" : "Bamboo Grove (Exhausted)") : "Bamboo Grove (Day 5)";
             }
 
             if (forageHoneyBtn != null)
             {
                 bool u = ForagingManager.Instance.IsZoneUnlocked("HoneyMeadow", day);
-                forageHoneyBtn.interactable = u;
+                forageHoneyBtn.interactable = u && canForageTonight;
                 var t = forageHoneyBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = u ? "Honey Meadow" : "Honey Meadow (Day 11)";
+                if (t != null) t.text = u ? (canForageTonight ? "Honey Meadow" : "Honey Meadow (Exhausted)") : "Honey Meadow (Day 11)";
             }
 
             if (forageMountainBtn != null)
             {
                 bool u = ForagingManager.Instance.IsZoneUnlocked("MistMountain", day);
-                forageMountainBtn.interactable = u;
+                forageMountainBtn.interactable = u && canForageTonight;
                 var t = forageMountainBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = u ? "Mist Peak Mountain" : "Mist Mountain (Day 18)";
+                if (t != null) t.text = u ? (canForageTonight ? "Mist Peak Mountain" : "Mist Mountain (Exhausted)") : "Mist Mountain (Day 18)";
             }
 
             if (foragingLogText != null)
             {
-                foragingLogText.text = "Select an unlocked region to forage wild ingredients tonight.";
+                if (performedActivityTonight == NightActivityType.Market)
+                {
+                    foragingLogText.text = "<color=#FFAA00>Exhausted from Market trip! Only 1 night activity allowed per night.</color>";
+                }
+                else if (ForagingManager.Instance.HasForagedTonight)
+                {
+                    foragingLogText.text = "<color=#2ECC71>Foraging expedition completed for tonight. Rest up for tomorrow!</color>";
+                }
+                else
+                {
+                    foragingLogText.text = "Select an unlocked region to forage wild ingredients tonight.\n<i>(Note: Embarking will cause late opening tomorrow: -1 customer)</i>";
+                }
             }
         }
 
@@ -210,25 +294,47 @@ namespace BubbleTeaShop
         {
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
-            if (tabIndex == 0 && day < 2)
+            if (tabIndex == 0) // Market
             {
-                HUDController.Instance?.ShowNotification("Wholesale Supermarket unlocks on Day 2!");
-                return;
+                if (day < 2)
+                {
+                    HUDController.Instance?.ShowNotification("Wholesale Supermarket unlocks on Day 2!");
+                    return;
+                }
+
+                if (performedActivityTonight == NightActivityType.Foraging)
+                {
+                    HUDController.Instance?.ShowNotification("You are exhausted from tonight's Foraging expedition! Only 1 night activity allowed per night.", 4.5f);
+                    return;
+                }
+
+                RecordActivity(NightActivityType.Market);
+
+                if (SupermarketViewController.Instance != null)
+                {
+                    SupermarketViewController.Instance.OpenSupermarketView(day);
+                    return;
+                }
             }
-            if (tabIndex == 1 && day < 5)
+
+            if (tabIndex == 1) // Foraging
             {
-                HUDController.Instance?.ShowNotification("Foraging Expeditions unlock on Day 5!");
-                return;
+                if (day < 5)
+                {
+                    HUDController.Instance?.ShowNotification("Foraging Expeditions unlock on Day 5!");
+                    return;
+                }
+
+                if (performedActivityTonight == NightActivityType.Market)
+                {
+                    HUDController.Instance?.ShowNotification("You are exhausted from visiting the Supermarket! Only 1 night activity allowed per night.", 4.5f);
+                    return;
+                }
             }
+
             if (tabIndex == 2 && day < 8)
             {
                 HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!");
-                return;
-            }
-
-            if (tabIndex == 0 && SupermarketViewController.Instance != null)
-            {
-                SupermarketViewController.Instance.OpenSupermarketView(day);
                 return;
             }
 

@@ -20,6 +20,7 @@ namespace BubbleTeaShop
         [SerializeField] private int customersSkippedToday;
         [SerializeField] private float dailySalesTotal;
         [SerializeField] private float dailyTipsTotal;
+        [SerializeField] private bool hadNightActivityLastNight = false;
 
         public int CurrentDay => currentDay;
         public int LastCompletedDay => lastCompletedDay;
@@ -31,6 +32,7 @@ namespace BubbleTeaShop
         public int CustomersRemainingToday => Mathf.Max(0, totalCustomersToday - ProcessedCustomersToday);
         public float DailySalesTotal => dailySalesTotal;
         public float DailyTipsTotal => dailyTipsTotal;
+        public bool HadNightActivityLastNight => hadNightActivityLastNight;
         public bool IsDayFinished => ProcessedCustomersToday >= totalCustomersToday;
 
         public event Action<int> OnDayStarted;
@@ -47,6 +49,12 @@ namespace BubbleTeaShop
             Instance = this;
         }
 
+        public void RecordNightActivity()
+        {
+            hadNightActivityLastNight = true;
+            Debug.Log("[DayManager] Night activity recorded! Tomorrow's customer count will be reduced by 1 due to late opening.");
+        }
+
         public void StartNewDay()
         {
             currentCustomerIndex = 0;
@@ -60,7 +68,17 @@ namespace BubbleTeaShop
             int min = hasSign ? 5 : minCustomersPerDay;
             int max = hasSign ? 8 : maxCustomersPerDay;
 
-            totalCustomersToday = UnityEngine.Random.Range(min, max + 1);
+            int rolled = UnityEngine.Random.Range(min, max + 1);
+
+            // Night activity penalty: reduce customer traffic by 1 due to late morning opening
+            if (hadNightActivityLastNight)
+            {
+                rolled = Mathf.Max(1, rolled - 1);
+                Debug.Log($"[DayManager] Late opening penalty applied from last night's activity! Total customers today: {rolled}");
+                hadNightActivityLastNight = false;
+            }
+
+            totalCustomersToday = rolled;
             
             OnDayStarted?.Invoke(currentDay);
             OnCustomerProgressUpdated?.Invoke(currentCustomerIndex, totalCustomersToday);

@@ -12,12 +12,15 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite mentorSprite;
         [SerializeField] private bool hasCompletedDay1Briefing = false;
         [SerializeField] private bool hasCompletedDay2Briefing = false;
+        [SerializeField] private bool hasCompletedDay5Briefing = false;
 
         public bool HasCompletedDay1Briefing => hasCompletedDay1Briefing;
         public bool HasCompletedDay2Briefing => hasCompletedDay2Briefing;
+        public bool HasCompletedDay5Briefing => hasCompletedDay5Briefing;
 
         public event Action OnDay1BriefingCompleted;
         public event Action OnDay2BriefingCompleted;
+        public event Action OnDay5BriefingCompleted;
 
         private void Awake()
         {
@@ -89,9 +92,11 @@ namespace BubbleTeaShop
             string[] briefingLines = new string[]
             {
                 "Great job surviving your first two days of business!",
-                "From tonight onwards, you can head to the Wholesale Market tab to purchase fresh ingredients and toppings.",
+                "From tonight onwards, you can head to the Wholesale Market to purchase fresh ingredients and toppings.",
+                "Keep in mind: embarking on night activities like the market means staying up late and opening late tomorrow, costing you 1 customer the next day!",
+                "You can only do 1 night activity per night, so choose wisely.",
                 "I'm also passing you this Premium Milk Dispenser unit! It lets you dispense Oat Milk, Coconut Milk, and Condensed Milk.",
-                "I've loaded it with 1 starter serving of each milk. Close the shutter whenever you're ready to head to the market!"
+                "I've loaded it with 1 starter serving of each milk. Close the shutter whenever you're ready to start the night phase!"
             };
 
             if (customerController != null)
@@ -110,6 +115,45 @@ namespace BubbleTeaShop
             else
             {
                 OnDay2BriefingCompleted?.Invoke();
+                onFinished?.Invoke();
+            }
+        }
+
+        public void TriggerDay5NightBriefing(CustomerController customerController, Action onFinished = null)
+        {
+            if (hasCompletedDay5Briefing)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            hasCompletedDay5Briefing = true;
+
+            string[] briefingLines = new string[]
+            {
+                "You've made remarkable progress managing the store through your first 5 days!",
+                "Starting tonight, you can embark on Foraging Expeditions to find rare wild toppings like Golden Honey Pearls and fresh herbs.",
+                "Remember: foraging is also a late-night activity that will cause you to open late and lose 1 customer tomorrow.",
+                "Also, you can only do ONE night activity per night—either visit the Market OR go Foraging, but never both in the same night.",
+                "Close the shutter whenever you're ready to head into the night!"
+            };
+
+            if (customerController != null)
+            {
+                customerController.SpawnMentorSequence(
+                    briefingLines,
+                    3.5f,
+                    mentorSprite,
+                    () =>
+                    {
+                        OnDay5BriefingCompleted?.Invoke();
+                        onFinished?.Invoke();
+                    }
+                );
+            }
+            else
+            {
+                OnDay5BriefingCompleted?.Invoke();
                 onFinished?.Invoke();
             }
         }

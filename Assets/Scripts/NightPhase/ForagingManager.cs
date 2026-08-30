@@ -41,6 +41,13 @@ namespace BubbleTeaShop
 
         public bool GoForaging(string zone)
         {
+            if (NightPhaseManager.Instance != null && NightPhaseManager.Instance.PerformedActivityTonight == NightPhaseManager.NightActivityType.Market)
+            {
+                OnForagingResult?.Invoke("You are too exhausted from visiting the Supermarket! Only 1 night activity allowed per night.");
+                HUDController.Instance?.ShowNotification("You've already visited the Market tonight! Only 1 night activity allowed per night (late opening penalty tomorrow).", 4.5f);
+                return false;
+            }
+
             if (hasForagedTonight)
             {
                 OnForagingResult?.Invoke("You are too exhausted to forage again tonight! Rest up for tomorrow.");
@@ -48,6 +55,7 @@ namespace BubbleTeaShop
             }
 
             hasForagedTonight = true;
+            NightPhaseManager.Instance?.RecordActivity(NightPhaseManager.NightActivityType.Foraging);
             string resultMessage = "";
 
             if (zone == "BambooGrove")
