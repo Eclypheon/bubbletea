@@ -105,6 +105,7 @@ namespace BubbleTeaShop
             DrinkOrder nextOrder = dailyCustomerQueue.Dequeue();
             float patience = GetPatienceForArchetype(nextOrder.archetype);
             DayManager.Instance?.AdvanceCustomerIndex();
+            GameManager.Instance?.SetState(GameState.CustomerWaiting);
             customerController.SpawnCustomer(nextOrder, patience);
             OnCustomerArrived?.Invoke(nextOrder);
             return true;
@@ -134,6 +135,10 @@ namespace BubbleTeaShop
             {
                 GameManager.Instance?.SetState(GameState.ShopClosing);
                 OnAllDailyCustomersFinished?.Invoke();
+            }
+            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing)
+            {
+                GameManager.Instance?.SetState(GameState.ShopOpen);
             }
         }
 

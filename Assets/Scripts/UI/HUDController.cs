@@ -95,7 +95,7 @@ namespace BubbleTeaShop
             {
                 GameState.MorningPrep => "Open the shutters to begin the day!",
                 GameState.ShopOpen => "Ring the bell to call the next customer.",
-                GameState.CustomerWaiting => "Customer waiting! Prepare their requested drink.",
+                GameState.CustomerWaiting => "Prepare the customer's order!",
                 GameState.ShopClosing => "All customers served! Pull down the shutter to close.",
                 GameState.NightPhase => "Night Phase: Buy stock, forage, and upgrade.",
                 GameState.GameOver => "Game Over! You lost the shop.",

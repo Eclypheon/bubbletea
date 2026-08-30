@@ -42,8 +42,8 @@ namespace BubbleTeaShop
                 }
             }
 
-            // Call next customer if shutter is open
-            if (GameManager.Instance.CurrentState == GameState.ShopOpen)
+            // Call next customer if shutter is open or customer is waiting
+            if (GameManager.Instance != null && (GameManager.Instance.CurrentState == GameState.ShopOpen || GameManager.Instance.CurrentState == GameState.CustomerWaiting))
             {
                 CustomerManager.Instance?.TryCallNextCustomer();
             }
