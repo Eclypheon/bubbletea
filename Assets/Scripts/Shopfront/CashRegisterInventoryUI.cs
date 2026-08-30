@@ -114,13 +114,10 @@ namespace BubbleTeaShop
 
             if (milkStockText != null && InventoryManager.Instance != null)
             {
-                bool hasDispenser = InventoryManager.Instance.HasPremiumMilkDispenser;
-                string premiumStatus = hasDispenser ? "<color=#2ECC71>(Premium Dispenser Active)</color>" : "<color=#888888>(Unlocked Day 2 Night)</color>";
-                
                 milkStockText.text = $"• <b>Fresh Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)} servings\n" +
-                                     $"• <b>Oat Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)} servings {premiumStatus}\n" +
-                                     $"• <b>Coconut Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)} servings {premiumStatus}\n" +
-                                     $"• <b>Condensed Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk)} servings {premiumStatus}";
+                                     $"• <b>Oat Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)} servings\n" +
+                                     $"• <b>Coconut Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)} servings\n" +
+                                     $"• <b>Condensed Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk)} servings";
             }
 
             if (toppingStockText != null && InventoryManager.Instance != null)
