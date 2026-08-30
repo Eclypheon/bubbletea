@@ -302,6 +302,78 @@ namespace BubbleTeaShop
             gameObject.SetActive(false);
         }
 
+        private bool isMentorActive = false;
+        public bool IsMentorActive => isMentorActive;
+        private Coroutine mentorRoutine;
+
+        public void SpawnMentorSequence(string[] lines, float delayPerLine, Sprite mentorSpriteParam, Action onCompletedSequence = null)
+        {
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
+            if (mentorRoutine != null)
+            {
+                StopCoroutine(mentorRoutine);
+                mentorRoutine = null;
+            }
+
+            isMentorActive = true;
+            isWaiting = false;
+            activeOrder = null;
+
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(false);
+
+            if (customerImage != null)
+            {
+                Sprite s = mentorSpriteParam != null ? mentorSpriteParam : dyscalculiaSprite;
+                if (s != null) customerImage.sprite = s;
+            }
+
+            gameObject.SetActive(true);
+            mentorRoutine = StartCoroutine(MentorDialogueSequenceRoutine(lines, delayPerLine, onCompletedSequence));
+        }
+
+        private IEnumerator MentorDialogueSequenceRoutine(string[] lines, float delayPerLine, Action onCompletedSequence)
+        {
+            if (lines == null || lines.Length == 0) yield break;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowMessage(lines[i]);
+                }
+
+                if (i < lines.Length - 1)
+                {
+                    yield return new WaitForSeconds(delayPerLine);
+                }
+            }
+
+            HUDController.Instance?.SetStatusHint("Ring the desk bell to call your first customer!");
+            onCompletedSequence?.Invoke();
+        }
+
+        public void DismissMentor()
+        {
+            if (mentorRoutine != null)
+            {
+                StopCoroutine(mentorRoutine);
+                mentorRoutine = null;
+            }
+
+            isMentorActive = false;
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(true);
+            DismissCustomer();
+            if (GameManager.Instance != null)
+            {
+                HUDController.Instance?.UpdateStateHint(GameManager.Instance.CurrentState);
+            }
+        }
+
         private bool rentDiscountedByDrink = false;
         private float discountedRentAmount = 0f;
 

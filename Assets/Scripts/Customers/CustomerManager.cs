@@ -62,6 +62,23 @@ namespace BubbleTeaShop
             {
                 DayManager.Instance.OnDayStarted += GenerateDailyQueue;
             }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnStateChanged += HandleStateChanged;
+            }
+        }
+
+        private void HandleStateChanged(GameState state)
+        {
+            if (state == GameState.ShopOpen)
+            {
+                int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                if (day == 1 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay1Briefing)
+                {
+                    MentorController.Instance.TriggerDay1MorningBriefing(customerController);
+                }
+            }
         }
 
         public void GenerateDailyQueue(int dayNumber)
@@ -83,6 +100,12 @@ namespace BubbleTeaShop
             {
                 HUDController.Instance?.ShowNotification("The Landlord is waiting! Settle your rent first.");
                 return false;
+            }
+
+            if (customerController != null && customerController.IsMentorActive)
+            {
+                customerController.DismissMentor();
+                return SpawnNextInQueue();
             }
 
             if (customerController != null && customerController.IsPresent)
@@ -290,8 +313,15 @@ namespace BubbleTeaShop
                 }
             }
 
-            // Base price scales slightly with complexity
-            order.basePrice = 5.00f + (order.targetMilk != MilkType.None ? 0.75f : 0f) + (order.targetToppings.Count * 0.75f);
+            // Base price scales dynamically with ingredient cost + 15% profit markup
+            if (MarketPriceManager.Instance != null)
+            {
+                order.basePrice = MarketPriceManager.Instance.CalculateDrinkSellPrice(order);
+            }
+            else
+            {
+                order.basePrice = 5.00f + (order.targetMilk != MilkType.None ? 0.75f : 0f) + (order.targetToppings.Count * 0.75f);
+            }
 
             // 3. Generate personality-rich dialogue referencing their exact order
             string teaName = order.GetFormattedTea();
