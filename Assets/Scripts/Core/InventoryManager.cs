@@ -15,6 +15,9 @@ namespace BubbleTeaShop
         [SerializeField] private int startingSugarServings = 40;
         [SerializeField] private int startingIceServings = 40;
         [SerializeField] private int startingToppings = 15;
+        [Header("Dispensers Unlocked")]
+        [SerializeField] private bool hasPremiumMilkDispenser = false;
+        public bool HasPremiumMilkDispenser => hasPremiumMilkDispenser;
 
         private Dictionary<string, int> stock = new Dictionary<string, int>();
 
@@ -31,31 +34,53 @@ namespace BubbleTeaShop
             InitializeStock();
         }
 
+        public void SetupDay1StarterStock()
+        {
+            stock.Clear();
+            stock["Cup"] = 25;
+            stock["Sugar"] = 100;
+            stock["Ice"] = 100;
+
+            // Day 1 Teas
+            stock[$"Tea_{TeaBase.BlackTea}"] = 15;
+            stock[$"Tea_{TeaBase.GreenTea}"] = 15;
+            stock[$"Tea_{TeaBase.OolongTea}"] = 10;
+            stock[$"Tea_{TeaBase.ThaiTea}"] = 10;
+            stock[$"Tea_{TeaBase.TaroTea}"] = 10;
+            stock[$"Tea_{TeaBase.WildMountainTea}"] = 0;
+
+            // Day 1 Milk: 15 Fresh Milk
+            stock[$"Milk_{MilkType.FreshMilk}"] = 15;
+            stock[$"Milk_{MilkType.OatMilk}"] = 0;
+            stock[$"Milk_{MilkType.CoconutMilk}"] = 0;
+            stock[$"Milk_{MilkType.CondensedMilk}"] = 0;
+
+            // Day 1 Toppings: 15 Tapioca Pearls
+            stock[$"Topping_{ToppingType.TapiocaPearls}"] = 15;
+            stock[$"Topping_{ToppingType.PoppingBoba}"] = 0;
+            stock[$"Topping_{ToppingType.GrassJelly}"] = 0;
+            stock[$"Topping_{ToppingType.EggPudding}"] = 0;
+            stock[$"Topping_{ToppingType.CoconutJelly}"] = 0;
+            stock[$"Topping_{ToppingType.CheeseFoam}"] = 0;
+            stock[$"Topping_{ToppingType.GoldenHoneyPearls}"] = 0;
+
+            hasPremiumMilkDispenser = false;
+            OnInventoryUpdated?.Invoke();
+        }
+
+        public void UnlockPremiumMilkDispenser()
+        {
+            hasPremiumMilkDispenser = true;
+            AddMilkStock(MilkType.OatMilk, 1);
+            AddMilkStock(MilkType.CoconutMilk, 1);
+            AddMilkStock(MilkType.CondensedMilk, 1);
+            HUDController.Instance?.ShowNotification("🌟 Premium Milk Dispenser Unlocked (+1 sample of Oat, Coconut, Condensed Milk)!", 4f);
+            OnInventoryUpdated?.Invoke();
+        }
+
         private void InitializeStock()
         {
-            stock["Cup"] = startingCups;
-            stock["Sugar"] = startingSugarServings;
-            stock["Ice"] = startingIceServings;
-            
-            // Teas
-            foreach (TeaBase tea in Enum.GetValues(typeof(TeaBase)))
-            {
-                if (tea == TeaBase.None) continue;
-                stock[$"Tea_{tea}"] = (tea == TeaBase.BlackTea || tea == TeaBase.GreenTea) ? startingTeaServings : 5;
-            }
-
-            // Milk
-            foreach (MilkType milk in Enum.GetValues(typeof(MilkType)))
-            {
-                if (milk == MilkType.None) continue;
-                stock[$"Milk_{milk}"] = (milk == MilkType.FreshMilk) ? startingMilkServings : 5;
-            }
-
-            // Toppings
-            foreach (ToppingType topping in Enum.GetValues(typeof(ToppingType)))
-            {
-                stock[$"Topping_{topping}"] = (topping == ToppingType.TapiocaPearls) ? startingToppings : 5;
-            }
+            SetupDay1StarterStock();
         }
 
         public int GetStock(string key)

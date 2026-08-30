@@ -28,6 +28,17 @@ namespace BubbleTeaShop
             hasForagedTonight = false;
         }
 
+        public bool IsZoneUnlocked(string zone, int day)
+        {
+            return zone switch
+            {
+                "BambooGrove" => day >= 5,
+                "HoneyMeadow" => day >= 11,
+                "MistMountain" => day >= 18,
+                _ => false
+            };
+        }
+
         public bool GoForaging(string zone)
         {
             if (hasForagedTonight)
