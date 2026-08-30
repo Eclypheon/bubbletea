@@ -271,9 +271,9 @@ namespace BubbleTeaShop
                 Destroy(container.GetChild(i).gameObject);
             }
 
-            float cardHeight = 52f;
+            float cardHeight = 62f;
             float spacingY = 8f;
-            float headerHeight = 28f;
+            float headerHeight = 32f;
 
             // Section Header
             GameObject headerObj = new GameObject($"Header_{sectionTitle}", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -287,7 +287,7 @@ namespace BubbleTeaShop
 
             var headerTmp = headerObj.GetComponent<TextMeshProUGUI>();
             headerTmp.text = $"<b>{sectionTitle}</b>";
-            headerTmp.fontSize = 16;
+            headerTmp.fontSize = 22;
             headerTmp.alignment = TextAlignmentOptions.MidlineLeft;
             headerTmp.color = new Color(0.9f, 0.9f, 0.95f, 1f);
 
@@ -310,7 +310,7 @@ namespace BubbleTeaShop
                 cardImg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
 
                 // Left: Icon
-                float leftOffset = 12f;
+                float leftOffset = 14f;
                 if (icon != null)
                 {
                     GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -319,13 +319,13 @@ namespace BubbleTeaShop
                     iconRt.anchorMin = new Vector2(0, 0.5f);
                     iconRt.anchorMax = new Vector2(0, 0.5f);
                     iconRt.pivot = new Vector2(0, 0.5f);
-                    iconRt.sizeDelta = new Vector2(38, 38);
-                    iconRt.anchoredPosition = new Vector2(8, 0);
+                    iconRt.sizeDelta = new Vector2(48, 48);
+                    iconRt.anchoredPosition = new Vector2(10, 0);
 
                     var img = iconObj.GetComponent<Image>();
                     img.sprite = icon;
                     img.preserveAspect = true;
-                    leftOffset = 52f;
+                    leftOffset = 66f;
                 }
 
                 // Right: Count Badge Pill
@@ -335,8 +335,8 @@ namespace BubbleTeaShop
                 pillRt.anchorMin = new Vector2(1, 0.5f);
                 pillRt.anchorMax = new Vector2(1, 0.5f);
                 pillRt.pivot = new Vector2(1, 0.5f);
-                pillRt.sizeDelta = new Vector2(68, 32);
-                pillRt.anchoredPosition = new Vector2(-10, 0);
+                pillRt.sizeDelta = new Vector2(88, 40);
+                pillRt.anchoredPosition = new Vector2(-12, 0);
 
                 var pillImg = pillObj.GetComponent<Image>();
                 pillImg.color = new Color(0.18f, 0.24f, 0.36f, 0.90f);
@@ -351,7 +351,7 @@ namespace BubbleTeaShop
 
                 var countTmp = countTextObj.GetComponent<TextMeshProUGUI>();
                 countTmp.text = FormatStockCount(item.count);
-                countTmp.fontSize = 15;
+                countTmp.fontSize = 20;
                 countTmp.alignment = TextAlignmentOptions.Center;
                 countTmp.enableWordWrapping = false;
 
@@ -362,11 +362,11 @@ namespace BubbleTeaShop
                 nameRt.anchorMin = new Vector2(0, 0);
                 nameRt.anchorMax = new Vector2(1, 1);
                 nameRt.offsetMin = new Vector2(leftOffset, 0);
-                nameRt.offsetMax = new Vector2(-82, 0);
+                nameRt.offsetMax = new Vector2(-105, 0);
 
                 var nameTmp = nameObj.GetComponent<TextMeshProUGUI>();
                 nameTmp.text = $"<b>{item.name}</b>";
-                nameTmp.fontSize = 15;
+                nameTmp.fontSize = 21;
                 nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 nameTmp.color = Color.white;
                 nameTmp.enableWordWrapping = false;

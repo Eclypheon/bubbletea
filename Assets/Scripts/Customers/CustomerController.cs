@@ -426,9 +426,12 @@ namespace BubbleTeaShop
             // Use assigned Landlord sprite, fallback to anxiety/connoisseur
             if (customerImage != null)
             {
+                customerImage.gameObject.SetActive(true);
+                customerImage.color = Color.white;
                 Sprite s = landlordSprite != null ? landlordSprite : anxietySprite;
                 if (s != null) customerImage.sprite = s;
             }
+            if (customerRoot != null) customerRoot.gameObject.SetActive(true);
 
             gameObject.SetActive(true);
 

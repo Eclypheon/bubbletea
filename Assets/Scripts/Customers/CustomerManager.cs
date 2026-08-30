@@ -224,22 +224,11 @@ namespace BubbleTeaShop
         private IEnumerator DelayedRentArrivalRoutine(float delay, int dayNumber)
         {
             yield return new WaitForSeconds(delay);
-            if (RentCollectorController.Instance != null)
+            customerController?.SpawnLandlord(dayNumber, () =>
             {
-                RentCollectorController.Instance.TriggerRentEncounter(dayNumber, () =>
-                {
-                    GameManager.Instance?.SetState(GameState.ShopClosing);
-                    OnAllDailyCustomersFinished?.Invoke();
-                });
-            }
-            else
-            {
-                customerController?.SpawnLandlord(dayNumber, () =>
-                {
-                    GameManager.Instance?.SetState(GameState.ShopClosing);
-                    OnAllDailyCustomersFinished?.Invoke();
-                });
-            }
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
         }
 
         public float GetPatienceForArchetype(CustomerArchetype archetype)
