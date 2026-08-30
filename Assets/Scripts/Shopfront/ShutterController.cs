@@ -58,7 +58,7 @@ namespace BubbleTeaShop
             if (isOpen)
             {
                 // 1. Block closing if Landlord is currently waiting at the window
-                if (RentCollectorController.Instance != null && RentCollectorController.Instance.IsEncounterActive)
+                if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
                 {
                     HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlord is waiting for rent!");
                     Debug.Log("Cannot close shutters while Landlord is waiting for rent!");

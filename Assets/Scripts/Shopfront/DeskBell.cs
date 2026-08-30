@@ -43,7 +43,7 @@ namespace BubbleTeaShop
             }
 
             // Call next customer if shutter is open or customer is waiting
-            if (RentCollectorController.Instance != null && RentCollectorController.Instance.IsEncounterActive)
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
                 HUDController.Instance?.ShowNotification("The Landlord is waiting! Settle your rent first.");
                 return;

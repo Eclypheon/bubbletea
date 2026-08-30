@@ -24,6 +24,14 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite dyscalculiaSprite;
         [SerializeField] private Sprite dyslexiaSprite;
 
+        [Header("Landlord & Rent Settings")]
+        [SerializeField] private Sprite landlordSprite;
+        [SerializeField] private GameObject rentChoicePanel;
+        [SerializeField] private Button payRentButton;
+        [SerializeField] private TMPro.TextMeshProUGUI payRentButtonText;
+        [SerializeField] private Button skipRentButton;
+        [SerializeField] private TMPro.TextMeshProUGUI skipRentButtonText;
+
         [Header("Departure Timers (Seconds)")]
         [Tooltip("How long a customer stays after receiving their drink")]
         [SerializeField] private float servedReactionDuration = 4f;
@@ -38,15 +46,29 @@ namespace BubbleTeaShop
         private float maxPatience = 45f;
         private float currentPatience = 45f;
         private bool isWaiting = false;
+        private bool isLandlordActive = false;
+        private Action onLandlordFinished;
+        private int currentRentDay;
         private Coroutine leaveRoutine;
 
         public DrinkOrder ActiveOrder => activeOrder;
         public float PatiencePercent => Mathf.Clamp01(currentPatience / maxPatience);
-        public bool IsActive => isWaiting;
+        public bool IsActive => isWaiting || isLandlordActive;
+        public bool IsWaitingDrink => isWaiting;
+        public bool IsLandlordActive => isLandlordActive;
         public bool IsPresent => gameObject.activeSelf;
 
         public event Action<CustomerController, EvaluationResult> OnCustomerServed;
         public event Action<CustomerController> OnCustomerLeftAngry;
+
+        private void Start()
+        {
+            if (payRentButton != null) payRentButton.onClick.AddListener(HandlePayRent);
+            if (skipRentButton != null) skipRentButton.onClick.AddListener(HandleSkipRent);
+            if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
+            if (payRentButton != null) payRentButton.gameObject.SetActive(false);
+            if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
+        }
 
         private void Update()
         {
@@ -272,7 +294,152 @@ namespace BubbleTeaShop
 
             isWaiting = false;
             if (speechBubble != null) speechBubble.HideBubbleInstant();
+            if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
+            if (payRentButton != null) payRentButton.gameObject.SetActive(false);
+            if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
             gameObject.SetActive(false);
+        }
+
+        public void SpawnLandlord(int dayNumber, Action onFinished)
+        {
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
+            isLandlordActive = true;
+            isWaiting = false;
+            activeOrder = null;
+            currentRentDay = dayNumber;
+            onLandlordFinished = onFinished;
+
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(false);
+
+            // Use assigned Landlord sprite, fallback to anxiety/connoisseur
+            if (customerImage != null)
+            {
+                Sprite s = landlordSprite != null ? landlordSprite : anxietySprite;
+                if (s != null) customerImage.sprite = s;
+            }
+
+            gameObject.SetActive(true);
+
+            float totalRent = EconomyManager.Instance.GetTotalRentDue(dayNumber);
+            bool canAfford = EconomyManager.Instance.CanAfford(totalRent);
+            bool canSkip = EconomyManager.Instance.CanSkipRent();
+            int skipsUsed = EconomyManager.Instance.RentSkipsUsed;
+
+            if (speechBubble != null)
+            {
+                if (skipsUsed > 0)
+                {
+                    speechBubble.ShowMessage($"You're on thin ice! You owe last week's rent PLUS this week's: ${totalRent:F2}. Pay up now or you're evicted!");
+                }
+                else
+                {
+                    int week = Mathf.CeilToInt((float)dayNumber / EconomyManager.Instance.RentCycleDays);
+                    speechBubble.ShowMessage($"Greetings. Week {week} has ended. Your rent of ${totalRent:F2} is due right now before you close up.");
+                }
+            }
+
+            if (rentChoicePanel != null) rentChoicePanel.SetActive(true);
+
+            if (payRentButton != null)
+            {
+                payRentButton.gameObject.SetActive(true);
+                payRentButton.interactable = canAfford;
+                if (payRentButtonText != null)
+                {
+                    payRentButtonText.text = canAfford ? $"Pay Rent (${totalRent:F2})" : $"Can't Afford (${totalRent:F2})";
+                }
+            }
+
+            if (skipRentButton != null)
+            {
+                skipRentButton.gameObject.SetActive(true);
+                skipRentButton.interactable = true;
+                if (skipRentButtonText != null)
+                {
+                    skipRentButtonText.text = canSkip ? "Ask for Extension (1 left)" : "Can't Pay (Face Eviction)";
+                }
+            }
+
+            HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3.5f);
+        }
+
+        private void HandlePayRent()
+        {
+            if (payRentButton != null) payRentButton.interactable = false;
+            if (skipRentButton != null) skipRentButton.interactable = false;
+
+            bool success = EconomyManager.Instance.PayTotalRent(currentRentDay);
+            if (success)
+            {
+                if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
+                if (payRentButton != null) payRentButton.gameObject.SetActive(false);
+                if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
+
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowReaction("Payment accepted in full. Keep the shop running well, and I will see you next week.", 5);
+                }
+                HUDController.Instance?.ShowNotification("Rent paid successfully!", 3f);
+                StartCoroutine(DismissLandlordAfterDelay(3.5f));
+            }
+            else
+            {
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowMessage("You don't have enough money! Don't play games with me!");
+                }
+                if (payRentButton != null) payRentButton.interactable = false;
+                if (skipRentButton != null) skipRentButton.interactable = true;
+            }
+        }
+
+        private void HandleSkipRent()
+        {
+            if (payRentButton != null) payRentButton.interactable = false;
+            if (skipRentButton != null) skipRentButton.interactable = false;
+
+            if (EconomyManager.Instance.CanSkipRent())
+            {
+                EconomyManager.Instance.SkipRent(currentRentDay);
+                if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
+                if (payRentButton != null) payRentButton.gameObject.SetActive(false);
+                if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
+
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowReaction("Hmph! I'll give you ONE extension. Next week you MUST pay the accumulated amount or get evicted on the spot!", 1);
+                }
+                HUDController.Instance?.ShowNotification("Rent skipped! 1 extension used.", 3.5f);
+                StartCoroutine(DismissLandlordAfterDelay(3.5f));
+            }
+            else
+            {
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowReaction("You already used your ONE extension! Pack your things, you are EVICTED!", 0);
+                }
+                StartCoroutine(TriggerEvictionGameOver(2.5f));
+            }
+        }
+
+        private IEnumerator DismissLandlordAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            isLandlordActive = false;
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(true);
+            DismissCustomer();
+            onLandlordFinished?.Invoke();
+        }
+
+        private IEnumerator TriggerEvictionGameOver(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the landlord.");
         }
     }
 }

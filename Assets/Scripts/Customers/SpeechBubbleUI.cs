@@ -31,6 +31,24 @@ namespace BubbleTeaShop
             fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.25f));
         }
 
+        public void ShowMessage(string message)
+        {
+            if (dialogueText != null)
+            {
+                dialogueText.text = $"\"{message}\"";
+            }
+
+            if (fadeRoutine != null) StopCoroutine(fadeRoutine);
+            if (canvasGroup != null)
+            {
+                fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.25f));
+            }
+            else
+            {
+                gameObject.SetActive(true);
+            }
+        }
+
         public void ShowReaction(string reactionText, int stars)
         {
             string starString = new string('★', stars) + new string('☆', 5 - stars);

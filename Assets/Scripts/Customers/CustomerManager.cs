@@ -140,6 +140,8 @@ namespace BubbleTeaShop
             CheckRemainingCustomers();
         }
 
+        public CustomerController CustomerController => customerController;
+
         public void CheckRemainingCustomers()
         {
             // Only check end of day after the current customer has completely departed
@@ -150,7 +152,7 @@ namespace BubbleTeaShop
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                 bool isRentDay = (currentDay % 7 == 0);
 
-                if (isRentDay && !rentEncounterTriggeredToday && RentCollectorController.Instance != null)
+                if (isRentDay && !rentEncounterTriggeredToday && customerController != null)
                 {
                     rentEncounterTriggeredToday = true;
                     if (rentArrivalRoutine != null) StopCoroutine(rentArrivalRoutine);
@@ -162,7 +164,7 @@ namespace BubbleTeaShop
                     OnAllDailyCustomersFinished?.Invoke();
                 }
             }
-            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing && (RentCollectorController.Instance == null || !RentCollectorController.Instance.IsEncounterActive))
+            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing && (customerController == null || !customerController.IsLandlordActive))
             {
                 GameManager.Instance?.SetState(GameState.ShopOpen);
             }
@@ -171,7 +173,7 @@ namespace BubbleTeaShop
         private IEnumerator DelayedRentArrivalRoutine(float delay, int dayNumber)
         {
             yield return new WaitForSeconds(delay);
-            RentCollectorController.Instance?.TriggerRentEncounter(dayNumber, () =>
+            customerController?.SpawnLandlord(dayNumber, () =>
             {
                 GameManager.Instance?.SetState(GameState.ShopClosing);
                 OnAllDailyCustomersFinished?.Invoke();
