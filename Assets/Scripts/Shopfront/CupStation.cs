@@ -69,15 +69,6 @@ namespace BubbleTeaShop
 
         public void SpawnNewCup()
         {
-            if (InventoryManager.Instance != null)
-            {
-                if (!InventoryManager.Instance.ConsumeStock("Cup", 1))
-                {
-                    Debug.LogWarning("Out of cups! Buy more at the night market!");
-                    return;
-                }
-            }
-
             currentCup.Reset();
             UpdateVisuals();
         }

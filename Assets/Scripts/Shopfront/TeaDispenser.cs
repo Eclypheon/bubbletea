@@ -36,16 +36,6 @@ namespace BubbleTeaShop
                 return;
             }
 
-            if (InventoryManager.Instance != null)
-            {
-                if (!InventoryManager.Instance.ConsumeStock($"Tea_{teaType}", 1))
-                {
-                    Debug.LogWarning($"Out of {teaType}! Buy more at the night market.");
-                    HUDController.Instance?.ShowNotification($"Out of {teaType}! Buy more at night.");
-                    return;
-                }
-            }
-
             if (teaPourSound != null)
             {
                 AudioManager.Instance?.PlaySFX(teaPourSound);

@@ -101,20 +101,15 @@ namespace BubbleTeaShop
 
             if (dailySuppliesText != null)
             {
-                int cups = InventoryManager.Instance != null ? InventoryManager.Instance.GetCupStock() : 0;
                 int sugar = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Sugar") : 0;
                 int ice = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Ice") : 0;
-                dailySuppliesText.text = $"• <b>Cups & Straws:</b> {cups} remaining\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
+                dailySuppliesText.text = $"• <b>Cups & Straws:</b> <color=#2ECC71>Unlimited Supply</color>\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
             }
 
             if (teaStockText != null && InventoryManager.Instance != null)
             {
-                teaStockText.text = $"• <b>Black Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.BlackTea)} servings\n" +
-                                    $"• <b>Green Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.GreenTea)} servings\n" +
-                                    $"• <b>Oolong Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.OolongTea)} servings\n" +
-                                    $"• <b>Thai Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.ThaiTea)} servings\n" +
-                                    $"• <b>Taro Powder:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.TaroTea)} servings\n" +
-                                    $"• <b>Wild Mountain Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.WildMountainTea)} servings";
+                teaStockText.text = $"• <b>Tea Bases:</b> <color=#2ECC71>Unlimited Supply</color>\n" +
+                                    $"  <i>(Black, Green, Oolong, Thai, Taro, Wild Mountain)</i>";
             }
 
             if (milkStockText != null && InventoryManager.Instance != null)
