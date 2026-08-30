@@ -68,15 +68,164 @@ namespace BubbleTeaShop
 
             if (isNight)
             {
+                int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
+                // Day 2 Night Mentor Event: Introduce Wholesale Market & Grant Premium Milk Dispenser
+                if (day == 2 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay2Briefing)
+                {
+                    MentorController.Instance.TriggerDay2NightBriefing(() =>
+                    {
+                        HUDController.Instance?.ShowNotification("Wholesale Market & Premium Milk Dispenser are now active!", 4f);
+                    });
+                }
+
                 ForagingManager.Instance?.ResetNightForaging();
-                if (foragingLogText != null) foragingLogText.text = "Select a region to forage wild ingredients tonight.";
+                UpdateTabsState(day);
+                UpdateForagingButtons(day);
+                UpdateMarketTab(day);
                 UpdateLedger();
                 SwitchTab(3); // Start on Ledger
             }
         }
 
+        private void UpdateTabsState(int day)
+        {
+            // 1. Market Tab: Unlocks on Day 2
+            bool marketUnlocked = (day >= 2);
+            if (tabMarketButton != null)
+            {
+                tabMarketButton.interactable = marketUnlocked;
+                var t = tabMarketButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = marketUnlocked ? "Wholesale Market" : "Market (Day 2)";
+            }
+
+            // 2. Foraging Tab: Unlocks on Day 5
+            bool foragingUnlocked = (day >= 5);
+            if (tabForagingButton != null)
+            {
+                tabForagingButton.interactable = foragingUnlocked;
+                var t = tabForagingButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = foragingUnlocked ? "Foraging Expedition" : "Foraging (Day 5)";
+            }
+
+            // 3. Upgrades Tab: Unlocks on Day 8 (Week 2)
+            bool upgradesUnlocked = (day >= 8);
+            if (tabUpgradesButton != null)
+            {
+                tabUpgradesButton.interactable = upgradesUnlocked;
+                var t = tabUpgradesButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = upgradesUnlocked ? "Shop Upgrades" : "Upgrades (Day 8)";
+            }
+        }
+
+        private void UpdateForagingButtons(int day)
+        {
+            if (ForagingManager.Instance == null) return;
+
+            if (forageBambooBtn != null)
+            {
+                bool u = ForagingManager.Instance.IsZoneUnlocked("BambooGrove", day);
+                forageBambooBtn.interactable = u;
+                var t = forageBambooBtn.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = u ? "Bamboo Grove" : "Bamboo Grove (Day 5)";
+            }
+
+            if (forageHoneyBtn != null)
+            {
+                bool u = ForagingManager.Instance.IsZoneUnlocked("HoneyMeadow", day);
+                forageHoneyBtn.interactable = u;
+                var t = forageHoneyBtn.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = u ? "Honey Meadow" : "Honey Meadow (Day 11)";
+            }
+
+            if (forageMountainBtn != null)
+            {
+                bool u = ForagingManager.Instance.IsZoneUnlocked("MistMountain", day);
+                forageMountainBtn.interactable = u;
+                var t = forageMountainBtn.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = u ? "Mist Peak Mountain" : "Mist Mountain (Day 18)";
+            }
+
+            if (foragingLogText != null)
+            {
+                foragingLogText.text = "Select an unlocked region to forage wild ingredients tonight.";
+            }
+        }
+
+        private void UpdateMarketTab(int day)
+        {
+            if (marketTabPanel == null || MarketManager.Instance == null) return;
+
+            // Clear old market buttons if any
+            for (int i = marketTabPanel.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(marketTabPanel.transform.GetChild(i).gameObject);
+            }
+
+            var catalog = MarketManager.Instance.GetAvailableCatalog(day);
+            int cols = 3;
+            float startX = -280f;
+            float startY = 120f;
+            float spacingX = 280f;
+            float spacingY = 70f;
+
+            for (int i = 0; i < catalog.Count; i++)
+            {
+                var item = catalog[i];
+                int row = i / cols;
+                int col = i % cols;
+                Vector2 pos = new Vector2(startX + col * spacingX, startY - row * spacingY);
+
+                GameObject btnObj = new GameObject($"Buy_{item.stockKey}", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnObj.transform.SetParent(marketTabPanel.transform, false);
+                var rt = btnObj.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(260, 58);
+                rt.anchoredPosition = pos;
+
+                var img = btnObj.GetComponent<Image>();
+                img.color = new Color(0.2f, 0.25f, 0.35f, 1f);
+
+                GameObject textObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                textObj.transform.SetParent(btnObj.transform, false);
+                var trt = textObj.GetComponent<RectTransform>();
+                trt.sizeDelta = rt.sizeDelta;
+                var tmp = textObj.GetComponent<TextMeshProUGUI>();
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.fontSize = 15;
+                tmp.color = Color.white;
+                tmp.text = $"<b>{item.displayName}</b> (+{item.bundleQuantity})\n<color=#2ECC71>${item.price:F2}</color>";
+
+                var btn = btnObj.GetComponent<Button>();
+                btn.onClick.AddListener(() =>
+                {
+                    if (MarketManager.Instance.BuyItem(item))
+                    {
+                        UpdateLedger();
+                    }
+                });
+            }
+        }
+
         public void SwitchTab(int tabIndex)
         {
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
+            if (tabIndex == 0 && day < 2)
+            {
+                HUDController.Instance?.ShowNotification("Wholesale Market unlocks on Day 2!");
+                return;
+            }
+            if (tabIndex == 1 && day < 5)
+            {
+                HUDController.Instance?.ShowNotification("Foraging Expeditions unlock on Day 5!");
+                return;
+            }
+            if (tabIndex == 2 && day < 8)
+            {
+                HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!");
+                return;
+            }
+
             if (marketTabPanel != null) marketTabPanel.SetActive(tabIndex == 0);
             if (foragingTabPanel != null) foragingTabPanel.SetActive(tabIndex == 1);
             if (upgradesTabPanel != null) upgradesTabPanel.SetActive(tabIndex == 2);
@@ -117,6 +266,12 @@ namespace BubbleTeaShop
             if (buyoutShopButton != null)
             {
                 buyoutShopButton.interactable = EconomyManager.Instance.CanAfford(EconomyManager.Instance.BuyoutGoal);
+            }
+
+            // Check 4-Week Lease Victory (Day 28 completion)
+            if (day >= 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
+            {
+                HUDController.Instance?.ShowNotification("🏆 Incredible! You have successfully completed the 4-week lease!", 5f);
             }
         }
 
