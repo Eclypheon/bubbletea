@@ -34,7 +34,7 @@ namespace BubbleTeaShop
         private Queue<DrinkOrder> dailyCustomerQueue = new Queue<DrinkOrder>();
         private bool rentEncounterTriggeredToday = false;
         public bool RentEncounterTriggeredToday => rentEncounterTriggeredToday;
-        public bool HasCustomerAtWindow => customerController != null && customerController.IsActive;
+        public bool HasCustomerAtWindow => customerController != null && customerController.IsWaitingDrink;
 
         public event Action<DrinkOrder> OnCustomerArrived;
         public event Action OnAllDailyCustomersFinished;
@@ -79,9 +79,15 @@ namespace BubbleTeaShop
 
         public bool TryCallNextCustomer()
         {
+            if (customerController != null && customerController.IsLandlordActive)
+            {
+                HUDController.Instance?.ShowNotification("The Landlord is waiting! Settle your rent first.");
+                return false;
+            }
+
             if (customerController != null && customerController.IsPresent)
             {
-                if (customerController.IsActive)
+                if (customerController.IsWaitingDrink)
                 {
                     // Customer was waiting and unserved -> trigger angry skip reaction, then spawn next
                     customerController.ForceSkipCustomer(() => SpawnNextInQueue());

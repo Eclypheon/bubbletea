@@ -370,7 +370,7 @@ namespace BubbleTeaShop
                 }
             }
 
-            HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3.5f);
+            HUDController.Instance?.SetStatusHint("The Landlord has arrived to collect weekly rent!");
         }
 
         public void ReceiveLandlordDrink(BubbleTeaCup cup)
@@ -491,6 +491,10 @@ namespace BubbleTeaShop
             if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(true);
             DismissCustomer();
             onLandlordFinished?.Invoke();
+            if (GameManager.Instance != null)
+            {
+                HUDController.Instance?.UpdateStateHint(GameManager.Instance.CurrentState);
+            }
         }
 
         private IEnumerator TriggerEvictionGameOver(float delay)

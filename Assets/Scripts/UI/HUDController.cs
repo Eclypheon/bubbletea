@@ -70,6 +70,17 @@ namespace BubbleTeaShop
             }
         }
 
+        public void SetStatusHint(string text)
+        {
+            if (statusHintText == null) return;
+            if (notificationRoutine != null)
+            {
+                StopCoroutine(notificationRoutine);
+                notificationRoutine = null;
+            }
+            statusHintText.text = text;
+        }
+
         public void ShowNotification(string message, float duration = 2.5f)
         {
             if (statusHintText == null) return;
@@ -81,15 +92,25 @@ namespace BubbleTeaShop
         {
             statusHintText.text = $"<color=#FF5555><b>{message}</b></color>";
             yield return new WaitForSeconds(duration);
-            if (GameManager.Instance != null)
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
+            {
+                statusHintText.text = "The Landlord has arrived to collect weekly rent!";
+            }
+            else if (GameManager.Instance != null)
             {
                 UpdateStateHint(GameManager.Instance.CurrentState);
             }
         }
 
-        private void UpdateStateHint(GameState state)
+        public void UpdateStateHint(GameState state)
         {
             if (statusHintText == null) return;
+
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
+            {
+                statusHintText.text = "The Landlord has arrived to collect weekly rent!";
+                return;
+            }
 
             statusHintText.text = state switch
             {

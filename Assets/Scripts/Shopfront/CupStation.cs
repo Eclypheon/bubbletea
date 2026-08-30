@@ -170,9 +170,9 @@ namespace BubbleTeaShop
                 return;
             }
 
-            if (CustomerManager.Instance != null && CustomerManager.Instance.HasCustomerAtWindow)
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
-                CustomerManager.Instance.ServeCurrentCustomer(currentCup);
+                CustomerManager.Instance.CustomerController.ReceiveLandlordDrink(currentCup);
                 OrderTicketUI.Instance?.HideTicket();
                 if (serveSound != null) AudioManager.Instance?.PlaySFX(serveSound);
                 currentCup.hasCup = false;
@@ -180,9 +180,9 @@ namespace BubbleTeaShop
                 // Prepare next empty cup
                 Invoke(nameof(SpawnNewCup), 0.5f);
             }
-            else if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
+            else if (CustomerManager.Instance != null && CustomerManager.Instance.HasCustomerAtWindow)
             {
-                CustomerManager.Instance.CustomerController.ReceiveLandlordDrink(currentCup);
+                CustomerManager.Instance.ServeCurrentCustomer(currentCup);
                 OrderTicketUI.Instance?.HideTicket();
                 if (serveSound != null) AudioManager.Instance?.PlaySFX(serveSound);
                 currentCup.hasCup = false;
