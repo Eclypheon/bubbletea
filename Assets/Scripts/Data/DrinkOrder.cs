@@ -73,10 +73,23 @@ namespace BubbleTeaShop
         public string GetFormattedSummary()
         {
             string teaName = GetFormattedTea();
-            string milkName = GetFormattedMilk();
-            string milkStr = !string.IsNullOrEmpty(milkName) ? $" w/ {milkName}" : "";
-            string toppingsStr = targetToppings.Count > 0 ? string.Join(", ", targetToppings.Select(FormatToppingName)) : "No Toppings";
-            return $"{teaName}{milkStr}\n• Sugar: {targetSweetnessPercent}% | Ice: {targetIcePercent}%\n• Toppings: {toppingsStr}";
+            string milkName = !string.IsNullOrEmpty(GetFormattedMilk()) ? GetFormattedMilk() : "None";
+            
+            string toppingsStr;
+            if (targetToppings == null || targetToppings.Count == 0)
+            {
+                toppingsStr = "None";
+            }
+            else
+            {
+                toppingsStr = string.Join(", ", targetToppings.Select(FormatToppingName));
+            }
+
+            return $"<b>Tea:</b> {teaName}\n" +
+                   $"<b>Milk:</b> {milkName}\n" +
+                   $"<b>Sugar:</b> {targetSweetnessPercent}%\n" +
+                   $"<b>Ice:</b> {targetIcePercent}%\n" +
+                   $"<b>Toppings:</b> {toppingsStr}";
         }
     }
 }
