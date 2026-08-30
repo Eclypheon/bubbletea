@@ -32,6 +32,7 @@ namespace BubbleTeaShop
 
         private Queue<DrinkOrder> dailyCustomerQueue = new Queue<DrinkOrder>();
         private bool rentEncounterTriggeredToday = false;
+        public bool RentEncounterTriggeredToday => rentEncounterTriggeredToday;
         public bool HasCustomerAtWindow => customerController != null && customerController.IsActive;
 
         public event Action<DrinkOrder> OnCustomerArrived;

@@ -8,11 +8,24 @@ namespace BubbleTeaShop
 {
     public class RentCollectorController : MonoBehaviour
     {
-        public static RentCollectorController Instance { get; private set; }
+        private static RentCollectorController _instance;
+        public static RentCollectorController Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<RentCollectorController>(true);
+                }
+                return _instance;
+            }
+            private set => _instance = value;
+        }
 
         [Header("UI Root & Container")]
         [SerializeField] private GameObject collectorRoot;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private GameObject rentBubbleObject;
         [SerializeField] private Image landlordImage;
         [SerializeField] private Sprite landlordSprite;
 
@@ -41,14 +54,13 @@ namespace BubbleTeaShop
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
-            Instance = this;
-            if (collectorRoot != null) collectorRoot.SetActive(false);
-            if (canvasGroup != null) canvasGroup.alpha = 0f;
+            _instance = this;
+            HideInstant();
         }
 
         private void Start()
@@ -57,15 +69,41 @@ namespace BubbleTeaShop
             if (skipRentButton != null) skipRentButton.onClick.AddListener(OnSkipRentClicked);
         }
 
+        public void HideInstant()
+        {
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 0f;
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+            }
+            if (collectorRoot != null && collectorRoot != gameObject)
+            {
+                collectorRoot.SetActive(false);
+            }
+        }
+
         public void TriggerRentEncounter(int dayNumber, Action onComplete)
         {
             currentDayNumber = dayNumber;
             onEncounterFinished = onComplete;
             isEncounterActive = true;
 
+            gameObject.SetActive(true);
             if (collectorRoot != null) collectorRoot.SetActive(true);
-            if (landlordImage != null && landlordSprite != null) landlordImage.sprite = landlordSprite;
-            if (collectorNameText != null) collectorNameText.text = "Landlord Sterling";
+            if (rentBubbleObject != null) rentBubbleObject.SetActive(true);
+
+            if (landlordImage != null)
+            {
+                landlordImage.gameObject.SetActive(true);
+                if (landlordSprite != null) landlordImage.sprite = landlordSprite;
+            }
+
+            if (collectorNameText != null)
+            {
+                collectorNameText.gameObject.SetActive(true);
+                collectorNameText.text = "Landlord Sterling";
+            }
 
             float totalRent = EconomyManager.Instance.GetTotalRentDue(dayNumber);
             bool canAfford = EconomyManager.Instance.CanAfford(totalRent);
@@ -74,11 +112,13 @@ namespace BubbleTeaShop
 
             if (rentAmountText != null)
             {
+                rentAmountText.gameObject.SetActive(true);
                 rentAmountText.text = $"Total Rent Due: <color=#FFD700>${totalRent:F2}</color>";
             }
 
             if (dialogueText != null)
             {
+                dialogueText.gameObject.SetActive(true);
                 if (skipsUsed > 0)
                 {
                     dialogueText.text = $"\"You're on thin ice! You owe last week's rent PLUS this week's: ${totalRent:F2}. Pay up now or you're evicted!\"";
@@ -93,6 +133,7 @@ namespace BubbleTeaShop
             // Pay Button
             if (payRentButton != null)
             {
+                payRentButton.gameObject.SetActive(true);
                 payRentButton.interactable = canAfford;
                 if (payRentButtonText != null)
                 {
@@ -103,6 +144,7 @@ namespace BubbleTeaShop
             // Skip Button
             if (skipRentButton != null)
             {
+                skipRentButton.gameObject.SetActive(true);
                 skipRentButton.interactable = true;
                 if (skipRentButtonText != null)
                 {
@@ -110,11 +152,18 @@ namespace BubbleTeaShop
                 }
             }
 
-            HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3f);
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+                canvasGroup.interactable = true;
+                canvasGroup.blocksRaycasts = true;
+            }
+
+            HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3.5f);
             if (arriveSound != null) AudioManager.Instance?.PlaySFX(arriveSound);
 
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
-            fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.3f));
+            fadeRoutine = StartCoroutine(FadeCanvasGroup(0f, 1f, 0.25f));
         }
 
         private void OnPayRentClicked()
@@ -140,6 +189,7 @@ namespace BubbleTeaShop
                     dialogueText.text = "\"You don't have enough money! Don't play games with me!\"";
                 }
                 if (payRentButton != null) payRentButton.interactable = false;
+                if (skipRentButton != null) skipRentButton.interactable = true;
             }
         }
 
@@ -176,7 +226,7 @@ namespace BubbleTeaShop
         {
             yield return new WaitForSeconds(delay);
             yield return StartCoroutine(FadeCanvasGroup(canvasGroup != null ? canvasGroup.alpha : 1f, 0f, 0.3f));
-            if (collectorRoot != null) collectorRoot.SetActive(false);
+            HideInstant();
             isEncounterActive = false;
             onEncounterFinished?.Invoke();
         }

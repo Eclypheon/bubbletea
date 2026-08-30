@@ -183,6 +183,7 @@ namespace BubbleTeaShop.Editor
             var rentCtrl = rentCollectorObj.AddComponent<RentCollectorController>();
             SetSerializedProperty(rentCtrl, "collectorRoot", rentCollectorObj);
             SetSerializedProperty(rentCtrl, "canvasGroup", rentGroup);
+            SetSerializedProperty(rentCtrl, "rentBubbleObject", rentBubble);
             SetSerializedProperty(rentCtrl, "landlordImage", llImg);
             SetSerializedProperty(rentCtrl, "landlordSprite", connoisseurSp);
             SetSerializedProperty(rentCtrl, "collectorNameText", rentNameTmp);

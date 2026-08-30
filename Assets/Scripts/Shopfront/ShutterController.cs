@@ -57,6 +57,24 @@ namespace BubbleTeaShop
             // Only allow closing if day is ready to close or before opening
             if (isOpen)
             {
+                // 1. Block closing if Landlord is currently waiting at the window
+                if (RentCollectorController.Instance != null && RentCollectorController.Instance.IsEncounterActive)
+                {
+                    HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlord is waiting for rent!");
+                    Debug.Log("Cannot close shutters while Landlord is waiting for rent!");
+                    return;
+                }
+
+                // 2. Block closing if it is a rent day and the rent encounter hasn't settled yet
+                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                if (currentDay % 7 == 0 && CustomerManager.Instance != null && !CustomerManager.Instance.RentEncounterTriggeredToday)
+                {
+                    HUDController.Instance?.ShowNotification("The Landlord is on his way! You must settle rent before closing.");
+                    Debug.Log("Cannot close shutters: Rent collection pending!");
+                    return;
+                }
+
+                // 3. Normal closing condition
                 if (DayManager.Instance.IsDayFinished || GameManager.Instance.CurrentState == GameState.ShopClosing)
                 {
                     StartCoroutine(MoveShutterRoutine(openPosY, closedPosY, false));
