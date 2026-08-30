@@ -70,15 +70,6 @@ namespace BubbleTeaShop
             {
                 int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
-                // Day 2 Night Mentor Event: Introduce Wholesale Market & Grant Premium Milk Dispenser
-                if (day == 2 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay2Briefing)
-                {
-                    MentorController.Instance.TriggerDay2NightBriefing(() =>
-                    {
-                        HUDController.Instance?.ShowNotification("Wholesale Market & Premium Milk Dispenser are now active!", 4f);
-                    });
-                }
-
                 ForagingManager.Instance?.ResetNightForaging();
                 UpdateTabsState(day);
                 UpdateForagingButtons(day);

@@ -57,16 +57,31 @@ namespace BubbleTeaShop
             // Only allow closing if day is ready to close or before opening
             if (isOpen)
             {
-                // 1. Block closing if Landlord is currently waiting at the window
-                if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
+                // 1. Block closing if Landlord or Mentor is currently waiting at the window
+                if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null)
                 {
-                    HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlord is waiting for rent!");
-                    Debug.Log("Cannot close shutters while Landlord is waiting for rent!");
+                    if (CustomerManager.Instance.CustomerController.IsLandlordActive)
+                    {
+                        HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlord is waiting for rent!");
+                        return;
+                    }
+                    if (CustomerManager.Instance.CustomerController.IsMentorActive)
+                    {
+                        HUDController.Instance?.ShowNotification("Listen to your Mentor before closing the shop!");
+                        return;
+                    }
+                }
+
+                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
+                // 2. Block closing on Day 2 if Day 2 mentor briefing hasn't arrived yet
+                if (currentDay == 2 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay2Briefing)
+                {
+                    HUDController.Instance?.ShowNotification("Your Mentor is arriving to speak with you before closing!");
                     return;
                 }
 
-                // 2. Block closing if it is a rent day and the rent encounter hasn't settled yet
-                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                // 3. Block closing if it is a rent day and the rent encounter hasn't settled yet
                 if (currentDay % 7 == 0 && CustomerManager.Instance != null && !CustomerManager.Instance.RentEncounterTriggeredToday)
                 {
                     HUDController.Instance?.ShowNotification("The Landlord is on his way! You must settle rent before closing.");

@@ -171,6 +171,8 @@ namespace BubbleTeaShop
 
         public CustomerController CustomerController => customerController;
 
+        private Coroutine mentorArrivalRoutine;
+
         public void CheckRemainingCustomers()
         {
             // Only check end of day after the current customer has completely departed
@@ -181,7 +183,12 @@ namespace BubbleTeaShop
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                 bool isRentDay = (currentDay % 7 == 0);
 
-                if (isRentDay && !rentEncounterTriggeredToday && customerController != null)
+                if (currentDay == 2 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay2Briefing && customerController != null)
+                {
+                    if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
+                    mentorArrivalRoutine = StartCoroutine(DelayedDay2MentorArrivalRoutine(0.6f));
+                }
+                else if (isRentDay && !rentEncounterTriggeredToday && customerController != null)
                 {
                     rentEncounterTriggeredToday = true;
                     if (rentArrivalRoutine != null) StopCoroutine(rentArrivalRoutine);
@@ -193,10 +200,20 @@ namespace BubbleTeaShop
                     OnAllDailyCustomersFinished?.Invoke();
                 }
             }
-            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing && (customerController == null || !customerController.IsLandlordActive))
+            else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing && (customerController == null || (!customerController.IsLandlordActive && !customerController.IsMentorActive)))
             {
                 GameManager.Instance?.SetState(GameState.ShopOpen);
             }
+        }
+
+        private IEnumerator DelayedDay2MentorArrivalRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            MentorController.Instance?.TriggerDay2NightBriefing(customerController, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
         }
 
         private IEnumerator DelayedRentArrivalRoutine(float delay, int dayNumber)

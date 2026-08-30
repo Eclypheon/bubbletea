@@ -70,7 +70,7 @@ namespace BubbleTeaShop
             }
         }
 
-        public void TriggerDay2NightBriefing(Action onFinished)
+        public void TriggerDay2NightBriefing(CustomerController customerController, Action onFinished = null)
         {
             if (hasCompletedDay2Briefing)
             {
@@ -83,8 +83,32 @@ namespace BubbleTeaShop
             // Unlock Premium Milk Dispenser and grant 1 sample of Oat, Coconut, Condensed milk
             InventoryManager.Instance?.UnlockPremiumMilkDispenser();
 
-            OnDay2BriefingCompleted?.Invoke();
-            onFinished?.Invoke();
+            string[] briefingLines = new string[]
+            {
+                "Great job surviving your first two days of business!",
+                "From tonight onwards, you can head to the Wholesale Market tab to purchase fresh ingredients and toppings.",
+                "I'm also passing you this Premium Milk Dispenser unit! It lets you dispense Oat Milk, Coconut Milk, and Condensed Milk.",
+                "I've loaded it with 1 starter serving of each milk. Close the shutter whenever you're ready to head to the market!"
+            };
+
+            if (customerController != null)
+            {
+                customerController.SpawnMentorSequence(
+                    briefingLines,
+                    3.5f,
+                    mentorSprite,
+                    () =>
+                    {
+                        OnDay2BriefingCompleted?.Invoke();
+                        onFinished?.Invoke();
+                    }
+                );
+            }
+            else
+            {
+                OnDay2BriefingCompleted?.Invoke();
+                onFinished?.Invoke();
+            }
         }
     }
 }
