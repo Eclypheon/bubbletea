@@ -23,6 +23,19 @@ namespace BubbleTeaShop
         [Header("Catalog Container")]
         [SerializeField] private Transform marketCatalogContainer;
 
+        [Header("Ingredient Icons (Optional)")]
+        [SerializeField] private Sprite freshMilkIcon;
+        [SerializeField] private Sprite oatMilkIcon;
+        [SerializeField] private Sprite coconutMilkIcon;
+        [SerializeField] private Sprite condensedMilkIcon;
+        [SerializeField] private Sprite tapiocaIcon;
+        [SerializeField] private Sprite poppingBobaIcon;
+        [SerializeField] private Sprite grassJellyIcon;
+        [SerializeField] private Sprite eggPuddingIcon;
+        [SerializeField] private Sprite coconutJellyIcon;
+        [SerializeField] private Sprite cheeseFoamIcon;
+        [SerializeField] private Sprite goldenHoneyPearlsIcon;
+
         [Header("Audio (Optional)")]
         [SerializeField] private AudioClip purchaseChimeSound;
 
@@ -56,6 +69,46 @@ namespace BubbleTeaShop
             }
         }
 
+        public Sprite GetIngredientIcon(string key)
+        {
+            Sprite icon = key switch
+            {
+                "Milk_FreshMilk" => freshMilkIcon,
+                "Milk_OatMilk" => oatMilkIcon,
+                "Milk_CoconutMilk" => coconutMilkIcon,
+                "Milk_CondensedMilk" => condensedMilkIcon,
+                "Topping_TapiocaPearls" => tapiocaIcon,
+                "Topping_PoppingBoba" => poppingBobaIcon,
+                "Topping_GrassJelly" => grassJellyIcon,
+                "Topping_EggPudding" => eggPuddingIcon,
+                "Topping_CoconutJelly" => coconutJellyIcon,
+                "Topping_CheeseFoam" => cheeseFoamIcon,
+                "Topping_GoldenHoneyPearls" => goldenHoneyPearlsIcon,
+                _ => null
+            };
+
+            if (icon == null && CashRegisterInventoryUI.Instance != null)
+            {
+                icon = CashRegisterInventoryUI.Instance.GetIngredientIcon(key);
+            }
+            else if (icon == null && CupStation.Instance != null)
+            {
+                icon = key switch
+                {
+                    "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
+                    "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
+                    "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
+                    "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
+                    "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
+                    "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
+                    "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
+                    _ => null
+                };
+            }
+
+            return icon;
+        }
+
         public void OpenSupermarketView(int dayNumber)
         {
             if (supermarketPanelRoot != null)
@@ -70,7 +123,7 @@ namespace BubbleTeaShop
 
             if (marketAisleTitleText != null)
             {
-                marketAisleTitleText.text = $"🛒 <b>Wholesale Supermarket</b> — Day {dayNumber}";
+                marketAisleTitleText.text = $"Wholesale Supermarket — Day {dayNumber}";
             }
 
             UpdateSupermarketDisplay(dayNumber);
@@ -106,57 +159,92 @@ namespace BubbleTeaShop
             }
 
             var catalog = MarketManager.Instance.GetAvailableCatalog(dayNumber);
-            int cols = 3;
-            float startX = -290f;
-            float startY = 110f;
-            float spacingX = 290f;
-            float spacingY = 85f;
+            if (catalog.Count == 0) return;
+
+            RectTransform containerRt = marketCatalogContainer as RectTransform;
+            float totalWidth = containerRt != null && containerRt.rect.width > 200 ? containerRt.rect.width : 960f;
+            float totalHeight = containerRt != null && containerRt.rect.height > 100 ? containerRt.rect.height : 450f;
+
+            int cols = totalWidth > 800 ? 3 : 2;
+            int totalRows = Mathf.CeilToInt((float)catalog.Count / cols);
+
+            float paddingX = 20f;
+            float paddingY = 20f;
+            float spacingX = 24f;
+            float spacingY = 18f;
+
+            float cardWidth = (totalWidth - (paddingX * 2) - (spacingX * (cols - 1))) / cols;
+            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 72f, 100f);
+
+            float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
+            float startY = totalHeight * 0.5f - paddingY - (cardHeight * 0.5f);
 
             for (int i = 0; i < catalog.Count; i++)
             {
                 var item = catalog[i];
                 int currentStock = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock(item.stockKey) : 0;
                 bool canAfford = EconomyManager.Instance != null && EconomyManager.Instance.CanAfford(item.price);
+                Sprite itemIcon = GetIngredientIcon(item.stockKey);
 
                 int row = i / cols;
                 int col = i % cols;
-                Vector2 pos = new Vector2(startX + col * spacingX, startY - row * spacingY);
+                Vector2 pos = new Vector2(startX + col * (cardWidth + spacingX), startY - row * (cardHeight + spacingY));
 
                 // Container card
                 GameObject cardObj = new GameObject($"Card_{item.stockKey}", typeof(RectTransform), typeof(Image));
                 cardObj.transform.SetParent(marketCatalogContainer, false);
                 var rt = cardObj.GetComponent<RectTransform>();
-                rt.sizeDelta = new Vector2(275, 76);
+                rt.sizeDelta = new Vector2(cardWidth, cardHeight);
                 rt.anchoredPosition = pos;
 
                 var img = cardObj.GetComponent<Image>();
-                img.color = new Color(0.12f, 0.16f, 0.24f, 0.92f);
+                img.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
 
-                // Info Text (Item Name + Pack quantity + In Stock count)
+                // Left: Ingredient Icon
+                float leftOffset = 12f;
+                if (itemIcon != null)
+                {
+                    GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                    iconObj.transform.SetParent(cardObj.transform, false);
+                    var iconRt = iconObj.GetComponent<RectTransform>();
+                    iconRt.anchorMin = new Vector2(0, 0.5f);
+                    iconRt.anchorMax = new Vector2(0, 0.5f);
+                    iconRt.pivot = new Vector2(0, 0.5f);
+                    float iconSize = Mathf.Min(cardHeight - 16f, 52f);
+                    iconRt.sizeDelta = new Vector2(iconSize, iconSize);
+                    iconRt.anchoredPosition = new Vector2(10, 0);
+
+                    var iconImg = iconObj.GetComponent<Image>();
+                    iconImg.sprite = itemIcon;
+                    iconImg.preserveAspect = true;
+                    leftOffset = iconSize + 20f;
+                }
+
+                // Middle: Info Text (Item Name + Pack Quantity + In Bag count)
                 GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
                 infoTextObj.transform.SetParent(cardObj.transform, false);
                 var infoRt = infoTextObj.GetComponent<RectTransform>();
                 infoRt.anchorMin = new Vector2(0, 0);
-                infoRt.anchorMax = new Vector2(0.65f, 1);
-                infoRt.offsetMin = new Vector2(10, 6);
-                infoRt.offsetMax = new Vector2(0, -6);
+                infoRt.anchorMax = new Vector2(0.66f, 1);
+                infoRt.offsetMin = new Vector2(leftOffset, 4);
+                infoRt.offsetMax = new Vector2(-4, -4);
                 var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
                 infoTmp.fontSize = 13;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 infoTmp.text = $"<b>{item.displayName}</b>\n" +
-                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Bag: <color=#F1C40F>{currentStock:D2}</color>";
+                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Bag: <color=#F1C40F>x {currentStock:D2}</color>";
 
-                // Buy Button
+                // Right: Buy Button
                 GameObject buyBtnObj = new GameObject("BuyButton", typeof(RectTransform), typeof(Image), typeof(Button));
                 buyBtnObj.transform.SetParent(cardObj.transform, false);
                 var buyRt = buyBtnObj.GetComponent<RectTransform>();
-                buyRt.anchorMin = new Vector2(0.66f, 0.15f);
-                buyRt.anchorMax = new Vector2(0.96f, 0.85f);
+                buyRt.anchorMin = new Vector2(0.68f, 0.12f);
+                buyRt.anchorMax = new Vector2(0.97f, 0.88f);
                 buyRt.offsetMin = Vector2.zero;
                 buyRt.offsetMax = Vector2.zero;
 
                 var buyImg = buyBtnObj.GetComponent<Image>();
-                buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.4f, 0.4f, 0.4f, 0.7f);
+                buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.35f, 0.35f, 0.35f, 0.65f);
 
                 var buyBtn = buyBtnObj.GetComponent<Button>();
                 buyBtn.interactable = canAfford;

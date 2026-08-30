@@ -31,6 +31,14 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite goldenHoneyPearlsSprite;
         [SerializeField] private Sprite cheeseFoamSprite;
 
+        public Sprite TapiocaSprite => tapiocaSprite;
+        public Sprite PoppingBobaSprite => poppingBobaSprite;
+        public Sprite GrassJellySprite => grassJellySprite;
+        public Sprite CoconutJellySprite => coconutJellySprite;
+        public Sprite EggPuddingSprite => eggPuddingSprite;
+        public Sprite GoldenHoneyPearlsSprite => goldenHoneyPearlsSprite;
+        public Sprite CheeseFoamSprite => cheeseFoamSprite;
+
         [Header("Action Buttons")]
         [Tooltip("Optional - New cups are automatically spawned, but this can be assigned if desired")]
         [SerializeField] private Button newCupButton;
