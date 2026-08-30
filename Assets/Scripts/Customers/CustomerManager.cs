@@ -116,6 +116,7 @@ namespace BubbleTeaShop
             if (HasCustomerAtWindow)
             {
                 customerController.ReceiveDrink(cup);
+                CheckRemainingCustomers();
             }
         }
 
@@ -129,7 +130,7 @@ namespace BubbleTeaShop
             CheckRemainingCustomers();
         }
 
-        private void CheckRemainingCustomers()
+        public void CheckRemainingCustomers()
         {
             if (dailyCustomerQueue.Count == 0 && !HasCustomerAtWindow)
             {

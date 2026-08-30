@@ -242,6 +242,7 @@ namespace BubbleTeaShop
             {
                 speechBubble.ShowReaction("Took too long! I'm leaving!", 1);
             }
+            CustomerManager.Instance?.CheckRemainingCustomers();
 
             if (leaveRoutine != null) StopCoroutine(leaveRoutine);
             leaveRoutine = StartCoroutine(LeaveAngryRoutine());
