@@ -88,6 +88,7 @@ namespace BubbleTeaShop
         {
             if (!currentCup.hasCup) return;
             if (currentCup.isSealed) return;
+            if (currentCup.tea != TeaBase.None) return; // Prevent overwriting existing tea
 
             currentCup.tea = tea;
             UpdateVisuals();
@@ -97,6 +98,7 @@ namespace BubbleTeaShop
         {
             if (!currentCup.hasCup) return;
             if (currentCup.isSealed) return;
+            if (currentCup.milk != MilkType.None) return; // Prevent overwriting existing milk
 
             currentCup.milk = milk;
             UpdateVisuals();

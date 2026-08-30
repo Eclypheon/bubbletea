@@ -22,11 +22,26 @@ namespace BubbleTeaShop
 
         public void DispenseMilk()
         {
+            if (CupStation.Instance == null || !CupStation.Instance.CurrentCup.hasCup) return;
+
+            if (CupStation.Instance.CurrentCup.isSealed)
+            {
+                HUDController.Instance?.ShowNotification("Cup is already sealed!");
+                return;
+            }
+
+            if (CupStation.Instance.CurrentCup.milk != MilkType.None)
+            {
+                HUDController.Instance?.ShowNotification("Cup already has milk! Trash the cup to start over.");
+                return;
+            }
+
             if (InventoryManager.Instance != null)
             {
                 if (!InventoryManager.Instance.ConsumeStock($"Milk_{milkType}", 1))
                 {
                     Debug.LogWarning($"Out of {milkType}!");
+                    HUDController.Instance?.ShowNotification($"Out of {milkType}! Buy more at night.");
                     return;
                 }
             }
