@@ -208,59 +208,72 @@ namespace BubbleTeaShop
 
             int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
-            // 1. Determine ingredient availability based on day / week progression
-            List<TeaBase> availableTeas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea };
-            List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk };
-            List<int> availableSweetness = new List<int> { 0, 50, 100 };
-            List<int> availableIce = new List<int> { 0, 50, 100 };
-            List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
-            int maxToppings = 1;
-
-            if (currentDay >= 4) // Mid-Week 1
+            // 1. Day 1 Dopamine Funnel vs Progressive Day 2+ Difficulty
+            if (currentDay == 1)
             {
-                availableTeas.Add(TeaBase.OolongTea);
-                availableMilks.Add(MilkType.OatMilk);
-                availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
-                availableToppings.Add(ToppingType.CoconutJelly);
+                // Day 1: Simple, highly satisfying classic milk teas with Tapioca Pearls and polarized 0%/100% options
+                order.targetTea = (UnityEngine.Random.value > 0.5f) ? TeaBase.BlackTea : TeaBase.GreenTea;
+                order.targetMilk = MilkType.FreshMilk;
+                order.targetSweetnessPercent = (UnityEngine.Random.value > 0.5f) ? 100 : 0;
+                order.targetIcePercent = (UnityEngine.Random.value > 0.5f) ? 100 : 0;
+                order.targetToppings = new List<ToppingType> { ToppingType.TapiocaPearls };
             }
-
-            if (currentDay >= 8) // Week 2+
+            else
             {
-                availableTeas.Add(TeaBase.ThaiTea);
-                availableTeas.Add(TeaBase.TaroTea);
-                availableMilks.Add(MilkType.CondensedMilk);
-                availableToppings.Add(ToppingType.EggPudding);
-                availableToppings.Add(ToppingType.CheeseFoam);
-                maxToppings = 2;
-            }
+                // Day 2+: Progressive ingredient availability based on progression
+                List<TeaBase> availableTeas = new List<TeaBase> { TeaBase.BlackTea, TeaBase.GreenTea };
+                List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk };
+                List<int> availableSweetness = new List<int> { 0, 50, 100 };
+                List<int> availableIce = new List<int> { 0, 50, 100 };
+                List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
+                int maxToppings = 1;
 
-            if (currentDay >= 15) // Week 3+ (Rare & Foraged)
-            {
-                availableTeas.Add(TeaBase.WildMountainTea);
-                availableMilks.Add(MilkType.CoconutMilk);
-                availableToppings.Add(ToppingType.GoldenHoneyPearls);
-            }
-
-            // 2. Randomly construct the drink from available ingredients
-            order.targetTea = availableTeas[UnityEngine.Random.Range(0, availableTeas.Count)];
-            order.targetMilk = (UnityEngine.Random.value > 0.35f)
-                ? availableMilks[UnityEngine.Random.Range(1, availableMilks.Count)]
-                : MilkType.None;
-
-            order.targetSweetnessPercent = availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
-            order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
-
-            // Toppings: 65% chance of topping(s), 35% chance of no toppings
-            if (UnityEngine.Random.value < 0.65f && availableToppings.Count > 0)
-            {
-                int toppingsCount = UnityEngine.Random.Range(1, maxToppings + 1);
-                List<ToppingType> toppingPool = new List<ToppingType>(availableToppings);
-
-                for (int i = 0; i < toppingsCount && toppingPool.Count > 0; i++)
+                if (currentDay >= 4) // Mid-Week 1
                 {
-                    int randIdx = UnityEngine.Random.Range(0, toppingPool.Count);
-                    order.targetToppings.Add(toppingPool[randIdx]);
-                    toppingPool.RemoveAt(randIdx);
+                    availableTeas.Add(TeaBase.OolongTea);
+                    availableMilks.Add(MilkType.OatMilk);
+                    availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
+                    availableToppings.Add(ToppingType.CoconutJelly);
+                }
+
+                if (currentDay >= 8) // Week 2+
+                {
+                    availableTeas.Add(TeaBase.ThaiTea);
+                    availableTeas.Add(TeaBase.TaroTea);
+                    availableMilks.Add(MilkType.CondensedMilk);
+                    availableToppings.Add(ToppingType.EggPudding);
+                    availableToppings.Add(ToppingType.CheeseFoam);
+                    maxToppings = 2;
+                }
+
+                if (currentDay >= 15) // Week 3+ (Rare & Foraged)
+                {
+                    availableTeas.Add(TeaBase.WildMountainTea);
+                    availableMilks.Add(MilkType.CoconutMilk);
+                    availableToppings.Add(ToppingType.GoldenHoneyPearls);
+                }
+
+                // Randomly construct the drink from available ingredients
+                order.targetTea = availableTeas[UnityEngine.Random.Range(0, availableTeas.Count)];
+                order.targetMilk = (UnityEngine.Random.value > 0.35f)
+                    ? availableMilks[UnityEngine.Random.Range(1, availableMilks.Count)]
+                    : MilkType.None;
+
+                order.targetSweetnessPercent = availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
+                order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
+
+                // Toppings: 65% chance of topping(s), 35% chance of no toppings
+                if (UnityEngine.Random.value < 0.65f && availableToppings.Count > 0)
+                {
+                    int toppingsCount = UnityEngine.Random.Range(1, maxToppings + 1);
+                    List<ToppingType> toppingPool = new List<ToppingType>(availableToppings);
+
+                    for (int i = 0; i < toppingsCount && toppingPool.Count > 0; i++)
+                    {
+                        int randIdx = UnityEngine.Random.Range(0, toppingPool.Count);
+                        order.targetToppings.Add(toppingPool[randIdx]);
+                        toppingPool.RemoveAt(randIdx);
+                    }
                 }
             }
 
