@@ -116,6 +116,8 @@ namespace BubbleTeaShop
             {
                 speechBubble.ShowOrder(order);
             }
+
+            OrderTicketUI.Instance?.ShowTicket(order);
         }
 
         private void UpdateCustomerSprite(CustomerArchetype archetype)
@@ -411,7 +413,7 @@ namespace BubbleTeaShop
 
                     if (speechBubble != null)
                     {
-                        speechBubble.ShowMessage("W-wait... Is this Oolong Milk Tea with tapioca pearls, 100% sugar and 50% ice?! H-how did you know this is my favorite...?! ...O-okay, fine! Just for this once, I'll lower your rent by 10%! But don't get the wrong idea, baka!");
+                        speechBubble.ShowMessage("W-wait... Is this Oolong Milk Tea with tapioca pearls, 100% sugar and 50% ice?! ...O-okay, fine! Just for this once, I'll lower your rent by 10%! But don't get the wrong idea, baka!");
                     }
                     HUDController.Instance?.ShowNotification("💖 Landlord loved her favorite drink! Rent reduced by 10%!", 4f);
                 }

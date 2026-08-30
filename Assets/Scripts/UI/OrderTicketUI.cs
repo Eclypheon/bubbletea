@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace BubbleTeaShop
 {
@@ -11,6 +12,9 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI customerNameText;
         [SerializeField] private TextMeshProUGUI recipeDetailText;
 
+        private Image backgroundImage;
+        private CanvasGroup canvasGroup;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -19,13 +23,22 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+
+            backgroundImage = GetComponent<Image>();
+            canvasGroup = GetComponent<CanvasGroup>();
             if (ticketRoot == null) ticketRoot = gameObject;
+
+            if (CustomerManager.Instance != null)
+            {
+                CustomerManager.Instance.OnCustomerArrived += ShowTicket;
+            }
         }
 
         private void Start()
         {
             if (CustomerManager.Instance != null)
             {
+                CustomerManager.Instance.OnCustomerArrived -= ShowTicket;
                 CustomerManager.Instance.OnCustomerArrived += ShowTicket;
             }
             HideTicket();
@@ -33,14 +46,62 @@ namespace BubbleTeaShop
 
         public void ShowTicket(DrinkOrder order)
         {
-            if (ticketRoot != null) ticketRoot.SetActive(true);
-            if (customerNameText != null) customerNameText.text = $"#{order.customerName}";
-            if (recipeDetailText != null) recipeDetailText.text = order.GetFormattedSummary();
+            if (order == null) return;
+
+            gameObject.SetActive(true);
+
+            if (ticketRoot != null && ticketRoot != gameObject)
+            {
+                ticketRoot.SetActive(true);
+            }
+            else
+            {
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 1f;
+                    canvasGroup.interactable = true;
+                    canvasGroup.blocksRaycasts = true;
+                }
+                if (backgroundImage != null) backgroundImage.enabled = true;
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    transform.GetChild(i).gameObject.SetActive(true);
+                }
+            }
+
+            if (customerNameText != null)
+            {
+                customerNameText.gameObject.SetActive(true);
+                customerNameText.text = $"#{order.customerName}";
+            }
+
+            if (recipeDetailText != null)
+            {
+                recipeDetailText.gameObject.SetActive(true);
+                recipeDetailText.text = order.GetFormattedSummary();
+            }
         }
 
         public void HideTicket()
         {
-            if (ticketRoot != null) ticketRoot.SetActive(false);
+            if (ticketRoot != null && ticketRoot != gameObject)
+            {
+                ticketRoot.SetActive(false);
+            }
+            else
+            {
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 0f;
+                    canvasGroup.interactable = false;
+                    canvasGroup.blocksRaycasts = false;
+                }
+                if (backgroundImage != null) backgroundImage.enabled = false;
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    transform.GetChild(i).gameObject.SetActive(false);
+                }
+            }
         }
     }
 }
