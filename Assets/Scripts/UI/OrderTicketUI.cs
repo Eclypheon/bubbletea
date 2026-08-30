@@ -5,9 +5,22 @@ namespace BubbleTeaShop
 {
     public class OrderTicketUI : MonoBehaviour
     {
+        public static OrderTicketUI Instance { get; private set; }
+
         [SerializeField] private GameObject ticketRoot;
         [SerializeField] private TextMeshProUGUI customerNameText;
         [SerializeField] private TextMeshProUGUI recipeDetailText;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+            if (ticketRoot == null) ticketRoot = gameObject;
+        }
 
         private void Start()
         {
@@ -15,7 +28,7 @@ namespace BubbleTeaShop
             {
                 CustomerManager.Instance.OnCustomerArrived += ShowTicket;
             }
-            if (ticketRoot != null) ticketRoot.SetActive(false);
+            HideTicket();
         }
 
         public void ShowTicket(DrinkOrder order)

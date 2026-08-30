@@ -71,12 +71,17 @@ namespace BubbleTeaShop
         public bool PayTotalRent(int currentDay)
         {
             float total = GetTotalRentDue(currentDay);
-            if (SpendCash(total, $"Weekly Rent Settlement (Day {currentDay})"))
+            return PaySpecificRent(total, currentDay);
+        }
+
+        public bool PaySpecificRent(float amount, int currentDay)
+        {
+            if (SpendCash(amount, $"Weekly Rent Settlement (Day {currentDay})"))
             {
                 accumulatedRentOwed = 0f;
                 rentSkipsUsed = 0; // Reset skip strike once caught up
-                OnRentPaid?.Invoke(total, currentDay);
-                Debug.Log($"[Economy] Paid total rent: ${total:F2}");
+                OnRentPaid?.Invoke(amount, currentDay);
+                Debug.Log($"[Economy] Paid rent: ${amount:F2}");
                 return true;
             }
             return false;

@@ -140,6 +140,7 @@ namespace BubbleTeaShop
         {
             if (!isWaiting) return;
             isWaiting = false;
+            OrderTicketUI.Instance?.HideTicket();
 
             if (leaveRoutine != null) StopCoroutine(leaveRoutine);
 
@@ -173,6 +174,7 @@ namespace BubbleTeaShop
             if (isWaiting)
             {
                 isWaiting = false;
+                OrderTicketUI.Instance?.HideTicket();
                 DayManager.Instance?.RecordCustomerSkipped();
                 string angryLine = GetAngrySkipLine(activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
                 if (speechBubble != null)
@@ -221,27 +223,23 @@ namespace BubbleTeaShop
                 },
                 CustomerArchetype.Tourettes => new string[]
                 {
-                    "HEY! WOW! You didn't even make my drink! Worst boba shop in town, I'M OUTTA HERE!",
-                    "DON'T RING THAT BELL AT ME! Zero stars, never stepping foot in this joint again!",
-                    "Rude!! You just lost your best customer! Keep your tea!"
+                    "Ringing the bell in my face?! *tic* Rude! I'm leaving right now!",
+                    "You couldn't wait two seconds?! Wow, worst customer service ever!",
+                    "I had my money ready! Unbelievable disrespect!"
                 },
                 CustomerArchetype.Dyscalculia => new string[]
                 {
-                    "I spent 10 minutes counting my coins for you to just kick me out?! I'm never returning!",
-                    "Ringing the bell before I can even pay?! The math on your customer service is ZERO!",
-                    "Forget it! I'm taking my money to the coffee shop next door!"
+                    "I was just counting my change! Why are you rushing me out the door?!",
+                    "Numbers take me a moment to count, you didn't have to be so rude about it!",
+                    "Skipped just for trying to pay?! That's terrible!"
                 },
                 CustomerArchetype.Dyslexia => new string[]
                 {
-                    "I was just trying to read your menu board! You didn't have to kick me out, I'm never coming back!",
-                    "Rude! Not everyone can read your fancy tea names in 2 seconds! Never returning!",
-                    "Worst service ever! I'll tell everyone to avoid this place!"
+                    "I was still trying to read the menu board! You didn't give me a chance!",
+                    "I just needed a few seconds to understand the drink list! Goodbye!",
+                    "So impatient... never returning here again!"
                 },
-                _ => new string[]
-                {
-                    "Hey! You're skipping me?! Never coming back to this shop!",
-                    "Rude! I'm taking my business elsewhere!"
-                }
+                _ => new string[] { "I'm leaving!" }
             };
 
             return lines[UnityEngine.Random.Range(0, lines.Length)];
@@ -259,6 +257,7 @@ namespace BubbleTeaShop
         private void HandleCustomerTimeout()
         {
             isWaiting = false;
+            OrderTicketUI.Instance?.HideTicket();
             DayManager.Instance?.RecordCustomerSkipped();
             if (speechBubble != null)
             {
@@ -293,12 +292,16 @@ namespace BubbleTeaShop
             }
 
             isWaiting = false;
+            OrderTicketUI.Instance?.HideTicket();
             if (speechBubble != null) speechBubble.HideBubbleInstant();
             if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
             if (payRentButton != null) payRentButton.gameObject.SetActive(false);
             if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
             gameObject.SetActive(false);
         }
+
+        private bool rentDiscountedByDrink = false;
+        private float discountedRentAmount = 0f;
 
         public void SpawnLandlord(int dayNumber, Action onFinished)
         {
@@ -313,6 +316,8 @@ namespace BubbleTeaShop
             activeOrder = null;
             currentRentDay = dayNumber;
             onLandlordFinished = onFinished;
+            rentDiscountedByDrink = false;
+            discountedRentAmount = 0f;
 
             if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(false);
 
@@ -334,12 +339,12 @@ namespace BubbleTeaShop
             {
                 if (skipsUsed > 0)
                 {
-                    speechBubble.ShowMessage($"You're on thin ice! You owe last week's rent PLUS this week's: ${totalRent:F2}. Pay up now or you're evicted!");
+                    speechBubble.ShowMessage($"B-Baka! You still owe me last week's rent PLUS this week's (${totalRent:F2})! Pay up right now or you're totally kicked out, hmph!");
                 }
                 else
                 {
                     int week = Mathf.CeilToInt((float)dayNumber / EconomyManager.Instance.RentCycleDays);
-                    speechBubble.ShowMessage($"Greetings. Week {week} has ended. Your rent of ${totalRent:F2} is due right now before you close up.");
+                    speechBubble.ShowMessage($"H-hey! Don't look at me like that! Week {week} is over, so hand over the rent (${totalRent:F2}) already! It's not like I came here just to see you or anything...");
                 }
             }
 
@@ -368,12 +373,64 @@ namespace BubbleTeaShop
             HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3.5f);
         }
 
+        public void ReceiveLandlordDrink(BubbleTeaCup cup)
+        {
+            if (!isLandlordActive) return;
+
+            // Check favorite recipe: Oolong Tea + Fresh Milk + 100% Sugar + 50% Ice
+            bool isFavorite = (cup.tea == TeaBase.OolongTea &&
+                               cup.milk == MilkType.FreshMilk &&
+                               cup.sweetnessPercent == 100 &&
+                               cup.icePercent == 50);
+
+            if (isFavorite)
+            {
+                if (rentDiscountedByDrink)
+                {
+                    if (speechBubble != null)
+                    {
+                        speechBubble.ShowMessage("H-hey! I already gave you a 10% discount for that drink! You can't get double discounts, baka! Just pay the rent!");
+                    }
+                }
+                else
+                {
+                    rentDiscountedByDrink = true;
+                    float baseRentDue = EconomyManager.Instance.GetTotalRentDue(currentRentDay);
+                    discountedRentAmount = (float)Math.Round(baseRentDue * 0.90f, 2);
+
+                    if (payRentButtonText != null)
+                    {
+                        payRentButtonText.text = $"Pay Rent (${discountedRentAmount:F2})";
+                    }
+                    if (payRentButton != null)
+                    {
+                        payRentButton.interactable = EconomyManager.Instance.CanAfford(discountedRentAmount);
+                    }
+
+                    if (speechBubble != null)
+                    {
+                        speechBubble.ShowMessage("W-wait... Is this Oolong Milk Tea with 100% sugar and 50% ice?! H-how did you know this is my favorite...?! ...O-okay, fine! Just for this once, I'll lower your rent by 10%! But don't get the wrong idea, baka!");
+                    }
+                    HUDController.Instance?.ShowNotification("💖 Landlord loved her favorite drink! Rent reduced by 10%!", 4f);
+                }
+            }
+            else
+            {
+                if (speechBubble != null)
+                {
+                    speechBubble.ShowMessage("D-DON'T TRY TO BRIBE ME WITH A DRINK >:(! Hand over the rent already!");
+                }
+                HUDController.Instance?.ShowNotification("The Landlord rejected the bribe!", 3f);
+            }
+        }
+
         private void HandlePayRent()
         {
             if (payRentButton != null) payRentButton.interactable = false;
             if (skipRentButton != null) skipRentButton.interactable = false;
 
-            bool success = EconomyManager.Instance.PayTotalRent(currentRentDay);
+            float amountToPay = rentDiscountedByDrink ? discountedRentAmount : EconomyManager.Instance.GetTotalRentDue(currentRentDay);
+            bool success = EconomyManager.Instance.PaySpecificRent(amountToPay, currentRentDay);
             if (success)
             {
                 if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
@@ -382,7 +439,7 @@ namespace BubbleTeaShop
 
                 if (speechBubble != null)
                 {
-                    speechBubble.ShowReaction("Payment accepted in full. Keep the shop running well, and I will see you next week.", 5);
+                    speechBubble.ShowMessage("Hmph, fine! I guess your payment is good. Don't go slacking off next week, dummy! ...S-see you next time.");
                 }
                 HUDController.Instance?.ShowNotification("Rent paid successfully!", 3f);
                 StartCoroutine(DismissLandlordAfterDelay(3.5f));
@@ -391,7 +448,7 @@ namespace BubbleTeaShop
             {
                 if (speechBubble != null)
                 {
-                    speechBubble.ShowMessage("You don't have enough money! Don't play games with me!");
+                    speechBubble.ShowMessage("You don't even have enough money, dummy! Stop teasing me and pay up!");
                 }
                 if (payRentButton != null) payRentButton.interactable = false;
                 if (skipRentButton != null) skipRentButton.interactable = true;
@@ -412,7 +469,7 @@ namespace BubbleTeaShop
 
                 if (speechBubble != null)
                 {
-                    speechBubble.ShowReaction("Hmph! I'll give you ONE extension. Next week you MUST pay the accumulated amount or get evicted on the spot!", 1);
+                    speechBubble.ShowMessage("W-WHAT?! You can't pay?! ...F-fine, I'll give you ONE extension, but ONLY because I'm nice! Next week you better pay double or you're out on the street! Hmph!");
                 }
                 HUDController.Instance?.ShowNotification("Rent skipped! 1 extension used.", 3.5f);
                 StartCoroutine(DismissLandlordAfterDelay(3.5f));
@@ -421,7 +478,7 @@ namespace BubbleTeaShop
             {
                 if (speechBubble != null)
                 {
-                    speechBubble.ShowReaction("You already used your ONE extension! Pack your things, you are EVICTED!", 0);
+                    speechBubble.ShowMessage("I already gave you an extension, idiot! That's it, you're officially EVICTED! Hmph!");
                 }
                 StartCoroutine(TriggerEvictionGameOver(2.5f));
             }
