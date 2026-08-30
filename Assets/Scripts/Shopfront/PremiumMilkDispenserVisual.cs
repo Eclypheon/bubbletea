@@ -5,81 +5,25 @@ namespace BubbleTeaShop
 {
     public class PremiumMilkDispenserVisual : MonoBehaviour
     {
-        [Tooltip("Optional: If assigned to a child or external object, will toggle SetActive on it. If empty or assigned to this GameObject, will toggle Image/Graphic components so the script stays active.")]
-        [SerializeField] private GameObject visualRoot;
-
         private void Start()
         {
-            UpdateVisibility();
+            CheckVisibility();
         }
 
-        private void OnEnable()
+        private void Update()
         {
-            UpdateVisibility();
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.OnInventoryUpdated += UpdateVisibility;
-            }
-            if (DayManager.Instance != null)
-            {
-                DayManager.Instance.OnDayStarted += HandleDayStarted;
-            }
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.OnStateChanged += HandleStateChanged;
-            }
+            CheckVisibility();
         }
 
-        private void OnDisable()
+        private void CheckVisibility()
         {
-            if (InventoryManager.Instance != null)
-            {
-                InventoryManager.Instance.OnInventoryUpdated -= UpdateVisibility;
-            }
-            if (DayManager.Instance != null)
-            {
-                DayManager.Instance.OnDayStarted -= HandleDayStarted;
-            }
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.OnStateChanged -= HandleStateChanged;
-            }
-        }
+            if (DayManager.Instance == null) return;
+            bool isVisible = DayManager.Instance.CurrentDay > 2;
 
-        private void HandleDayStarted(int day) => UpdateVisibility();
-        private void HandleStateChanged(GameState state) => UpdateVisibility();
-
-        public void UpdateVisibility()
-        {
-            bool isUnlocked = (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser) 
-                           || (DayManager.Instance != null && DayManager.Instance.CurrentDay >= 3);
-
-            if (visualRoot != null && visualRoot != gameObject)
+            var graphics = GetComponentsInChildren<Graphic>(true);
+            foreach (var g in graphics)
             {
-                visualRoot.SetActive(isUnlocked);
-            }
-            else
-            {
-                // Toggle Image and UI Graphics without deactivating the GameObject itself,
-                // ensuring the script and its event listeners remain active and functional.
-                var graphics = GetComponentsInChildren<Graphic>(true);
-                foreach (var g in graphics)
-                {
-                    g.enabled = isUnlocked;
-                }
-
-                var renderers = GetComponentsInChildren<CanvasRenderer>(true);
-                foreach (var r in renderers)
-                {
-                    r.cull = !isUnlocked;
-                }
-
-                if (TryGetComponent<CanvasGroup>(out var cg))
-                {
-                    cg.alpha = isUnlocked ? 1f : 0f;
-                    cg.interactable = isUnlocked;
-                    cg.blocksRaycasts = isUnlocked;
-                }
+                g.enabled = isVisible;
             }
         }
     }

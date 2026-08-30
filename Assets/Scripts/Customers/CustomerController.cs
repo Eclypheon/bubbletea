@@ -333,6 +333,8 @@ namespace BubbleTeaShop
             }
 
             gameObject.SetActive(true);
+            OrderTicketUI.Instance?.HideTicket();
+            HUDController.Instance?.SetStatusHint("Listen to your Mentor's advice...");
             mentorRoutine = StartCoroutine(MentorDialogueSequenceRoutine(lines, delayPerLine, onCompletedSequence));
         }
 

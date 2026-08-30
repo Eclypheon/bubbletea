@@ -38,23 +38,26 @@ namespace BubbleTeaShop
             }
         }
 
+        private void Update()
+        {
+            UpdateVisibility();
+        }
+
         public void UpdateVisibility()
         {
             if (toppingType == ToppingType.TapiocaPearls)
             {
                 // Tapioca Pearls jar is always available on countertop
-                if (scoopButton != null) scoopButton.gameObject.SetActive(true);
+                SetVisible(true);
                 return;
             }
 
-            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             int stock = InventoryManager.Instance != null ? InventoryManager.Instance.GetToppingStock(toppingType) : 0;
+            SetVisible(stock > 0);
+        }
 
-            bool unlockedBySchedule = (day >= 3 && (toppingType == ToppingType.PoppingBoba || toppingType == ToppingType.GrassJelly)) ||
-                                     (day >= 8 && (toppingType == ToppingType.EggPudding || toppingType == ToppingType.CoconutJelly)) ||
-                                     (day >= 15 && (toppingType == ToppingType.CheeseFoam || toppingType == ToppingType.GoldenHoneyPearls));
-
-            bool isVisible = unlockedBySchedule || stock > 0;
+        private void SetVisible(bool isVisible)
+        {
             if (scoopButton != null)
             {
                 scoopButton.gameObject.SetActive(isVisible);
