@@ -203,7 +203,7 @@ namespace BubbleTeaShop
 
             if (tabIndex == 0 && day < 2)
             {
-                HUDController.Instance?.ShowNotification("Wholesale Market unlocks on Day 2!");
+                HUDController.Instance?.ShowNotification("Wholesale Supermarket unlocks on Day 2!");
                 return;
             }
             if (tabIndex == 1 && day < 5)
@@ -214,6 +214,12 @@ namespace BubbleTeaShop
             if (tabIndex == 2 && day < 8)
             {
                 HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!");
+                return;
+            }
+
+            if (tabIndex == 0 && SupermarketViewController.Instance != null)
+            {
+                SupermarketViewController.Instance.OpenSupermarketView(day);
                 return;
             }
 

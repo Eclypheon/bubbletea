@@ -99,36 +99,38 @@ namespace BubbleTeaShop
                 cashBalanceText.text = $"Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
             }
 
-            if (dailySuppliesText != null)
-            {
-                int sugar = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Sugar") : 0;
-                int ice = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Ice") : 0;
-                dailySuppliesText.text = $"• <b>Cups & Straws:</b> Auto-restocked for $10/day\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
-            }
-
-            if (teaStockText != null && InventoryManager.Instance != null)
-            {
-                teaStockText.text = $"• <b>Tea Bases:</b> Auto-restocked for $10/day\n" +
-                                    $"  <i>(Black, Green, Oolong, Thai, Taro)</i>";
-            }
-
             if (milkStockText != null && InventoryManager.Instance != null)
             {
-                milkStockText.text = $"• <b>Fresh Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)} servings\n" +
-                                     $"• <b>Oat Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)} servings\n" +
-                                     $"• <b>Coconut Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)} servings\n" +
-                                     $"• <b>Condensed Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk)} servings";
+                int fresh = InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk);
+                int oat = InventoryManager.Instance.GetMilkStock(MilkType.OatMilk);
+                int coconut = InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk);
+                int condensed = InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk);
+
+                milkStockText.text = $"<b>🥛 MILKS</b>\n" +
+                                     $"• Fresh Whole Milk    <color=#F1C40F>x {fresh:D2}</color>\n" +
+                                     $"• Barista Oat Milk    <color=#F1C40F>x {oat:D2}</color>\n" +
+                                     $"• Organic Coconut Milk <color=#F1C40F>x {coconut:D2}</color>\n" +
+                                     $"• Sweet Condensed Milk <color=#F1C40F>x {condensed:D2}</color>";
             }
 
             if (toppingStockText != null && InventoryManager.Instance != null)
             {
-                toppingStockText.text = $"• <b>Tapioca Pearls:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)} servings\n" +
-                                        $"• <b>Popping Boba:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)} servings\n" +
-                                        $"• <b>Grass Jelly:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.GrassJelly)} servings\n" +
-                                        $"• <b>Egg Custard:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding)} servings\n" +
-                                        $"• <b>Coconut Jelly:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.CoconutJelly)} servings\n" +
-                                        $"• <b>Cheese Foam:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)} servings\n" +
-                                        $"• <b>Golden Honey Pearls:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls)} servings";
+                int tapioca = InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls);
+                int popping = InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba);
+                int grass = InventoryManager.Instance.GetToppingStock(ToppingType.GrassJelly);
+                int egg = InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding);
+                int coconutJelly = InventoryManager.Instance.GetToppingStock(ToppingType.CoconutJelly);
+                int cheese = InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam);
+                int golden = InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls);
+
+                toppingStockText.text = $"<b>🧋 TOPPINGS</b>\n" +
+                                        $"• Raw Tapioca Pearls   <color=#F1C40F>x {tapioca:D2}</color>\n" +
+                                        $"• Mango Popping Boba   <color=#F1C40F>x {popping:D2}</color>\n" +
+                                        $"• Herbal Grass Jelly   <color=#F1C40F>x {grass:D2}</color>\n" +
+                                        $"• Silky Egg Custard    <color=#F1C40F>x {egg:D2}</color>\n" +
+                                        $"• Sweet Coconut Jelly  <color=#F1C40F>x {coconutJelly:D2}</color>\n" +
+                                        $"• Salted Cheese Foam   <color=#F1C40F>x {cheese:D2}</color>\n" +
+                                        $"• Golden Honey Pearls  <color=#F1C40F>x {golden:D2}</color>";
             }
 
             if (marketNewsText != null)
