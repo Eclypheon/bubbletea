@@ -168,13 +168,13 @@ namespace BubbleTeaShop
             int cols = totalWidth > 800 ? 3 : 2;
             int totalRows = Mathf.CeilToInt((float)catalog.Count / cols);
 
-            float paddingX = 20f;
-            float paddingY = 20f;
-            float spacingX = 24f;
-            float spacingY = 18f;
+            float paddingX = 16f;
+            float paddingY = 16f;
+            float spacingX = 20f;
+            float spacingY = 16f;
 
             float cardWidth = (totalWidth - (paddingX * 2) - (spacingX * (cols - 1))) / cols;
-            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 72f, 100f);
+            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 76f, 100f);
 
             float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
             float startY = totalHeight * 0.5f - paddingY - (cardHeight * 0.5f);
@@ -198,10 +198,10 @@ namespace BubbleTeaShop
                 rt.anchoredPosition = pos;
 
                 var img = cardObj.GetComponent<Image>();
-                img.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
+                img.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
 
                 // Left: Ingredient Icon
-                float leftOffset = 12f;
+                float leftOffset = 10f;
                 if (itemIcon != null)
                 {
                     GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
@@ -210,38 +210,26 @@ namespace BubbleTeaShop
                     iconRt.anchorMin = new Vector2(0, 0.5f);
                     iconRt.anchorMax = new Vector2(0, 0.5f);
                     iconRt.pivot = new Vector2(0, 0.5f);
-                    float iconSize = Mathf.Min(cardHeight - 16f, 52f);
+                    float iconSize = Mathf.Min(cardHeight - 16f, 54f);
                     iconRt.sizeDelta = new Vector2(iconSize, iconSize);
                     iconRt.anchoredPosition = new Vector2(10, 0);
 
                     var iconImg = iconObj.GetComponent<Image>();
                     iconImg.sprite = itemIcon;
                     iconImg.preserveAspect = true;
-                    leftOffset = iconSize + 20f;
+                    leftOffset = iconSize + 18f;
                 }
 
-                // Middle: Info Text (Item Name + Pack Quantity + In Bag count)
-                GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                infoTextObj.transform.SetParent(cardObj.transform, false);
-                var infoRt = infoTextObj.GetComponent<RectTransform>();
-                infoRt.anchorMin = new Vector2(0, 0);
-                infoRt.anchorMax = new Vector2(0.66f, 1);
-                infoRt.offsetMin = new Vector2(leftOffset, 4);
-                infoRt.offsetMax = new Vector2(-4, -4);
-                var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
-                infoTmp.fontSize = 13;
-                infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
-                infoTmp.text = $"<b>{item.displayName}</b>\n" +
-                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Bag: <color=#F1C40F>x {currentStock:D2}</color>";
-
-                // Right: Buy Button
+                // Right: Dedicated Buy Button (Generous width to fit text without wrapping)
+                float buyButtonWidth = 86f;
                 GameObject buyBtnObj = new GameObject("BuyButton", typeof(RectTransform), typeof(Image), typeof(Button));
                 buyBtnObj.transform.SetParent(cardObj.transform, false);
                 var buyRt = buyBtnObj.GetComponent<RectTransform>();
-                buyRt.anchorMin = new Vector2(0.68f, 0.12f);
-                buyRt.anchorMax = new Vector2(0.97f, 0.88f);
-                buyRt.offsetMin = Vector2.zero;
-                buyRt.offsetMax = Vector2.zero;
+                buyRt.anchorMin = new Vector2(1, 0.5f);
+                buyRt.anchorMax = new Vector2(1, 0.5f);
+                buyRt.pivot = new Vector2(1, 0.5f);
+                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 16f);
+                buyRt.anchoredPosition = new Vector2(-10, 0);
 
                 var buyImg = buyBtnObj.GetComponent<Image>();
                 buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.35f, 0.35f, 0.35f, 0.65f);
@@ -252,11 +240,33 @@ namespace BubbleTeaShop
                 GameObject buyTextObj = new GameObject("BuyText", typeof(RectTransform), typeof(TextMeshProUGUI));
                 buyTextObj.transform.SetParent(buyBtnObj.transform, false);
                 var buyTextRt = buyTextObj.GetComponent<RectTransform>();
-                buyTextRt.sizeDelta = buyRt.sizeDelta;
+                buyTextRt.anchorMin = Vector2.zero;
+                buyTextRt.anchorMax = Vector2.one;
+                buyTextRt.offsetMin = new Vector2(2, 2);
+                buyTextRt.offsetMax = new Vector2(-2, -2);
+
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
-                buyTmp.fontSize = 13;
+                buyTmp.fontSize = 12.5f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
-                buyTmp.text = $"<b>Buy</b>\n${item.price:F2}";
+                buyTmp.enableWordWrapping = false;
+                buyTmp.lineSpacing = -15f;
+                buyTmp.text = $"<b>BUY</b>\n${item.price:F2}";
+
+                // Middle: Info Text (Item Name + Pack Quantity + In Bag count)
+                GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                infoTextObj.transform.SetParent(cardObj.transform, false);
+                var infoRt = infoTextObj.GetComponent<RectTransform>();
+                infoRt.anchorMin = new Vector2(0, 0);
+                infoRt.anchorMax = new Vector2(1, 1);
+                infoRt.offsetMin = new Vector2(leftOffset, 4);
+                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 18f), -4);
+
+                var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
+                infoTmp.fontSize = 13f;
+                infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
+                infoTmp.enableWordWrapping = true;
+                infoTmp.text = $"<b>{item.displayName}</b>\n" +
+                               $"<color=#BDC3C7>Pack of {item.bundleQuantity}</color> | In Bag: <color=#F1C40F>x {currentStock:D2}</color>";
 
                 buyBtn.onClick.AddListener(() =>
                 {

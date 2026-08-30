@@ -15,13 +15,14 @@ namespace BubbleTeaShop
         [SerializeField] private Button cashRegisterButton;
         [SerializeField] private Button closeButton;
 
-        [Header("Display Text (Standard)")]
+        [Header("Display Text (Fallbacks)")]
         [SerializeField] private TextMeshProUGUI cashBalanceText;
         [SerializeField] private TextMeshProUGUI milkStockText;
         [SerializeField] private TextMeshProUGUI toppingStockText;
         [SerializeField] private TextMeshProUGUI marketNewsText;
 
-        [Header("Dynamic Table Containers (Optional for Visual Icon Grid)")]
+        [Header("Card Containers (Visual Item Cards)")]
+        [SerializeField] private Transform inventoryCardsContainer;
         [SerializeField] private Transform milkTableContainer;
         [SerializeField] private Transform toppingTableContainer;
 
@@ -173,7 +174,7 @@ namespace BubbleTeaShop
                 ("Topping_GoldenHoneyPearls", "Golden Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))
             };
 
-            // Update Text Fallbacks (Clean standard ASCII formatting)
+            // Update Fallback Texts (Clean ASCII)
             if (milkStockText != null)
             {
                 string text = "<b>MILKS</b>\n";
@@ -194,14 +195,21 @@ namespace BubbleTeaShop
                 toppingStockText.text = text.TrimEnd();
             }
 
-            // Populate Visual Icon Rows if containers are assigned
-            if (milkTableContainer != null)
+            // Populate Visual Container Cards
+            if (inventoryCardsContainer != null)
             {
-                PopulateVisualTable(milkTableContainer, milks);
+                PopulateUnifiedTwoColumnCards(inventoryCardsContainer, milks, toppings);
             }
-            if (toppingTableContainer != null)
+            else
             {
-                PopulateVisualTable(toppingTableContainer, toppings);
+                if (milkTableContainer != null)
+                {
+                    PopulateCardList(milkTableContainer, milks, "MILKS");
+                }
+                if (toppingTableContainer != null)
+                {
+                    PopulateCardList(toppingTableContainer, toppings, "TOPPINGS");
+                }
             }
 
             if (marketNewsText != null)
@@ -218,79 +226,144 @@ namespace BubbleTeaShop
             }
         }
 
-        private void PopulateVisualTable(Transform container, (string key, string name, int count)[] items)
+        private void PopulateUnifiedTwoColumnCards(Transform container, (string key, string name, int count)[] milks, (string key, string name, int count)[] toppings)
         {
             for (int i = container.childCount - 1; i >= 0; i--)
             {
                 Destroy(container.GetChild(i).gameObject);
             }
 
-            float rowHeight = 36f;
-            float spacingY = 4f;
+            RectTransform containerRt = container as RectTransform;
+            float totalWidth = containerRt != null && containerRt.rect.width > 200 ? containerRt.rect.width : 780f;
+            float colWidth = (totalWidth - 30f) * 0.5f;
 
+            // Left Column: Milks
+            GameObject milkColObj = new GameObject("MilksColumn", typeof(RectTransform));
+            milkColObj.transform.SetParent(container, false);
+            var milkColRt = milkColObj.GetComponent<RectTransform>();
+            milkColRt.anchorMin = new Vector2(0, 0);
+            milkColRt.anchorMax = new Vector2(0.49f, 1);
+            milkColRt.offsetMin = Vector2.zero;
+            milkColRt.offsetMax = Vector2.zero;
+            PopulateCardList(milkColObj.transform, milks, "MILKS");
+
+            // Right Column: Toppings
+            GameObject toppingColObj = new GameObject("ToppingsColumn", typeof(RectTransform));
+            toppingColObj.transform.SetParent(container, false);
+            var toppingColRt = toppingColObj.GetComponent<RectTransform>();
+            toppingColRt.anchorMin = new Vector2(0.51f, 0);
+            toppingColRt.anchorMax = new Vector2(1, 1);
+            toppingColRt.offsetMin = Vector2.zero;
+            toppingColRt.offsetMax = Vector2.zero;
+            PopulateCardList(toppingColObj.transform, toppings, "TOPPINGS");
+        }
+
+        private void PopulateCardList(Transform container, (string key, string name, int count)[] items, string sectionTitle)
+        {
+            for (int i = container.childCount - 1; i >= 0; i--)
+            {
+                Destroy(container.GetChild(i).gameObject);
+            }
+
+            float cardHeight = 44f;
+            float spacingY = 6f;
+            float headerHeight = 24f;
+
+            // Section Header
+            GameObject headerObj = new GameObject($"Header_{sectionTitle}", typeof(RectTransform), typeof(TextMeshProUGUI));
+            headerObj.transform.SetParent(container, false);
+            var headerRt = headerObj.GetComponent<RectTransform>();
+            headerRt.anchorMin = new Vector2(0, 1);
+            headerRt.anchorMax = new Vector2(1, 1);
+            headerRt.pivot = new Vector2(0.5f, 1);
+            headerRt.sizeDelta = new Vector2(0, headerHeight);
+            headerRt.anchoredPosition = new Vector2(0, 0);
+
+            var headerTmp = headerObj.GetComponent<TextMeshProUGUI>();
+            headerTmp.text = $"<b>{sectionTitle}</b>";
+            headerTmp.fontSize = 14;
+            headerTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            headerTmp.color = new Color(0.9f, 0.9f, 0.95f, 1f);
+
+            // Item Cards
             for (int i = 0; i < items.Length; i++)
             {
                 var item = items[i];
                 Sprite icon = GetIngredientIcon(item.key);
 
-                GameObject rowObj = new GameObject($"Row_{item.key}", typeof(RectTransform), typeof(Image));
-                rowObj.transform.SetParent(container, false);
-                var rt = rowObj.GetComponent<RectTransform>();
+                GameObject cardObj = new GameObject($"Card_{item.key}", typeof(RectTransform), typeof(Image));
+                cardObj.transform.SetParent(container, false);
+                var rt = cardObj.GetComponent<RectTransform>();
                 rt.anchorMin = new Vector2(0, 1);
                 rt.anchorMax = new Vector2(1, 1);
                 rt.pivot = new Vector2(0.5f, 1);
-                rt.sizeDelta = new Vector2(0, rowHeight);
-                rt.anchoredPosition = new Vector2(0, -i * (rowHeight + spacingY));
+                rt.sizeDelta = new Vector2(0, cardHeight);
+                rt.anchoredPosition = new Vector2(0, -(headerHeight + 6f) - (i * (cardHeight + spacingY)));
 
-                var rowBg = rowObj.GetComponent<Image>();
-                rowBg.color = (i % 2 == 0) ? new Color(0.15f, 0.20f, 0.30f, 0.6f) : new Color(0.12f, 0.16f, 0.24f, 0.4f);
+                var cardImg = cardObj.GetComponent<Image>();
+                cardImg.color = new Color(0.12f, 0.16f, 0.24f, 0.94f);
 
-                // Icon
+                // Left: Icon
+                float leftOffset = 10f;
                 if (icon != null)
                 {
                     GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-                    iconObj.transform.SetParent(rowObj.transform, false);
+                    iconObj.transform.SetParent(cardObj.transform, false);
                     var iconRt = iconObj.GetComponent<RectTransform>();
                     iconRt.anchorMin = new Vector2(0, 0.5f);
                     iconRt.anchorMax = new Vector2(0, 0.5f);
                     iconRt.pivot = new Vector2(0, 0.5f);
-                    iconRt.sizeDelta = new Vector2(28, 28);
-                    iconRt.anchoredPosition = new Vector2(6, 0);
+                    iconRt.sizeDelta = new Vector2(30, 30);
+                    iconRt.anchoredPosition = new Vector2(8, 0);
 
                     var img = iconObj.GetComponent<Image>();
                     img.sprite = icon;
                     img.preserveAspect = true;
+                    leftOffset = 44f;
                 }
 
-                // Name
+                // Right: Count Badge Pill
+                GameObject pillObj = new GameObject("CountPill", typeof(RectTransform), typeof(Image));
+                pillObj.transform.SetParent(cardObj.transform, false);
+                var pillRt = pillObj.GetComponent<RectTransform>();
+                pillRt.anchorMin = new Vector2(1, 0.5f);
+                pillRt.anchorMax = new Vector2(1, 0.5f);
+                pillRt.pivot = new Vector2(1, 0.5f);
+                pillRt.sizeDelta = new Vector2(58, 28);
+                pillRt.anchoredPosition = new Vector2(-8, 0);
+
+                var pillImg = pillObj.GetComponent<Image>();
+                pillImg.color = new Color(0.18f, 0.24f, 0.36f, 0.90f);
+
+                GameObject countTextObj = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                countTextObj.transform.SetParent(pillObj.transform, false);
+                var countTextRt = countTextObj.GetComponent<RectTransform>();
+                countTextRt.anchorMin = Vector2.zero;
+                countTextRt.anchorMax = Vector2.one;
+                countTextRt.offsetMin = Vector2.zero;
+                countTextRt.offsetMax = Vector2.zero;
+
+                var countTmp = countTextObj.GetComponent<TextMeshProUGUI>();
+                countTmp.text = $"<color=#F1C40F>x {item.count:D2}</color>";
+                countTmp.fontSize = 13;
+                countTmp.alignment = TextAlignmentOptions.Center;
+                countTmp.enableWordWrapping = false;
+
+                // Middle: Item Name
                 GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
-                nameObj.transform.SetParent(rowObj.transform, false);
+                nameObj.transform.SetParent(cardObj.transform, false);
                 var nameRt = nameObj.GetComponent<RectTransform>();
                 nameRt.anchorMin = new Vector2(0, 0);
-                nameRt.anchorMax = new Vector2(0.72f, 1);
-                nameRt.offsetMin = new Vector2(icon != null ? 38 : 10, 0);
-                nameRt.offsetMax = Vector2.zero;
+                nameRt.anchorMax = new Vector2(1, 1);
+                nameRt.offsetMin = new Vector2(leftOffset, 0);
+                nameRt.offsetMax = new Vector2(-70, 0);
 
                 var nameTmp = nameObj.GetComponent<TextMeshProUGUI>();
-                nameTmp.text = item.name;
+                nameTmp.text = $"<b>{item.name}</b>";
                 nameTmp.fontSize = 13;
                 nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 nameTmp.color = Color.white;
-
-                // Count
-                GameObject countObj = new GameObject("Count", typeof(RectTransform), typeof(TextMeshProUGUI));
-                countObj.transform.SetParent(rowObj.transform, false);
-                var countRt = countObj.GetComponent<RectTransform>();
-                countRt.anchorMin = new Vector2(0.72f, 0);
-                countRt.anchorMax = new Vector2(1, 1);
-                countRt.offsetMin = Vector2.zero;
-                countRt.offsetMax = new Vector2(-10, 0);
-
-                var countTmp = countObj.GetComponent<TextMeshProUGUI>();
-                countTmp.text = $"<color=#F1C40F>x {item.count:D2}</color>";
-                countTmp.fontSize = 13;
-                countTmp.alignment = TextAlignmentOptions.MidlineRight;
-                countTmp.color = Color.white;
+                nameTmp.enableWordWrapping = false;
             }
         }
     }
