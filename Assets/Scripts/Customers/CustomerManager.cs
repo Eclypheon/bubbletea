@@ -170,7 +170,7 @@ namespace BubbleTeaShop
             List<MilkType> availableMilks = new List<MilkType> { MilkType.None, MilkType.FreshMilk };
             List<int> availableSweetness = new List<int> { 0, 50, 100 };
             List<int> availableIce = new List<int> { 0, 50, 100 };
-            List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls };
+            List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
             int maxToppings = 1;
 
             if (currentDay >= 4) // Mid-Week 1
@@ -178,7 +178,6 @@ namespace BubbleTeaShop
                 availableTeas.Add(TeaBase.OolongTea);
                 availableMilks.Add(MilkType.OatMilk);
                 availableSweetness = new List<int> { 0, 25, 50, 75, 100 };
-                availableToppings.Add(ToppingType.GrassJelly);
                 availableToppings.Add(ToppingType.CoconutJelly);
             }
 
@@ -187,7 +186,6 @@ namespace BubbleTeaShop
                 availableTeas.Add(TeaBase.ThaiTea);
                 availableTeas.Add(TeaBase.TaroTea);
                 availableMilks.Add(MilkType.CondensedMilk);
-                availableToppings.Add(ToppingType.PoppingBoba);
                 availableToppings.Add(ToppingType.EggPudding);
                 availableToppings.Add(ToppingType.CheeseFoam);
                 maxToppings = 2;

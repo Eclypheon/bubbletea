@@ -17,8 +17,19 @@ namespace BubbleTeaShop
         [SerializeField] private RectTransform liquidLevelTransform;
         [SerializeField] private GameObject iceVisualParent;
         [SerializeField] private GameObject toppingsVisualParent;
+        [SerializeField] private Image primaryToppingImage;
+        [SerializeField] private Image secondaryToppingImage;
         [SerializeField] private GameObject sealedLidObject;
         [SerializeField] private GameObject strawObject;
+
+        [Header("Optional Custom Topping Sprites")]
+        [SerializeField] private Sprite tapiocaSprite;
+        [SerializeField] private Sprite poppingBobaSprite;
+        [SerializeField] private Sprite grassJellySprite;
+        [SerializeField] private Sprite coconutJellySprite;
+        [SerializeField] private Sprite eggPuddingSprite;
+        [SerializeField] private Sprite goldenHoneyPearlsSprite;
+        [SerializeField] private Sprite cheeseFoamSprite;
 
         [Header("Action Buttons")]
         [Tooltip("Optional - New cups are automatically spawned, but this can be assigned if desired")]
@@ -216,6 +227,62 @@ namespace BubbleTeaShop
                 toppingsVisualParent.SetActive(currentCup.toppings.Count > 0);
             }
 
+            // Auto-locate primary topping image if not explicitly assigned
+            if (primaryToppingImage == null && toppingsVisualParent != null)
+            {
+                primaryToppingImage = toppingsVisualParent.GetComponent<Image>();
+                if (primaryToppingImage == null)
+                {
+                    primaryToppingImage = toppingsVisualParent.GetComponentInChildren<Image>();
+                }
+            }
+
+            if (primaryToppingImage != null)
+            {
+                if (currentCup.toppings.Count > 0)
+                {
+                    primaryToppingImage.gameObject.SetActive(true);
+                    ToppingType firstTop = currentCup.toppings[0];
+                    Sprite customSp = GetToppingSprite(firstTop);
+                    if (customSp != null)
+                    {
+                        primaryToppingImage.sprite = customSp;
+                        primaryToppingImage.color = Color.white;
+                    }
+                    else
+                    {
+                        primaryToppingImage.color = GetToppingColor(firstTop);
+                    }
+                }
+                else
+                {
+                    primaryToppingImage.gameObject.SetActive(false);
+                }
+            }
+
+            if (secondaryToppingImage != null)
+            {
+                if (currentCup.toppings.Count > 1)
+                {
+                    secondaryToppingImage.gameObject.SetActive(true);
+                    ToppingType secondTop = currentCup.toppings[1];
+                    Sprite customSp = GetToppingSprite(secondTop);
+                    if (customSp != null)
+                    {
+                        secondaryToppingImage.sprite = customSp;
+                        secondaryToppingImage.color = Color.white;
+                    }
+                    else
+                    {
+                        secondaryToppingImage.color = GetToppingColor(secondTop);
+                    }
+                }
+                else
+                {
+                    secondaryToppingImage.gameObject.SetActive(false);
+                }
+            }
+
             // Sealing & straw
             if (sealedLidObject != null) sealedLidObject.SetActive(currentCup.isSealed);
             if (strawObject != null) strawObject.SetActive(currentCup.isSealed);
@@ -231,6 +298,36 @@ namespace BubbleTeaShop
             }
 
             OnCupUpdated?.Invoke();
+        }
+
+        public static Color GetToppingColor(ToppingType topping)
+        {
+            return topping switch
+            {
+                ToppingType.TapiocaPearls => new Color(0.12f, 0.08f, 0.06f, 0.95f),    // Classic Dark Boba (Black/Dark Brown)
+                ToppingType.PoppingBoba => new Color(1f, 0.35f, 0.45f, 0.95f),         // Bright Coral/Strawberry Red
+                ToppingType.GrassJelly => new Color(0.1f, 0.2f, 0.12f, 0.95f),          // Herbal Glossy Dark Emerald Black
+                ToppingType.CoconutJelly => new Color(0.92f, 0.95f, 0.98f, 0.85f),     // Frosty Translucent White
+                ToppingType.EggPudding => new Color(1f, 0.82f, 0.3f, 0.95f),           // Golden Custard Yellow
+                ToppingType.GoldenHoneyPearls => new Color(0.95f, 0.68f, 0.15f, 0.95f),// Honey Amber
+                ToppingType.CheeseFoam => new Color(1f, 0.97f, 0.88f, 0.95f),          // Creamy Froth
+                _ => new Color(0.15f, 0.12f, 0.1f, 0.95f)
+            };
+        }
+
+        private Sprite GetToppingSprite(ToppingType topping)
+        {
+            return topping switch
+            {
+                ToppingType.TapiocaPearls => tapiocaSprite,
+                ToppingType.PoppingBoba => poppingBobaSprite,
+                ToppingType.GrassJelly => grassJellySprite,
+                ToppingType.CoconutJelly => coconutJellySprite,
+                ToppingType.EggPudding => eggPuddingSprite,
+                ToppingType.GoldenHoneyPearls => goldenHoneyPearlsSprite,
+                ToppingType.CheeseFoam => cheeseFoamSprite,
+                _ => null
+            };
         }
 
         private Color GetTeaColor(TeaBase tea)
