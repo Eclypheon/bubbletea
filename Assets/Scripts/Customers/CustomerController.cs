@@ -354,8 +354,8 @@ namespace BubbleTeaShop
                     CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
                 }
 
-                // If mentioning bell or on the final line -> start attention wiggle on desk bell
-                if (line.Contains("bell") || i == lines.Length - 1)
+                // If explicitly asking player to ring the desk bell -> start attention wiggle on desk bell
+                if (line.Contains("desk bell") || line.Contains("Desk Bell"))
                 {
                     DeskBell.Instance?.StartAttentionWiggle();
                 }
@@ -366,7 +366,15 @@ namespace BubbleTeaShop
                 }
             }
 
-            HUDController.Instance?.SetStatusHint("Ring the desk bell to call your first customer!");
+            if (lines.Length > 0 && (lines[lines.Length - 1].Contains("desk bell") || lines[lines.Length - 1].Contains("Desk Bell")))
+            {
+                HUDController.Instance?.SetStatusHint("Ring the desk bell to call your first customer!");
+            }
+            else
+            {
+                HUDController.Instance?.SetStatusHint("Close the shutter to start the Night Phase!");
+            }
+
             onCompletedSequence?.Invoke();
         }
 

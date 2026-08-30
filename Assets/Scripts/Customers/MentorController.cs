@@ -45,6 +45,8 @@ namespace BubbleTeaShop
             string[] briefingLines = new string[]
             {
                 "Glad to see you starting up your own bubble tea store here!",
+                "Your ultimate goal is to buy out this store location for $5,000 to win the game.",
+                "Be careful with expenses! If you miss two weekly rent payments to the landlord, you will lose the shop.",
                 "Here are some basic ingredients to get you started: 15 servings of Tapioca Pearls, 15 Fresh Milk, and today's sugar & ice.",
                 "You can inspect your stock anytime by checking the Cash Register on the counter.",
                 "Ring the desk bell whenever you're ready to serve your first customer!"
