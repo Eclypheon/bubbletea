@@ -18,6 +18,47 @@ namespace BubbleTeaShop
             {
                 dispenseButton.onClick.AddListener(DispenseMilk);
             }
+            UpdateVisibility();
+        }
+
+        private void OnEnable()
+        {
+            UpdateVisibility();
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.OnInventoryUpdated += UpdateVisibility;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (InventoryManager.Instance != null)
+            {
+                InventoryManager.Instance.OnInventoryUpdated -= UpdateVisibility;
+            }
+        }
+
+        public void UpdateVisibility()
+        {
+            if (milkType == MilkType.FreshMilk)
+            {
+                // Fresh milk is always available on countertop
+                return;
+            }
+
+            // Oat Milk, Coconut Milk, and Condensed Milk unlock with the Premium Milk Dispenser
+            bool isUnlocked = (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser)
+                           || (DayManager.Instance != null && DayManager.Instance.CurrentDay >= 3);
+
+            if (dispenseButton != null)
+            {
+                dispenseButton.gameObject.SetActive(isUnlocked);
+            }
+            else
+            {
+                var graphics = GetComponentsInChildren<Graphic>(true);
+                foreach (var g in graphics) g.enabled = isUnlocked;
+            }
         }
 
         public void DispenseMilk()
