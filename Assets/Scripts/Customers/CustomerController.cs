@@ -342,9 +342,22 @@ namespace BubbleTeaShop
 
             for (int i = 0; i < lines.Length; i++)
             {
+                string line = lines[i];
                 if (speechBubble != null)
                 {
-                    speechBubble.ShowMessage(lines[i]);
+                    speechBubble.ShowMessage(line);
+                }
+
+                // If mentioning cash register -> trigger attention pulse on register button
+                if (line.Contains("Cash Register"))
+                {
+                    CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
+                }
+
+                // If mentioning bell or on the final line -> start attention wiggle on desk bell
+                if (line.Contains("bell") || i == lines.Length - 1)
+                {
+                    DeskBell.Instance?.StartAttentionWiggle();
                 }
 
                 if (i < lines.Length - 1)

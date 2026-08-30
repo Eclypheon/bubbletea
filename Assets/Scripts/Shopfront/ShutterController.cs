@@ -24,6 +24,7 @@ namespace BubbleTeaShop
         private bool isOpen = false;
         private bool isMoving = false;
         private Coroutine leverFlipRoutine;
+        private Coroutine attentionWiggleRoutine;
 
         public bool IsOpen => isOpen;
         public bool IsMoving => isMoving;
@@ -39,10 +40,64 @@ namespace BubbleTeaShop
             }
             SetShutterPosition(closedPosY);
             UpdateUI();
+
+            // Start attention wiggle at the start of the day if shutters are closed
+            if (!isOpen)
+            {
+                StartAttentionWiggle();
+            }
+        }
+
+        public void StartAttentionWiggle()
+        {
+            if (attentionWiggleRoutine != null) StopCoroutine(attentionWiggleRoutine);
+            attentionWiggleRoutine = StartCoroutine(AttentionWiggleLoop());
+        }
+
+        public void StopAttentionWiggle()
+        {
+            if (attentionWiggleRoutine != null)
+            {
+                StopCoroutine(attentionWiggleRoutine);
+                attentionWiggleRoutine = null;
+            }
+            if (shutterToggleButton != null)
+            {
+                shutterToggleButton.transform.localRotation = Quaternion.identity;
+                shutterToggleButton.transform.localScale = Vector3.one;
+            }
+        }
+
+        private IEnumerator AttentionWiggleLoop()
+        {
+            if (shutterToggleButton == null) yield break;
+            Transform tform = shutterToggleButton.transform;
+
+            while (!isOpen)
+            {
+                float duration = 0.8f;
+                float elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = elapsed / duration;
+                    float wiggle = Mathf.Sin(t * Mathf.PI * 6f) * 8f;
+                    float scale = Mathf.Lerp(1f, 1.15f, Mathf.Sin(t * Mathf.PI));
+                    tform.localRotation = Quaternion.Euler(0, 0, wiggle);
+                    tform.localScale = new Vector3(scale, scale, 1f);
+                    yield return null;
+                }
+
+                tform.localRotation = Quaternion.identity;
+                tform.localScale = Vector3.one;
+
+                yield return new WaitForSeconds(1.2f);
+            }
         }
 
         public void ToggleShutter()
         {
+            StopAttentionWiggle();
             if (isMoving) return;
 
             // Animate lever flip

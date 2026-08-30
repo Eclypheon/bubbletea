@@ -1,0 +1,177 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace BubbleTeaShop
+{
+    public class CashRegisterInventoryUI : MonoBehaviour
+    {
+        public static CashRegisterInventoryUI Instance { get; private set; }
+
+        [Header("UI Panels")]
+        [SerializeField] private GameObject inventoryModalPanel;
+        [SerializeField] private Button cashRegisterButton;
+        [SerializeField] private Button closeButton;
+
+        [Header("Display Text")]
+        [SerializeField] private TextMeshProUGUI cashBalanceText;
+        [SerializeField] private TextMeshProUGUI dailySuppliesText;
+        [SerializeField] private TextMeshProUGUI teaStockText;
+        [SerializeField] private TextMeshProUGUI milkStockText;
+        [SerializeField] private TextMeshProUGUI toppingStockText;
+        [SerializeField] private TextMeshProUGUI marketNewsText;
+
+        [Header("Audio")]
+        [SerializeField] private AudioClip registerChimeSound;
+
+        private Coroutine pulseRoutine;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
+
+        private void Start()
+        {
+            if (cashRegisterButton != null)
+            {
+                cashRegisterButton.onClick.AddListener(OpenInventoryModal);
+            }
+            if (closeButton != null)
+            {
+                closeButton.onClick.AddListener(CloseInventoryModal);
+            }
+
+            if (inventoryModalPanel != null)
+            {
+                inventoryModalPanel.SetActive(false);
+            }
+        }
+
+        public void TriggerAttentionPulse(float duration = 2.5f)
+        {
+            if (cashRegisterButton == null) return;
+            if (pulseRoutine != null) StopCoroutine(pulseRoutine);
+            pulseRoutine = StartCoroutine(AttentionPulseRoutine(duration));
+        }
+
+        private System.Collections.IEnumerator AttentionPulseRoutine(float duration)
+        {
+            if (cashRegisterButton == null) yield break;
+            Transform tform = cashRegisterButton.transform;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float wiggle = Mathf.Sin(elapsed * Mathf.PI * 6f) * 7f;
+                float scale = 1f + Mathf.PingPong(elapsed * 2f, 0.25f);
+                tform.localRotation = Quaternion.Euler(0, 0, wiggle);
+                tform.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
+
+            tform.localRotation = Quaternion.identity;
+            tform.localScale = Vector3.one;
+            pulseRoutine = null;
+        }
+
+        public void OpenInventoryModal()
+        {
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+                pulseRoutine = null;
+                if (cashRegisterButton != null)
+                {
+                    cashRegisterButton.transform.localRotation = Quaternion.identity;
+                    cashRegisterButton.transform.localScale = Vector3.one;
+                }
+            }
+
+            if (registerChimeSound != null)
+            {
+                AudioManager.Instance?.PlaySFX(registerChimeSound);
+            }
+
+            UpdateInventoryDisplay();
+            if (inventoryModalPanel != null)
+            {
+                inventoryModalPanel.SetActive(true);
+            }
+        }
+
+        public void CloseInventoryModal()
+        {
+            if (inventoryModalPanel != null)
+            {
+                inventoryModalPanel.SetActive(false);
+            }
+        }
+
+        public void UpdateInventoryDisplay()
+        {
+            if (EconomyManager.Instance != null && cashBalanceText != null)
+            {
+                cashBalanceText.text = $"Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
+            }
+
+            if (dailySuppliesText != null)
+            {
+                int cups = InventoryManager.Instance != null ? InventoryManager.Instance.GetCupStock() : 0;
+                int sugar = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Sugar") : 0;
+                int ice = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Ice") : 0;
+                dailySuppliesText.text = $"• <b>Cups & Straws:</b> {cups} remaining\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
+            }
+
+            if (teaStockText != null && InventoryManager.Instance != null)
+            {
+                teaStockText.text = $"• <b>Black Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.BlackTea)} servings\n" +
+                                    $"• <b>Green Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.GreenTea)} servings\n" +
+                                    $"• <b>Oolong Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.OolongTea)} servings\n" +
+                                    $"• <b>Thai Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.ThaiTea)} servings\n" +
+                                    $"• <b>Taro Powder:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.TaroTea)} servings\n" +
+                                    $"• <b>Wild Mountain Tea:</b> {InventoryManager.Instance.GetTeaStock(TeaBase.WildMountainTea)} servings";
+            }
+
+            if (milkStockText != null && InventoryManager.Instance != null)
+            {
+                bool hasDispenser = InventoryManager.Instance.HasPremiumMilkDispenser;
+                string premiumStatus = hasDispenser ? "<color=#2ECC71>(Premium Dispenser Active)</color>" : "<color=#888888>(Unlocked Day 2 Night)</color>";
+                
+                milkStockText.text = $"• <b>Fresh Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)} servings\n" +
+                                     $"• <b>Oat Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)} servings {premiumStatus}\n" +
+                                     $"• <b>Coconut Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)} servings {premiumStatus}\n" +
+                                     $"• <b>Condensed Milk:</b> {InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk)} servings {premiumStatus}";
+            }
+
+            if (toppingStockText != null && InventoryManager.Instance != null)
+            {
+                toppingStockText.text = $"• <b>Tapioca Pearls:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)} servings\n" +
+                                        $"• <b>Popping Boba:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)} servings\n" +
+                                        $"• <b>Grass Jelly:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.GrassJelly)} servings\n" +
+                                        $"• <b>Egg Custard:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding)} servings\n" +
+                                        $"• <b>Coconut Jelly:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.CoconutJelly)} servings\n" +
+                                        $"• <b>Cheese Foam:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)} servings\n" +
+                                        $"• <b>Golden Honey Pearls:</b> {InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls)} servings";
+            }
+
+            if (marketNewsText != null)
+            {
+                if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null)
+                {
+                    marketNewsText.text = $"<b>Market News:</b> <color=#FFAA00>{MarketEventManager.Instance.ActiveEvent.title}</color>\n<i>{MarketEventManager.Instance.ActiveEvent.description}</i>";
+                }
+                else
+                {
+                    marketNewsText.text = "<b>Market News:</b> <i>Wholesale prices are stable today.</i>";
+                }
+            }
+        }
+    }
+}
