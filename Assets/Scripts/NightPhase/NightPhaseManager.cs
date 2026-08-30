@@ -87,7 +87,9 @@ namespace BubbleTeaShop
         {
             int day = DayManager.Instance.CurrentDay;
             int daysLeft = EconomyManager.Instance.GetDaysUntilRent(day);
-            float rent = EconomyManager.Instance.GetRentDueForDay(day);
+            float totalRent = EconomyManager.Instance.GetTotalRentDue(day);
+            float baseRent = EconomyManager.Instance.GetRentDueForDay(day);
+            float accumulated = EconomyManager.Instance.AccumulatedRentOwed;
 
             if (ledgerSummaryText != null)
             {
@@ -96,8 +98,15 @@ namespace BubbleTeaShop
 
             if (rentStatusText != null)
             {
-                string dueNotice = daysLeft == 0 ? "<color=#FF4444><b>DUE TONIGHT!</b></color>" : $"Due in {daysLeft} days";
-                rentStatusText.text = $"Weekly Rent: ${rent:F2} ({dueNotice})";
+                if (accumulated > 0)
+                {
+                    rentStatusText.text = $"Weekly Rent: ${baseRent:F2} + <color=#FF4444>Overdue: ${accumulated:F2}</color> (Total: ${totalRent:F2}) | <color=#FFAA00>Extensions: 1/1 used</color>";
+                }
+                else
+                {
+                    string dueNotice = daysLeft == 0 ? "Due Today at Closing" : $"Due in {daysLeft} days";
+                    rentStatusText.text = $"Weekly Rent: ${totalRent:F2} ({dueNotice})";
+                }
             }
 
             if (buyoutButtonText != null)

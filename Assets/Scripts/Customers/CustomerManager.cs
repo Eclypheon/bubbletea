@@ -31,6 +31,7 @@ namespace BubbleTeaShop
         [SerializeField] private float dyslexiaPatience = 50f;
 
         private Queue<DrinkOrder> dailyCustomerQueue = new Queue<DrinkOrder>();
+        private bool rentEncounterTriggeredToday = false;
         public bool HasCustomerAtWindow => customerController != null && customerController.IsActive;
 
         public event Action<DrinkOrder> OnCustomerArrived;
@@ -64,6 +65,7 @@ namespace BubbleTeaShop
         public void GenerateDailyQueue(int dayNumber)
         {
             dailyCustomerQueue.Clear();
+            rentEncounterTriggeredToday = false;
             int count = DayManager.Instance.TotalCustomersToday;
 
             for (int i = 0; i < count; i++)
@@ -134,8 +136,23 @@ namespace BubbleTeaShop
         {
             if (dailyCustomerQueue.Count == 0 && !HasCustomerAtWindow)
             {
-                GameManager.Instance?.SetState(GameState.ShopClosing);
-                OnAllDailyCustomersFinished?.Invoke();
+                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                bool isRentDay = (currentDay % 7 == 0);
+
+                if (isRentDay && !rentEncounterTriggeredToday && RentCollectorController.Instance != null)
+                {
+                    rentEncounterTriggeredToday = true;
+                    RentCollectorController.Instance.TriggerRentEncounter(currentDay, () =>
+                    {
+                        GameManager.Instance?.SetState(GameState.ShopClosing);
+                        OnAllDailyCustomersFinished?.Invoke();
+                    });
+                }
+                else
+                {
+                    GameManager.Instance?.SetState(GameState.ShopClosing);
+                    OnAllDailyCustomersFinished?.Invoke();
+                }
             }
             else if (!HasCustomerAtWindow && GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.ShopClosing)
             {

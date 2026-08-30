@@ -143,6 +143,56 @@ namespace BubbleTeaShop.Editor
             SetSerializedProperty(speechUI, "dialogueText", dlgTmp);
             SetSerializedProperty(custMgr, "customerController", custController);
 
+            // Rent Collector Controller & Dialog UI
+            GameObject rentCollectorObj = CreateUIElement("RentCollectorEncounter", shopfrontRoot.transform);
+            RectTransform rentCollRect = rentCollectorObj.GetComponent<RectTransform>();
+            rentCollRect.anchorMin = new Vector2(0.5f, 0.5f);
+            rentCollRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rentCollRect.anchoredPosition = new Vector2(0, 100);
+            rentCollRect.sizeDelta = new Vector2(600, 380);
+
+            CanvasGroup rentGroup = rentCollectorObj.AddComponent<CanvasGroup>();
+
+            // Landlord Avatar
+            GameObject landlordAvatar = CreateUIElement("LandlordAvatar", rentCollectorObj.transform);
+            RectTransform llRect = landlordAvatar.GetComponent<RectTransform>();
+            llRect.anchoredPosition = new Vector2(-180, 20);
+            llRect.sizeDelta = new Vector2(200, 280);
+            var llImg = landlordAvatar.AddComponent<Image>();
+            llImg.sprite = connoisseurSp;
+            llImg.preserveAspect = true;
+
+            // Dialogue Container
+            GameObject rentBubble = CreateUIElement("RentBubble", rentCollectorObj.transform);
+            RectTransform rbRect = rentBubble.GetComponent<RectTransform>();
+            rbRect.anchoredPosition = new Vector2(100, 50);
+            rbRect.sizeDelta = new Vector2(340, 200);
+            var rbImg = rentBubble.AddComponent<Image>();
+            rbImg.sprite = bubbleSp;
+            rbImg.type = Image.Type.Sliced;
+
+            var rentNameTmp = CreateText("LandlordName", rentBubble.transform, "Landlord Sterling", new Vector2(0, 65), 20, Color.black);
+            var rentDlgTmp = CreateText("LandlordDialogue", rentBubble.transform, "\"Your rent is due!\"", new Vector2(0, 0), 17, new Color(0.15f, 0.15f, 0.15f));
+            rentDlgTmp.GetComponent<RectTransform>().sizeDelta = new Vector2(300, 90);
+            var rentAmtTmp = CreateText("RentAmount", rentBubble.transform, "Total Due: $150.00", new Vector2(0, -65), 18, new Color(0.6f, 0.3f, 0f));
+
+            // Buttons Container
+            GameObject payBtnObj = CreateButton("PayRentButton", rentCollectorObj.transform, "Pay Rent ($150.00)", new Vector2(20, -130), new Vector2(200, 50));
+            GameObject skipBtnObj = CreateButton("SkipRentButton", rentCollectorObj.transform, "Ask for Extension", new Vector2(240, -130), new Vector2(200, 50));
+
+            var rentCtrl = rentCollectorObj.AddComponent<RentCollectorController>();
+            SetSerializedProperty(rentCtrl, "collectorRoot", rentCollectorObj);
+            SetSerializedProperty(rentCtrl, "canvasGroup", rentGroup);
+            SetSerializedProperty(rentCtrl, "landlordImage", llImg);
+            SetSerializedProperty(rentCtrl, "landlordSprite", connoisseurSp);
+            SetSerializedProperty(rentCtrl, "collectorNameText", rentNameTmp);
+            SetSerializedProperty(rentCtrl, "dialogueText", rentDlgTmp);
+            SetSerializedProperty(rentCtrl, "rentAmountText", rentAmtTmp);
+            SetSerializedProperty(rentCtrl, "payRentButton", payBtnObj.GetComponent<Button>());
+            SetSerializedProperty(rentCtrl, "payRentButtonText", payBtnObj.GetComponentInChildren<TextMeshProUGUI>());
+            SetSerializedProperty(rentCtrl, "skipRentButton", skipBtnObj.GetComponent<Button>());
+            SetSerializedProperty(rentCtrl, "skipRentButtonText", skipBtnObj.GetComponentInChildren<TextMeshProUGUI>());
+
             // Shutter
             GameObject shutterObj = CreateUIElement("MetalShutter", streetBg.transform);
             RectTransform shutRect = shutterObj.GetComponent<RectTransform>();

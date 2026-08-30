@@ -16,9 +16,14 @@ namespace BubbleTeaShop
         [Header("Runtime State")]
         [SerializeField] private float currentCash;
         [SerializeField] private int rentCycleDays = 7;
+        [SerializeField] private float accumulatedRentOwed = 0f;
+        [SerializeField] private int rentSkipsUsed = 0; // Max allowed skips = 1
 
         public float CurrentCash => currentCash;
         public float BuyoutGoal => buyoutGoal;
+        public float AccumulatedRentOwed => accumulatedRentOwed;
+        public int RentSkipsUsed => rentSkipsUsed;
+        public int RentCycleDays => rentCycleDays;
 
         public event Action<float> OnCashChanged;
         public event Action<float, string> OnTransactionOccurred; // amount, description
@@ -44,6 +49,37 @@ namespace BubbleTeaShop
         {
             int weekNumber = Mathf.Max(1, Mathf.CeilToInt((float)currentDay / rentCycleDays));
             return baseRentAmount + (weekNumber - 1) * rentIncreasePerWeek;
+        }
+
+        public float GetTotalRentDue(int currentDay)
+        {
+            return GetRentDueForDay(currentDay) + accumulatedRentOwed;
+        }
+
+        public bool CanSkipRent()
+        {
+            return rentSkipsUsed < 1;
+        }
+
+        public void SkipRent(int currentDay)
+        {
+            accumulatedRentOwed += GetRentDueForDay(currentDay);
+            rentSkipsUsed++;
+            Debug.Log($"[Economy] Rent skipped! Total accumulated rent owed: ${accumulatedRentOwed:F2} (Skips used: {rentSkipsUsed}/1)");
+        }
+
+        public bool PayTotalRent(int currentDay)
+        {
+            float total = GetTotalRentDue(currentDay);
+            if (SpendCash(total, $"Weekly Rent Settlement (Day {currentDay})"))
+            {
+                accumulatedRentOwed = 0f;
+                rentSkipsUsed = 0; // Reset skip strike once caught up
+                OnRentPaid?.Invoke(total, currentDay);
+                Debug.Log($"[Economy] Paid total rent: ${total:F2}");
+                return true;
+            }
+            return false;
         }
 
         public int GetDaysUntilRent(int currentDay)
@@ -83,13 +119,7 @@ namespace BubbleTeaShop
 
         public bool TryPayRent(int day)
         {
-            float rent = GetRentDueForDay(day);
-            if (SpendCash(rent, $"Weekly Rent (Day {day})"))
-            {
-                OnRentPaid?.Invoke(rent, day);
-                return true;
-            }
-            return false;
+            return PayTotalRent(day);
         }
 
         public bool TryBuyoutShop()

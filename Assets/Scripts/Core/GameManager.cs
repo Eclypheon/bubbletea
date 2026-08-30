@@ -73,17 +73,6 @@ namespace BubbleTeaShop
 
         public void EndNightAndSleep()
         {
-            // Check rent if today is rent day
-            int currentDay = DayManager.Instance.CurrentDay;
-            if (EconomyManager.Instance.GetDaysUntilRent(currentDay) == 0)
-            {
-                if (!EconomyManager.Instance.TryPayRent(currentDay))
-                {
-                    TriggerGameOver("Could not afford weekly rent! The landlord reclaimed the shop.");
-                    return;
-                }
-            }
-
             StartNewDaySequence();
         }
 
