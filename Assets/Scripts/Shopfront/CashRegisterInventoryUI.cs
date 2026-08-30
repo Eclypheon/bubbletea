@@ -56,42 +56,20 @@ namespace BubbleTeaShop
         public void TriggerAttentionPulse(float duration = 2.5f)
         {
             if (cashRegisterButton == null) return;
-            if (pulseRoutine != null) StopCoroutine(pulseRoutine);
-            pulseRoutine = StartCoroutine(AttentionPulseRoutine(duration));
-        }
-
-        private System.Collections.IEnumerator AttentionPulseRoutine(float duration)
-        {
-            if (cashRegisterButton == null) yield break;
-            Transform tform = cashRegisterButton.transform;
-            float elapsed = 0f;
-
-            while (elapsed < duration)
+            var helper = cashRegisterButton.GetComponent<CashRegisterAttentionHelper>();
+            if (helper == null)
             {
-                elapsed += Time.deltaTime;
-                float wiggle = Mathf.Sin(elapsed * Mathf.PI * 6f) * 7f;
-                float scale = 1f + Mathf.PingPong(elapsed * 2f, 0.25f);
-                tform.localRotation = Quaternion.Euler(0, 0, wiggle);
-                tform.localScale = new Vector3(scale, scale, 1f);
-                yield return null;
+                helper = cashRegisterButton.gameObject.AddComponent<CashRegisterAttentionHelper>();
             }
-
-            tform.localRotation = Quaternion.identity;
-            tform.localScale = Vector3.one;
-            pulseRoutine = null;
+            helper.TriggerPulse(duration);
         }
 
         public void OpenInventoryModal()
         {
-            if (pulseRoutine != null)
+            if (cashRegisterButton != null)
             {
-                StopCoroutine(pulseRoutine);
-                pulseRoutine = null;
-                if (cashRegisterButton != null)
-                {
-                    cashRegisterButton.transform.localRotation = Quaternion.identity;
-                    cashRegisterButton.transform.localScale = Vector3.one;
-                }
+                var helper = cashRegisterButton.GetComponent<CashRegisterAttentionHelper>();
+                if (helper != null) helper.StopPulse();
             }
 
             if (registerChimeSound != null)
@@ -172,6 +150,49 @@ namespace BubbleTeaShop
                     marketNewsText.text = "<b>Market News:</b> <i>Wholesale prices are stable today.</i>";
                 }
             }
+        }
+    }
+
+    public class CashRegisterAttentionHelper : MonoBehaviour
+    {
+        private Coroutine pulseRoutine;
+
+        public void TriggerPulse(float duration = 2.5f)
+        {
+            if (!gameObject.activeInHierarchy) return;
+            if (pulseRoutine != null) StopCoroutine(pulseRoutine);
+            pulseRoutine = StartCoroutine(PulseRoutine(duration));
+        }
+
+        public void StopPulse()
+        {
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+                pulseRoutine = null;
+            }
+            transform.localRotation = Quaternion.identity;
+            transform.localScale = Vector3.one;
+        }
+
+        private System.Collections.IEnumerator PulseRoutine(float duration)
+        {
+            Transform tform = transform;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float wiggle = Mathf.Sin(elapsed * Mathf.PI * 6f) * 7f;
+                float scale = 1f + Mathf.PingPong(elapsed * 2f, 0.25f);
+                tform.localRotation = Quaternion.Euler(0, 0, wiggle);
+                tform.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
+
+            tform.localRotation = Quaternion.identity;
+            tform.localScale = Vector3.one;
+            pulseRoutine = null;
         }
     }
 }

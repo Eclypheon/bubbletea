@@ -81,9 +81,8 @@ namespace BubbleTeaShop
                 {
                     elapsed += Time.deltaTime;
                     float t = elapsed / duration;
-                    float wiggle = Mathf.Sin(t * Mathf.PI * 6f) * 8f;
-                    float scale = Mathf.Lerp(1f, 1.15f, Mathf.Sin(t * Mathf.PI));
-                    tform.localRotation = Quaternion.Euler(0, 0, wiggle);
+                    float scale = Mathf.Lerp(1f, 1.2f, Mathf.Sin(t * Mathf.PI));
+                    tform.localRotation = Quaternion.identity;
                     tform.localScale = new Vector3(scale, scale, 1f);
                     yield return null;
                 }
