@@ -78,6 +78,11 @@ namespace BubbleTeaShop
                 {
                     MentorController.Instance.TriggerDay1MorningBriefing(customerController);
                 }
+                else if (MarketEventManager.Instance != null && MarketEventManager.Instance.HasNewEventToday && MentorController.Instance != null && customerController != null)
+                {
+                    MarketEventManager.Instance.ConsumeNewEventFlag();
+                    MentorController.Instance.TriggerMarketEventBriefing(customerController, MarketEventManager.Instance.ActiveEvent);
+                }
             }
         }
 

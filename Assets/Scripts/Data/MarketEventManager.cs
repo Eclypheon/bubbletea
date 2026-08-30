@@ -1,0 +1,232 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace BubbleTeaShop
+{
+    [System.Serializable]
+    public class MarketEvent
+    {
+        public string eventId;
+        public string title;
+        public string description;
+        public string affectedKey;
+        public float priceMultiplier = 1.0f;
+        public float demandMultiplier = 1.0f;
+        public int totalDurationDays = 3;
+        public int daysRemaining = 3;
+    }
+
+    public class MarketEventManager : MonoBehaviour
+    {
+        public static MarketEventManager Instance { get; private set; }
+
+        [SerializeField] private MarketEvent activeEvent = null;
+        [SerializeField] private bool hasNewEventToday = false;
+        [SerializeField] private int lastEventEndDay = 0;
+
+        public MarketEvent ActiveEvent => activeEvent;
+        public bool HasNewEventToday => hasNewEventToday;
+
+        public event Action<MarketEvent> OnMarketEventTriggered;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
+
+        private void Start()
+        {
+            if (DayManager.Instance != null)
+            {
+                DayManager.Instance.OnDayStarted += EvaluateDailyEvent;
+            }
+        }
+
+        public void ConsumeNewEventFlag()
+        {
+            hasNewEventToday = false;
+        }
+
+        public void EvaluateDailyEvent(int dayNumber)
+        {
+            hasNewEventToday = false;
+
+            // Day 1 & 2 are tutorial days without disruptive events
+            if (dayNumber <= 2)
+            {
+                activeEvent = null;
+                return;
+            }
+
+            // If an event is already active, decrement its remaining days
+            if (activeEvent != null)
+            {
+                activeEvent.daysRemaining--;
+                if (activeEvent.daysRemaining <= 0)
+                {
+                    Debug.Log($"[MarketEventManager] Event '{activeEvent.title}' has concluded.");
+                    activeEvent = null;
+                    lastEventEndDay = dayNumber;
+                }
+                else
+                {
+                    Debug.Log($"[MarketEventManager] Event '{activeEvent.title}' continuing ({activeEvent.daysRemaining} days remaining).");
+                    return;
+                }
+            }
+
+            // Roll for a new 3-day event if no event is active
+            if (activeEvent == null)
+            {
+                // Ensure at least 1-day breather between consecutive events, then 55% chance
+                if (dayNumber > lastEventEndDay && UnityEngine.Random.value < 0.55f)
+                {
+                    activeEvent = GenerateRandomEvent(dayNumber);
+                    if (activeEvent != null)
+                    {
+                        activeEvent.totalDurationDays = 3;
+                        activeEvent.daysRemaining = 3;
+                        hasNewEventToday = true;
+                        Debug.Log($"[MarketEventManager] New 3-day event triggered on Day {dayNumber}: {activeEvent.title}");
+                        OnMarketEventTriggered?.Invoke(activeEvent);
+                    }
+                }
+            }
+        }
+
+        private MarketEvent GenerateRandomEvent(int dayNumber)
+        {
+            List<MarketEvent> pool = new List<MarketEvent>
+            {
+                new MarketEvent
+                {
+                    eventId = "tapioca_delay",
+                    title = "Tapioca Pearl Shortage",
+                    description = "Harbor shipping delays cause pearl wholesale prices to rise (+40%), and eager customers crave classic Boba (+50% demand)!",
+                    affectedKey = "Topping_TapiocaPearls",
+                    priceMultiplier = 1.40f,
+                    demandMultiplier = 1.50f
+                },
+                new MarketEvent
+                {
+                    eventId = "dairy_surplus",
+                    title = "Local Dairy Surplus",
+                    description = "Local pastures produced an abundance of milk! Fresh Milk & Oat Milk wholesale packs are discounted by 30%!",
+                    affectedKey = "Milk_FreshMilk",
+                    priceMultiplier = 0.70f,
+                    demandMultiplier = 1.30f
+                },
+                new MarketEvent
+                {
+                    eventId = "tropical_coconut",
+                    title = "Tropical Coconut Harvest",
+                    description = "A massive harvest of tropical coconuts has arrived! Coconut Milk & Coconut Jelly wholesale prices drop by 35%!",
+                    affectedKey = "Milk_CoconutMilk",
+                    priceMultiplier = 0.65f,
+                    demandMultiplier = 1.40f
+                },
+                new MarketEvent
+                {
+                    eventId = "cream_shortage",
+                    title = "Gourmet Cream Shortage",
+                    description = "Egg Custard and Cheese Foam wholesale prices rise (+30%), but customers are tipping generously (+25% tips) on rich drinks!",
+                    affectedKey = "Topping_CheeseFoam",
+                    priceMultiplier = 1.30f,
+                    demandMultiplier = 1.25f
+                },
+                new MarketEvent
+                {
+                    eventId = "plant_based_craze",
+                    title = "Plant-Based Milk Craze",
+                    description = "A viral wellness article surges customer demand for Barista Oat Milk and Organic Coconut Milk (+60% orders)!",
+                    affectedKey = "Milk_OatMilk",
+                    priceMultiplier = 1.0f,
+                    demandMultiplier = 1.60f
+                },
+                new MarketEvent
+                {
+                    eventId = "wellness_trend",
+                    title = "Herbal Wellness Trend",
+                    description = "Customers favor low/zero sweetness and refreshing Herbal Grass Jelly toppings (+50% Grass Jelly orders)!",
+                    affectedKey = "Topping_GrassJelly",
+                    priceMultiplier = 0.85f,
+                    demandMultiplier = 1.50f
+                },
+                new MarketEvent
+                {
+                    eventId = "summer_heatwave",
+                    title = "Summer Heatwave",
+                    description = "Scorching sunny weather hits town! Customers heavily prefer 100% Full Ice (+70% ice demand) and fruity Popping Boba!",
+                    affectedKey = "Ice",
+                    priceMultiplier = 1.0f,
+                    demandMultiplier = 1.70f
+                },
+                new MarketEvent
+                {
+                    eventId = "chilly_rain",
+                    title = "Chilly Monsoon Rain",
+                    description = "A rainy cold front sweeps across the city! Customers prefer 0% Ice (No Ice) and rich, creamy comfort milks!",
+                    affectedKey = "Milk_CondensedMilk",
+                    priceMultiplier = 1.0f,
+                    demandMultiplier = 1.40f
+                }
+            };
+
+            if (dayNumber >= 5)
+            {
+                pool.Add(new MarketEvent
+                {
+                    eventId = "golden_harvest",
+                    title = "Bountiful Foraging Season",
+                    description = "Wild groves and honey meadows are flourishing! Foraging expeditions yield double harvests for the next 3 days!",
+                    affectedKey = "Foraging",
+                    priceMultiplier = 1.0f,
+                    demandMultiplier = 2.0f
+                });
+            }
+
+            return pool[UnityEngine.Random.Range(0, pool.Count)];
+        }
+
+        public float GetPriceMultiplier(string stockKey)
+        {
+            if (activeEvent == null) return 1.0f;
+
+            if (activeEvent.affectedKey == stockKey)
+            {
+                return activeEvent.priceMultiplier;
+            }
+
+            // Multi-key group handlers
+            if (activeEvent.eventId == "dairy_surplus" && (stockKey == "Milk_FreshMilk" || stockKey == "Milk_OatMilk"))
+            {
+                return 0.70f;
+            }
+            if (activeEvent.eventId == "tropical_coconut" && (stockKey == "Milk_CoconutMilk" || stockKey == "Topping_CoconutJelly"))
+            {
+                return 0.65f;
+            }
+            if (activeEvent.eventId == "cream_shortage" && (stockKey == "Topping_CheeseFoam" || stockKey == "Topping_EggPudding"))
+            {
+                return 1.30f;
+            }
+
+            return 1.0f;
+        }
+
+        public float GetDemandMultiplier(string key)
+        {
+            if (activeEvent != null && activeEvent.affectedKey == key)
+            {
+                return activeEvent.demandMultiplier;
+            }
+            return 1.0f;
+        }
+    }
+}

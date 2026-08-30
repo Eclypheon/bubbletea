@@ -135,7 +135,8 @@ namespace BubbleTeaShop
             {
                 if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null)
                 {
-                    marketNewsText.text = $"<b>Market News:</b> <color=#FFAA00>{MarketEventManager.Instance.ActiveEvent.title}</color>\n<i>{MarketEventManager.Instance.ActiveEvent.description}</i>";
+                    var ev = MarketEventManager.Instance.ActiveEvent;
+                    marketNewsText.text = $"<b>Market News:</b> <color=#FFAA00>{ev.title}</color> ({ev.daysRemaining}d left)\n<i>{ev.description}</i>";
                 }
                 else
                 {

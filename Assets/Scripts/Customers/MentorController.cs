@@ -113,5 +113,32 @@ namespace BubbleTeaShop
                 onFinished?.Invoke();
             }
         }
+
+        public void TriggerMarketEventBriefing(CustomerController customerController, MarketEvent marketEvent, Action onFinished = null)
+        {
+            if (marketEvent == null || customerController == null)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            string[] briefingLines = new string[]
+            {
+                $"Good morning! There's breaking market news today: {marketEvent.title}!",
+                marketEvent.description,
+                "This market condition will last for the next 3 days, so plan your stock and preparations accordingly!",
+                "Ring the desk bell whenever you're ready to serve your first customer!"
+            };
+
+            customerController.SpawnMentorSequence(
+                briefingLines,
+                3.5f,
+                mentorSprite,
+                () =>
+                {
+                    onFinished?.Invoke();
+                }
+            );
+        }
     }
 }
