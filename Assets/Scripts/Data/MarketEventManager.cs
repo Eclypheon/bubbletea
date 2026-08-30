@@ -57,8 +57,8 @@ namespace BubbleTeaShop
         {
             hasNewEventToday = false;
 
-            // Day 1 & 2 are tutorial days without disruptive events
-            if (dayNumber <= 2)
+            // Days 1, 2, and 3: 0% probability of market events
+            if (dayNumber <= 3)
             {
                 activeEvent = null;
                 return;
@@ -84,8 +84,10 @@ namespace BubbleTeaShop
             // Roll for a new 3-day event if no event is active
             if (activeEvent == null)
             {
-                // Ensure at least 1-day breather between consecutive events, then 55% chance
-                if (dayNumber > lastEventEndDay && UnityEngine.Random.value < 0.55f)
+                // Day 4 is guaranteed 100% probability. Subsequently, 55% chance with at least 1-day breather.
+                bool shouldTrigger = (dayNumber == 4) || (dayNumber > lastEventEndDay && UnityEngine.Random.value < 0.55f);
+
+                if (shouldTrigger)
                 {
                     activeEvent = GenerateRandomEvent(dayNumber);
                     if (activeEvent != null)
