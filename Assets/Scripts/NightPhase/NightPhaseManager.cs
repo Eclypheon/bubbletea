@@ -61,6 +61,8 @@ namespace BubbleTeaShop
             nightPanelRoot.SetActive(false);
         }
 
+        private int lastDeductedDay = 0;
+
         private void HandleStateChanged(GameState state)
         {
             bool isNight = (state == GameState.NightPhase);
@@ -68,12 +70,19 @@ namespace BubbleTeaShop
 
             if (isNight)
             {
-                int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                int completedDay = DayManager.Instance != null ? DayManager.Instance.LastCompletedDay : 1;
+                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
+                if (lastDeductedDay != completedDay)
+                {
+                    lastDeductedDay = completedDay;
+                    EconomyManager.Instance?.DeductDailySupplies(completedDay);
+                }
 
                 ForagingManager.Instance?.ResetNightForaging();
-                UpdateTabsState(day);
-                UpdateForagingButtons(day);
-                UpdateMarketTab(day);
+                UpdateTabsState(currentDay);
+                UpdateForagingButtons(currentDay);
+                UpdateMarketTab(currentDay);
                 UpdateLedger();
                 SwitchTab(3); // Start on Ledger
             }
@@ -231,15 +240,32 @@ namespace BubbleTeaShop
 
         private void UpdateLedger()
         {
-            int day = DayManager.Instance.CurrentDay;
-            int daysLeft = EconomyManager.Instance.GetDaysUntilRent(day);
-            float totalRent = EconomyManager.Instance.GetTotalRentDue(day);
-            float baseRent = EconomyManager.Instance.GetRentDueForDay(day);
+            if (DayManager.Instance == null || EconomyManager.Instance == null) return;
+
+            int completedDay = DayManager.Instance.LastCompletedDay;
+            int currentDay = DayManager.Instance.CurrentDay;
+            int daysLeft = EconomyManager.Instance.GetDaysUntilRent(currentDay);
+            float totalRent = EconomyManager.Instance.GetTotalRentDue(currentDay);
+            float baseRent = EconomyManager.Instance.GetRentDueForDay(currentDay);
             float accumulated = EconomyManager.Instance.AccumulatedRentOwed;
+
+            float sales = DayManager.Instance.DailySalesTotal;
+            float tips = DayManager.Instance.DailyTipsTotal;
+            float suppliesExpense = EconomyManager.DailySuppliesExpense;
+            float netProfit = sales + tips - suppliesExpense;
+            string netProfitFormatted = netProfit >= 0
+                ? $"<color=#2ECC71>+${netProfit:F2}</color>"
+                : $"<color=#FF4444>-${Mathf.Abs(netProfit):F2}</color>";
 
             if (ledgerSummaryText != null)
             {
-                ledgerSummaryText.text = $"<b>Day {day} Summary:</b>\n• Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n• Sales Revenue: ${DayManager.Instance.DailySalesTotal:F2}\n• Tips Earned: ${DayManager.Instance.DailyTipsTotal:F2}\n• Total Balance: ${EconomyManager.Instance.CurrentCash:F2}";
+                ledgerSummaryText.text = $"<b>Day {completedDay} Summary:</b>\n" +
+                                         $"• Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n" +
+                                         $"• Sales Revenue: <color=#2ECC71>+${sales:F2}</color>\n" +
+                                         $"• Tips Earned: <color=#2ECC71>+${tips:F2}</color>\n" +
+                                         $"• Daily Supplies & Utilities: <color=#FF4444>-${suppliesExpense:F2}</color> <i>(Tea, Cups, Ice, Sugar)</i>\n" +
+                                         $"• Net Daily Profit: {netProfitFormatted}\n" +
+                                         $"• Total Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
             }
 
             if (rentStatusText != null)
@@ -266,7 +292,7 @@ namespace BubbleTeaShop
             }
 
             // Check 4-Week Lease Victory (Day 28 completion)
-            if (day >= 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
+            if (completedDay >= 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
             {
                 HUDController.Instance?.ShowNotification("🏆 Incredible! You have successfully completed the 4-week lease!", 5f);
             }

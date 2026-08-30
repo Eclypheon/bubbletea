@@ -13,6 +13,8 @@ namespace BubbleTeaShop
         [SerializeField] private float rentIncreasePerWeek = 50.00f;
         [SerializeField] private float buyoutGoal = 5000.00f;
 
+        public const float DailySuppliesExpense = 10.00f;
+
         [Header("Runtime State")]
         [SerializeField] private float currentCash;
         [SerializeField] private int rentCycleDays = 7;
@@ -91,6 +93,15 @@ namespace BubbleTeaShop
         {
             int mod = currentDay % rentCycleDays;
             return mod == 0 ? 0 : (rentCycleDays - mod);
+        }
+
+        public void DeductDailySupplies(int dayNumber)
+        {
+            currentCash -= DailySuppliesExpense;
+            currentCash = (float)Math.Round(currentCash, 2);
+            OnCashChanged?.Invoke(currentCash);
+            OnTransactionOccurred?.Invoke(-DailySuppliesExpense, $"Daily Supplies & Utilities (Day {dayNumber})");
+            Debug.Log($"[Economy] Deducted ${DailySuppliesExpense:F2} for daily supplies on Day {dayNumber}. Remaining cash: ${currentCash:F2}");
         }
 
         public void AddCash(float amount, string reason = "Sale")

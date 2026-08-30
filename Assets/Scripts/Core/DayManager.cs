@@ -9,6 +9,7 @@ namespace BubbleTeaShop
 
         [Header("Day Progression")]
         [SerializeField] private int currentDay = 1;
+        [SerializeField] private int lastCompletedDay = 1;
         [SerializeField] private int minCustomersPerDay = 3;
         [SerializeField] private int maxCustomersPerDay = 7;
 
@@ -21,6 +22,7 @@ namespace BubbleTeaShop
         [SerializeField] private float dailyTipsTotal;
 
         public int CurrentDay => currentDay;
+        public int LastCompletedDay => lastCompletedDay;
         public int TotalCustomersToday => totalCustomersToday;
         public int CurrentCustomerIndex => currentCustomerIndex;
         public int CustomersServedToday => customersServedToday;
@@ -84,6 +86,7 @@ namespace BubbleTeaShop
 
         public void CompleteDay()
         {
+            lastCompletedDay = currentDay;
             OnDayCompleted?.Invoke(currentDay, dailySalesTotal, dailyTipsTotal);
             currentDay++;
         }
