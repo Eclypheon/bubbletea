@@ -366,12 +366,17 @@ namespace BubbleTeaShop
                 }
             }
 
-            if (lines.Length > 0 && (lines[lines.Length - 1].Contains("desk bell") || lines[lines.Length - 1].Contains("Desk Bell")))
+            bool isBellPrompt = lines.Length > 0 && (lines[lines.Length - 1].Contains("desk bell") || lines[lines.Length - 1].Contains("Desk Bell"));
+
+            if (isBellPrompt)
             {
                 HUDController.Instance?.SetStatusHint("Ring the desk bell to call your first customer!");
+                // Keeps isMentorActive = true so ringing the bell dismisses him
             }
             else
             {
+                // Day 2 closing / non-bell briefing is finished: release isMentorActive so shutters can be closed
+                isMentorActive = false;
                 HUDController.Instance?.SetStatusHint("Close the shutter to start the Night Phase!");
             }
 

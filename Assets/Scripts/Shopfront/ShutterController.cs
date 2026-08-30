@@ -231,6 +231,10 @@ namespace BubbleTeaShop
             }
             else
             {
+                if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null)
+                {
+                    CustomerManager.Instance.CustomerController.DismissCustomer();
+                }
                 OnShutterClosed?.Invoke();
                 GameManager.Instance?.OnShutterClosed();
             }
