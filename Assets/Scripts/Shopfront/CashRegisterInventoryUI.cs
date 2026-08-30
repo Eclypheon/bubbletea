@@ -103,13 +103,13 @@ namespace BubbleTeaShop
             {
                 int sugar = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Sugar") : 0;
                 int ice = InventoryManager.Instance != null ? InventoryManager.Instance.GetStock("Ice") : 0;
-                dailySuppliesText.text = $"• <b>Cups & Straws:</b> <color=#2ECC71>Unlimited Supply</color>\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
+                dailySuppliesText.text = $"• <b>Cups & Straws:</b> Auto-restocked for $10/day\n• <b>Sugar:</b> {sugar}% daily tank (Auto-restocked for $10/day)\n• <b>Ice:</b> {ice}% daily freezer (Auto-restocked for $10/day)";
             }
 
             if (teaStockText != null && InventoryManager.Instance != null)
             {
-                teaStockText.text = $"• <b>Tea Bases:</b> <color=#2ECC71>Unlimited Supply</color>\n" +
-                                    $"  <i>(Black, Green, Oolong, Thai, Taro, Wild Mountain)</i>";
+                teaStockText.text = $"• <b>Tea Bases:</b> Auto-restocked for $10/day\n" +
+                                    $"  <i>(Black, Green, Oolong, Thai, Taro)</i>";
             }
 
             if (milkStockText != null && InventoryManager.Instance != null)
