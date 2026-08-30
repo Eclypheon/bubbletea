@@ -45,6 +45,10 @@ namespace BubbleTeaShop
             if (DayManager.Instance != null)
             {
                 DayManager.Instance.OnDayStarted += EvaluateDailyEvent;
+                if (DayManager.Instance.CurrentDay >= 4 && activeEvent == null)
+                {
+                    EvaluateDailyEvent(DayManager.Instance.CurrentDay);
+                }
             }
         }
 

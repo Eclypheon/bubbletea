@@ -69,6 +69,8 @@ namespace BubbleTeaShop
             }
         }
 
+        private bool hasTriggeredDay4EventBriefing = false;
+
         private void HandleStateChanged(GameState state)
         {
             if (state == GameState.ShopOpen)
@@ -78,10 +80,19 @@ namespace BubbleTeaShop
                 {
                     MentorController.Instance.TriggerDay1MorningBriefing(customerController);
                 }
-                else if (MarketEventManager.Instance != null && MarketEventManager.Instance.HasNewEventToday && MentorController.Instance != null && customerController != null)
+                else if (MarketEventManager.Instance != null && MentorController.Instance != null && customerController != null)
                 {
-                    MarketEventManager.Instance.ConsumeNewEventFlag();
-                    MentorController.Instance.TriggerMarketEventBriefing(customerController, MarketEventManager.Instance.ActiveEvent);
+                    if (day == 4 && MarketEventManager.Instance.ActiveEvent == null)
+                    {
+                        MarketEventManager.Instance.EvaluateDailyEvent(day);
+                    }
+
+                    if (MarketEventManager.Instance.HasNewEventToday || (day == 4 && MarketEventManager.Instance.ActiveEvent != null && !hasTriggeredDay4EventBriefing))
+                    {
+                        hasTriggeredDay4EventBriefing = true;
+                        MarketEventManager.Instance.ConsumeNewEventFlag();
+                        MentorController.Instance.TriggerMarketEventBriefing(customerController, MarketEventManager.Instance.ActiveEvent);
+                    }
                 }
             }
         }
@@ -90,6 +101,7 @@ namespace BubbleTeaShop
         {
             dailyCustomerQueue.Clear();
             rentEncounterTriggeredToday = false;
+            hasTriggeredDay4EventBriefing = false;
             int count = DayManager.Instance.TotalCustomersToday;
 
             for (int i = 0; i < count; i++)

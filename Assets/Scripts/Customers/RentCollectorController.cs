@@ -67,8 +67,6 @@ namespace BubbleTeaShop
         private void Start()
         {
             AutoDiscoverReferences();
-            if (payRentButton != null) payRentButton.onClick.AddListener(OnPayRentClicked);
-            if (skipRentButton != null) skipRentButton.onClick.AddListener(OnSkipRentClicked);
         }
 
         private void AutoDiscoverReferences()

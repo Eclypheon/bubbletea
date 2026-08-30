@@ -63,8 +63,16 @@ namespace BubbleTeaShop
 
         private void Start()
         {
-            if (payRentButton != null) payRentButton.onClick.AddListener(HandlePayRent);
-            if (skipRentButton != null) skipRentButton.onClick.AddListener(HandleSkipRent);
+            if (payRentButton != null)
+            {
+                payRentButton.onClick.RemoveAllListeners();
+                payRentButton.onClick.AddListener(HandlePayRent);
+            }
+            if (skipRentButton != null)
+            {
+                skipRentButton.onClick.RemoveAllListeners();
+                skipRentButton.onClick.AddListener(HandleSkipRent);
+            }
             if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
             if (payRentButton != null) payRentButton.gameObject.SetActive(false);
             if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
