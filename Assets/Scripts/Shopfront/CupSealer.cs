@@ -64,7 +64,7 @@ namespace BubbleTeaShop
                 // Instant seal
                 CupStation.Instance?.SealCup();
                 if (sealSound != null) AudioManager.Instance?.PlaySFX(sealSound);
-                HUDController.Instance?.ShowNotification("🧋 Cup sealed! Ready to serve.", 1.5f);
+                HUDController.Instance?.ShowNotification("Cup sealed! Ready to serve.", 1.5f);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace BubbleTeaShop
 
             CupStation.Instance?.SealCup();
             if (sealSound != null) AudioManager.Instance?.PlaySFX(sealSound);
-            HUDController.Instance?.ShowNotification("🧋 Cup sealed! Ready to serve.", 1.5f);
+            HUDController.Instance?.ShowNotification("Cup sealed! Ready to serve.", 1.5f);
 
             yield return new WaitForSeconds(0.15f);
             isSealing = false;

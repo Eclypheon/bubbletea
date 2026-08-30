@@ -145,13 +145,13 @@ namespace BubbleTeaShop
 
             if (currentCup.tea == TeaBase.None && currentCup.toppings.Count == 0)
             {
-                HUDController.Instance?.ShowNotification("⚠️ Cannot serve an empty cup! Add tea and toppings first.");
+                HUDController.Instance?.ShowNotification("Cannot serve an empty cup! Add tea and toppings first.");
                 return;
             }
 
             if (!currentCup.isSealed)
             {
-                HUDController.Instance?.ShowNotification("⚠️ You must click 'Seal Lid 🧋' before serving!");
+                HUDController.Instance?.ShowNotification("You must click 'Seal Lid' before serving!");
                 CupSealer.Instance?.HighlightSealer();
                 Debug.LogWarning("You must seal the drink before serving!");
                 return;

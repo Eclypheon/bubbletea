@@ -229,9 +229,9 @@ namespace BubbleTeaShop.Editor
             sealImg.sprite = sealedLidSp;
 
             // Cup Action Buttons
-            GameObject serveBtn = CreateButton("ServeButton", cupStationObj.transform, "SERVE DRINK 🥤", new Vector2(0, -60), new Vector2(200, 45));
-            GameObject trashBtn = CreateButton("TrashButton", cupStationObj.transform, "Trash 🗑️", new Vector2(-120, -60), new Vector2(90, 45));
-            GameObject newCupBtn = CreateButton("NewCupButton", cupStationObj.transform, "New Cup ➕", new Vector2(120, -60), new Vector2(90, 45));
+            GameObject serveBtn = CreateButton("ServeButton", cupStationObj.transform, "SERVE DRINK", new Vector2(0, -60), new Vector2(200, 45));
+            GameObject trashBtn = CreateButton("TrashButton", cupStationObj.transform, "Trash", new Vector2(-120, -60), new Vector2(90, 45));
+            GameObject newCupBtn = CreateButton("NewCupButton", cupStationObj.transform, "New Cup", new Vector2(120, -60), new Vector2(90, 45));
 
             var cupStation = cupStationObj.AddComponent<CupStation>();
             SetSerializedProperty(cupStation, "cupContainer", cupCont);
@@ -245,7 +245,7 @@ namespace BubbleTeaShop.Editor
             SetSerializedProperty(cupStation, "newCupButton", newCupBtn.GetComponent<Button>());
 
             // Cup Sealer Station
-            GameObject sealerObj = CreateButton("SealerButton", shopfrontRoot.transform, "Seal Cup Lid 🧋", new Vector2(250, 160), new Vector2(160, 50));
+            GameObject sealerObj = CreateButton("SealerButton", shopfrontRoot.transform, "Seal Cup Lid", new Vector2(250, 160), new Vector2(160, 50));
             var sealer = sealerObj.AddComponent<CupSealer>();
             SetSerializedProperty(sealer, "sealButton", sealerObj.GetComponent<Button>());
 
@@ -299,14 +299,14 @@ namespace BubbleTeaShop.Editor
             var nightBg = nightRoot.AddComponent<Image>();
             nightBg.color = new Color(0.08f, 0.08f, 0.12f, 0.96f);
 
-            var nightMenu = CreateText("NightTitle", nightRoot.transform, "🌙 NIGHT MANAGEMENT", new Vector2(0, 440), 32, Color.white);
+            var nightMenu = CreateText("NightTitle", nightRoot.transform, "NIGHT MANAGEMENT", new Vector2(0, 440), 32, Color.white);
             
             // Tab buttons
             GameObject tabMkt = CreateButton("TabMarket", nightRoot.transform, "Wholesale Market", new Vector2(-400, 360), new Vector2(220, 50));
             GameObject tabFor = CreateButton("TabForage", nightRoot.transform, "Foraging Expedition", new Vector2(-130, 360), new Vector2(220, 50));
             GameObject tabUpg = CreateButton("TabUpgrades", nightRoot.transform, "Shop Upgrades", new Vector2(140, 360), new Vector2(220, 50));
             GameObject tabLed = CreateButton("TabLedger", nightRoot.transform, "Daily Ledger & Rent", new Vector2(410, 360), new Vector2(220, 50));
-            GameObject sleepBtn = CreateButton("SleepButton", nightRoot.transform, "Sleep & Start Next Day 💤", new Vector2(0, -420), new Vector2(300, 60));
+            GameObject sleepBtn = CreateButton("SleepButton", nightRoot.transform, "Sleep & Start Next Day", new Vector2(0, -420), new Vector2(300, 60));
 
             // Content Panels
             GameObject mktPanel = CreatePanel("MarketPanel", nightRoot.transform);
@@ -315,9 +315,9 @@ namespace BubbleTeaShop.Editor
             GameObject ledPanel = CreatePanel("LedgerPanel", nightRoot.transform);
 
             // Foraging buttons inside Foraging Panel
-            GameObject bmbBtn = CreateButton("ForageBambooBtn", forPanel.transform, "🌿 Whispering Bamboo Grove", new Vector2(-300, 60), new Vector2(260, 60));
-            GameObject hnyBtn = CreateButton("ForageHoneyBtn", forPanel.transform, "🍯 Golden Honey Meadow", new Vector2(0, 60), new Vector2(260, 60));
-            GameObject mntBtn = CreateButton("ForageMntBtn", forPanel.transform, "⛰️ Mist Peak Mountain", new Vector2(300, 60), new Vector2(260, 60));
+            GameObject bmbBtn = CreateButton("ForageBambooBtn", forPanel.transform, "Whispering Bamboo Grove", new Vector2(-300, 60), new Vector2(260, 60));
+            GameObject hnyBtn = CreateButton("ForageHoneyBtn", forPanel.transform, "Golden Honey Meadow", new Vector2(0, 60), new Vector2(260, 60));
+            GameObject mntBtn = CreateButton("ForageMntBtn", forPanel.transform, "Mist Peak Mountain", new Vector2(300, 60), new Vector2(260, 60));
             var forLog = CreateText("ForageLogText", forPanel.transform, "Select a location to forage wild tea leaves & toppings.", new Vector2(0, -100), 20);
 
             // Ledger content

@@ -43,19 +43,19 @@ namespace BubbleTeaShop
             {
                 InventoryManager.Instance.AddTeaStock(TeaBase.GreenTea, 6);
                 InventoryManager.Instance.AddToppingStock(ToppingType.GrassJelly, 4);
-                resultMessage = "🌿 Bamboo Grove: Foraged 6x Fresh Jasmine Green Leaves and 4x Herbal Grass Jelly herbs!";
+                resultMessage = "Bamboo Grove: Foraged 6x Fresh Jasmine Green Leaves and 4x Herbal Grass Jelly herbs!";
             }
             else if (zone == "HoneyMeadow")
             {
                 InventoryManager.Instance.AddToppingStock(ToppingType.GoldenHoneyPearls, 6);
                 EconomyManager.Instance.AddCash(15f, "Foraged Wild Honey Sale");
-                resultMessage = "🍯 Honey Meadow: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
+                resultMessage = "Honey Meadow: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
             }
             else if (zone == "MistMountain")
             {
                 InventoryManager.Instance.AddTeaStock(TeaBase.WildMountainTea, 6);
                 InventoryManager.Instance.AddToppingStock(ToppingType.TapiocaPearls, 6);
-                resultMessage = "⛰️ Mist Mountain: Scaled the peak and harvested 6x Legendary Wild Mountain Tea Leaves!";
+                resultMessage = "Mist Mountain: Scaled the peak and harvested 6x Legendary Wild Mountain Tea Leaves!";
             }
 
             OnForagingResult?.Invoke(resultMessage);

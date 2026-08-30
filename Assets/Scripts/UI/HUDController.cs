@@ -94,7 +94,7 @@ namespace BubbleTeaShop
             statusHintText.text = state switch
             {
                 GameState.MorningPrep => "Open the shutters to begin the day!",
-                GameState.ShopOpen => "Ring the bell 🔔 to call the next customer.",
+                GameState.ShopOpen => "Ring the bell to call the next customer.",
                 GameState.CustomerWaiting => "Customer waiting! Prepare their requested drink.",
                 GameState.ShopClosing => "All customers served! Pull down the shutter to close.",
                 GameState.NightPhase => "Night Phase: Buy stock, forage, and upgrade.",
