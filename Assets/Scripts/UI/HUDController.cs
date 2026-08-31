@@ -24,10 +24,12 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+            BringToFront();
         }
 
         private void Start()
         {
+            BringToFront();
             if (EconomyManager.Instance != null)
             {
                 EconomyManager.Instance.OnCashChanged += UpdateCashDisplay;
@@ -83,8 +85,17 @@ namespace BubbleTeaShop
             statusHintText.text = text;
         }
 
+        public void BringToFront()
+        {
+            if (transform.parent != null)
+            {
+                transform.SetAsLastSibling();
+            }
+        }
+
         public void ShowNotification(string message, float duration = 2.5f)
         {
+            BringToFront();
             if (statusHintText == null) return;
             if (notificationRoutine != null) StopCoroutine(notificationRoutine);
             notificationRoutine = StartCoroutine(NotificationRoutine(message, duration));
@@ -92,7 +103,15 @@ namespace BubbleTeaShop
 
         private System.Collections.IEnumerator NotificationRoutine(string message, float duration)
         {
-            statusHintText.text = $"<color=#FF5555><b>{message}</b></color>";
+            if (message.Contains("<color"))
+            {
+                statusHintText.text = $"<b>{message}</b>";
+            }
+            else
+            {
+                statusHintText.text = $"<color=#FFAA00><b>{message}</b></color>";
+            }
+
             yield return new WaitForSeconds(duration);
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
