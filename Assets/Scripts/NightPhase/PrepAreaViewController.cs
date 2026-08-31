@@ -561,7 +561,7 @@ namespace BubbleTeaShop
                 {
                     PrepStationState.Empty => blenderEmptySprite,
                     PrepStationState.Loaded => blenderEmptySprite,
-                    PrepStationState.Processing => (blenderBlendedSprite != null ? blenderBlendedSprite : blenderEmptySprite),
+                    PrepStationState.Processing => blenderEmptySprite,
                     PrepStationState.ReadyToCollect => (blenderBlendedSprite != null ? blenderBlendedSprite : blenderEmptySprite),
                     _ => blenderEmptySprite
                 };
@@ -673,6 +673,11 @@ namespace BubbleTeaShop
             img.sprite = rawJellyBlocksIcon;
             img.preserveAspect = true;
             img.raycastTarget = false;
+
+            if (stationKnifeImage != null)
+            {
+                stationKnifeImage.transform.SetAsLastSibling();
+            }
         }
 
         private void SpawnChoppedJelliesOnBoard()
@@ -741,6 +746,11 @@ namespace BubbleTeaShop
                 img.preserveAspect = true;
                 img.raycastTarget = false;
             }
+
+            if (stationKnifeImage != null)
+            {
+                stationKnifeImage.transform.SetAsLastSibling();
+            }
         }
 
         private void ClearChoppingContents()
@@ -764,6 +774,7 @@ namespace BubbleTeaShop
 
             if (stationKnifeImage != null)
             {
+                stationKnifeImage.transform.SetAsLastSibling();
                 Vector3 origPos = stationKnifeImage.rectTransform.localPosition;
                 Quaternion origRot = stationKnifeImage.rectTransform.localRotation;
                 float elapsed = 0f;
@@ -899,7 +910,7 @@ namespace BubbleTeaShop
                 while (elapsed < duration)
                 {
                     elapsed += Time.deltaTime;
-                    stationCentrifugeImage.rectTransform.Rotate(0, 0, -720f * Time.deltaTime);
+                    stationCentrifugeImage.rectTransform.Rotate(0, 1080f * Time.deltaTime, 0, Space.Self);
                     yield return null;
                 }
                 stationCentrifugeImage.rectTransform.localRotation = Quaternion.identity;
