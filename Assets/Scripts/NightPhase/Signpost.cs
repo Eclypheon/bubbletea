@@ -31,13 +31,24 @@ namespace BubbleTeaShop
         [SerializeField] private AudioClip openSignSound;
         [SerializeField] private AudioClip closeSignSound;
 
+        [Header("Visual Glow")]
+        [SerializeField] private bool enablePulsingGlow = true;
+        [SerializeField] private Image glowAuraImage;
+
         private Coroutine zoomRoutine;
+        private Coroutine pulseRoutine;
+        private Vector3 baseScale = Vector3.one;
 
         private void Awake()
         {
             if (signpostButton == null)
             {
                 signpostButton = GetComponent<Button>();
+            }
+
+            if (sceneSignImage == null)
+            {
+                sceneSignImage = GetComponent<Image>();
             }
 
             if (signpostButton != null)
@@ -68,6 +79,77 @@ namespace BubbleTeaShop
             if (modalSignImage != null && signboardSprite != null)
             {
                 modalSignImage.sprite = signboardSprite;
+            }
+
+            baseScale = transform.localScale;
+            CreateGlowAura();
+        }
+
+        private void OnEnable()
+        {
+            if (enablePulsingGlow)
+            {
+                if (pulseRoutine != null) StopCoroutine(pulseRoutine);
+                pulseRoutine = StartCoroutine(SignPulseGlowRoutine());
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+                pulseRoutine = null;
+            }
+            transform.localScale = baseScale;
+        }
+
+        private void CreateGlowAura()
+        {
+            if (glowAuraImage != null) return;
+
+            GameObject auraObj = new GameObject("SignGlowAura", typeof(RectTransform), typeof(Image));
+            auraObj.transform.SetParent(transform, false);
+            auraObj.transform.SetAsFirstSibling();
+
+            var rt = auraObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(160f, 200f);
+            rt.anchoredPosition = Vector2.zero;
+
+            glowAuraImage = auraObj.GetComponent<Image>();
+            glowAuraImage.color = new Color(1f, 0.95f, 0.5f, 0.35f);
+            glowAuraImage.raycastTarget = false;
+            if (signboardSprite != null) glowAuraImage.sprite = signboardSprite;
+        }
+
+        private IEnumerator SignPulseGlowRoutine()
+        {
+            while (enabled)
+            {
+                float t = Time.time * 2.8f;
+                float pulse = (Mathf.Sin(t) + 1f) * 0.5f; // 0 to 1
+
+                // Subtle scale breathe
+                float scaleFactor = 1f + (pulse * 0.05f);
+                transform.localScale = baseScale * scaleFactor;
+
+                // Faint warm golden color tint pulse
+                if (sceneSignImage != null)
+                {
+                    sceneSignImage.color = Color.Lerp(Color.white, new Color(1f, 0.98f, 0.82f, 1f), pulse);
+                }
+
+                // Aura pulse
+                if (glowAuraImage != null)
+                {
+                    glowAuraImage.color = new Color(1f, 0.92f, 0.45f, 0.20f + (pulse * 0.30f));
+                    glowAuraImage.transform.localScale = Vector3.one * (1.08f + (pulse * 0.14f));
+                }
+
+                yield return null;
             }
         }
 
@@ -137,7 +219,6 @@ namespace BubbleTeaShop
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                // Overshoot bounce when opening
                 float curve = (targetScale > startScale)
                     ? Mathf.Sin(t * Mathf.PI * 0.5f) + (Mathf.Sin(t * Mathf.PI) * 0.1f)
                     : Mathf.SmoothStep(startScale, targetScale, t);
@@ -152,7 +233,6 @@ namespace BubbleTeaShop
 
         private void CreateAutoModal()
         {
-            // Automatic modal fallback if not wired in Inspector
             Transform canvasParent = transform.root;
             zoomModalRoot = new GameObject("AutoSignModal", typeof(RectTransform), typeof(Image));
             zoomModalRoot.transform.SetParent(transform.parent != null ? transform.parent : canvasParent, false);
@@ -164,64 +244,65 @@ namespace BubbleTeaShop
             rootRt.offsetMax = Vector2.zero;
 
             var bgImg = zoomModalRoot.GetComponent<Image>();
-            bgImg.color = new Color(0, 0, 0, 0.70f);
+            bgImg.color = new Color(0, 0, 0, 0.75f);
 
             var backdropBtn = zoomModalRoot.AddComponent<Button>();
             backdropBtn.onClick.AddListener(CloseSignInspection);
 
-            // Modal Card Content
+            // 2x Larger Modal Card Content (1020 x 680)
             GameObject cardObj = new GameObject("SignContentCard", typeof(RectTransform), typeof(Image));
             cardObj.transform.SetParent(zoomModalRoot.transform, false);
             modalContentTransform = cardObj.GetComponent<RectTransform>();
             modalContentTransform.anchorMin = new Vector2(0.5f, 0.5f);
             modalContentTransform.anchorMax = new Vector2(0.5f, 0.5f);
             modalContentTransform.pivot = new Vector2(0.5f, 0.5f);
-            modalContentTransform.sizeDelta = new Vector2(520f, 360f);
+            modalContentTransform.sizeDelta = new Vector2(1020f, 680f);
 
             var cardImg = cardObj.GetComponent<Image>();
-            cardImg.color = new Color(0.18f, 0.14f, 0.10f, 0.96f);
+            cardImg.color = new Color(0.16f, 0.13f, 0.09f, 0.98f);
             if (signboardSprite != null) cardImg.sprite = signboardSprite;
 
-            // Title
+            // 2x Larger Title
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
             titleObj.transform.SetParent(cardObj.transform, false);
             var titleRt = titleObj.GetComponent<RectTransform>();
             titleRt.anchorMin = new Vector2(0, 1);
             titleRt.anchorMax = new Vector2(1, 1);
             titleRt.pivot = new Vector2(0.5f, 1);
-            titleRt.anchoredPosition = new Vector2(0, -25);
-            titleRt.sizeDelta = new Vector2(-40, 45);
+            titleRt.anchoredPosition = new Vector2(0, -45);
+            titleRt.sizeDelta = new Vector2(-80, 75);
 
             loreTitleText = titleObj.GetComponent<TextMeshProUGUI>();
             loreTitleText.text = defaultTitle;
-            loreTitleText.fontSize = 22;
+            loreTitleText.fontSize = 40;
             loreTitleText.alignment = TextAlignmentOptions.Center;
             loreTitleText.color = new Color(1f, 0.88f, 0.55f);
 
-            // Body
+            // 2x Larger Body Text with Word Wrapping
             GameObject bodyObj = new GameObject("BodyText", typeof(RectTransform), typeof(TextMeshProUGUI));
             bodyObj.transform.SetParent(cardObj.transform, false);
             var bodyRt = bodyObj.GetComponent<RectTransform>();
             bodyRt.anchorMin = new Vector2(0, 0);
             bodyRt.anchorMax = new Vector2(1, 1);
-            bodyRt.offsetMin = new Vector2(35, 60);
-            bodyRt.offsetMax = new Vector2(-35, -75);
+            bodyRt.offsetMin = new Vector2(70, 130);
+            bodyRt.offsetMax = new Vector2(-70, -140);
 
             loreBodyText = bodyObj.GetComponent<TextMeshProUGUI>();
             loreBodyText.text = defaultLore;
-            loreBodyText.fontSize = 16;
+            loreBodyText.fontSize = 28;
+            loreBodyText.lineSpacing = 16;
             loreBodyText.alignment = TextAlignmentOptions.TopLeft;
-            loreBodyText.color = Color.white;
+            loreBodyText.color = new Color(0.96f, 0.96f, 0.94f, 1f);
 
-            // Close Prompt / Button
+            // 2x Larger Close Button
             GameObject closeObj = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeObj.transform.SetParent(cardObj.transform, false);
             var closeRt = closeObj.GetComponent<RectTransform>();
             closeRt.anchorMin = new Vector2(0.5f, 0);
             closeRt.anchorMax = new Vector2(0.5f, 0);
             closeRt.pivot = new Vector2(0.5f, 0);
-            closeRt.anchoredPosition = new Vector2(0, 16);
-            closeRt.sizeDelta = new Vector2(160, 36);
+            closeRt.anchoredPosition = new Vector2(0, 35);
+            closeRt.sizeDelta = new Vector2(280, 64);
 
             var cImg = closeObj.GetComponent<Image>();
             cImg.color = new Color(0.35f, 0.28f, 0.20f, 0.95f);
@@ -235,7 +316,7 @@ namespace BubbleTeaShop
             ctRt.offsetMax = Vector2.zero;
             var cTmp = closeTextObj.GetComponent<TextMeshProUGUI>();
             cTmp.text = "Tap to Close";
-            cTmp.fontSize = 15;
+            cTmp.fontSize = 26;
             cTmp.alignment = TextAlignmentOptions.Center;
             cTmp.color = Color.white;
 

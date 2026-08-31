@@ -345,19 +345,10 @@ namespace BubbleTeaShop
             if (rt == null) yield break;
 
             Vector2 moveDir = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-0.8f, 0.8f)).normalized;
-            float speed = UnityEngine.Random.Range(140f, 220f);
+            float speed = UnityEngine.Random.Range(150f, 240f);
             float lifetime = 14f; // Stay active for 14 seconds before burrowing away
             float elapsed = 0f;
-
-            // Flip sprite depending on horizontal movement
-            if (img != null && moveDir.x > 0.05f)
-            {
-                rt.localScale = new Vector3(-1f, 1f, 1f);
-            }
-            else
-            {
-                rt.localScale = new Vector3(1f, 1f, 1f);
-            }
+            float animFps = 10f; // 10 frames per second run animation
 
             while (elapsed < lifetime && rt != null && rt.gameObject.activeInHierarchy)
             {
@@ -366,14 +357,29 @@ namespace BubbleTeaShop
                 // Move
                 rt.anchoredPosition += moveDir * speed * Time.deltaTime;
 
-                // Gentle bounce Y wobble
-                float hopY = Mathf.Abs(Mathf.Sin(elapsed * 12f)) * 8f;
+                // Frame-by-frame sprite flipbook animation for running
+                if (img != null && babyYippeeRunSprites != null && babyYippeeRunSprites.Length > 0)
+                {
+                    int frameIndex = (int)(elapsed * animFps) % babyYippeeRunSprites.Length;
+                    if (babyYippeeRunSprites[frameIndex] != null)
+                    {
+                        img.sprite = babyYippeeRunSprites[frameIndex];
+                    }
+                }
+
+                // Running footstep tilt & vertical hop
+                float hopY = Mathf.Abs(Mathf.Sin(elapsed * 16f)) * 6f;
+                float tiltAngle = Mathf.Sin(elapsed * 18f) * 7f;
+                rt.localRotation = Quaternion.Euler(0, 0, tiltAngle);
+
+                // Flip sprite depending on horizontal movement
+                float dirScaleX = (moveDir.x > 0.05f) ? -1f : 1f;
+                rt.localScale = new Vector3(dirScaleX, 1f, 1f);
 
                 // Screen boundaries bounce check
                 if (Mathf.Abs(rt.anchoredPosition.x) > 420f)
                 {
                     moveDir.x = -moveDir.x;
-                    if (img != null) rt.localScale = new Vector3(moveDir.x > 0 ? -1f : 1f, 1f, 1f);
                 }
                 if (Mathf.Abs(rt.anchoredPosition.y) > 240f)
                 {
