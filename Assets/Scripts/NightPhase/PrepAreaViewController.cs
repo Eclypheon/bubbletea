@@ -45,9 +45,10 @@ namespace BubbleTeaShop
         [SerializeField] private Button stationChoppingButton;
         [SerializeField] private Image stationChoppingImage;
         [SerializeField] private Image stationKnifeImage;
+        [SerializeField] private Transform choppingContentsContainer;
         [SerializeField] private Sprite choppingEmptySprite;
-        [SerializeField] private Sprite choppingLoadedSprite;
-        [SerializeField] private Sprite choppingChoppedSprite;
+        [SerializeField] private Sprite grassJellyIcon;
+        [SerializeField] private Sprite coconutJellyIcon;
 
         [Header("Station 3: Bucket & Centrifuge (Day 18+)")]
         [SerializeField] private GameObject stationCentrifugeRoot;
@@ -77,6 +78,7 @@ namespace BubbleTeaShop
         [SerializeField] private int centrifugeLoadedCount = 0;
 
         private const int MAX_BLENDER_CAPACITY = 9;
+        private const int MAX_CHOPPING_CAPACITY = 3;
         private int currentDayNumber = 1;
         public event Action OnPrepAreaClosed;
 
@@ -373,13 +375,19 @@ namespace BubbleTeaShop
                         HUDController.Instance?.ShowNotification("Please collect your chopped Jelly cubes before loading a new batch!", 3f);
                         return;
                     }
+                    if (choppingLoadedCount >= MAX_CHOPPING_CAPACITY)
+                    {
+                        HUDController.Instance?.ShowNotification($"The chopping board is full! (Max {MAX_CHOPPING_CAPACITY} Jelly Blocks). Click board to chop.", 3f);
+                        return;
+                    }
                     if (InventoryManager.Instance.ConsumeRawStock(RawIngredientType.JellyBlocks, 1))
                     {
                         choppingLoadedCount++;
                         choppingState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
+                        SpawnJellyBlockOnBoard();
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Placed 1 Jelly Block on the Chopping Board! (Loaded: {choppingLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Placed a Jelly Block on the Chopping Board! ({choppingLoadedCount}/{MAX_CHOPPING_CAPACITY})", 2f);
                     }
                     break;
 
@@ -529,6 +537,55 @@ namespace BubbleTeaShop
         // =========================================================================
         // STATION 2: CHOPPING BOARD & KNIFE (GRASS JELLY & COCONUT JELLY)
         // =========================================================================
+        private Transform GetChoppingContainer()
+        {
+            if (choppingContentsContainer != null) return choppingContentsContainer;
+            if (stationChoppingImage != null) return stationChoppingImage.transform;
+            return stationChoppingRoot != null ? stationChoppingRoot.transform : null;
+        }
+
+        private Sprite GetGrassJellySprite()
+        {
+            if (grassJellyIcon != null) return grassJellyIcon;
+            if (SupermarketViewController.Instance != null)
+            {
+                var sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GrassJelly");
+                if (sp != null) return sp;
+            }
+            if (CashRegisterInventoryUI.Instance != null)
+            {
+                var sp = CashRegisterInventoryUI.Instance.GetIngredientIcon("Topping_GrassJelly");
+                if (sp != null) return sp;
+            }
+            if (CupStation.Instance != null)
+            {
+                var sp = CupStation.Instance.GrassJellySprite;
+                if (sp != null) return sp;
+            }
+            return null;
+        }
+
+        private Sprite GetCoconutJellySprite()
+        {
+            if (coconutJellyIcon != null) return coconutJellyIcon;
+            if (SupermarketViewController.Instance != null)
+            {
+                var sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_CoconutJelly");
+                if (sp != null) return sp;
+            }
+            if (CashRegisterInventoryUI.Instance != null)
+            {
+                var sp = CashRegisterInventoryUI.Instance.GetIngredientIcon("Topping_CoconutJelly");
+                if (sp != null) return sp;
+            }
+            if (CupStation.Instance != null)
+            {
+                var sp = CupStation.Instance.CoconutJellySprite;
+                if (sp != null) return sp;
+            }
+            return null;
+        }
+
         private void OnChoppingClicked()
         {
             if (choppingState == PrepStationState.Empty)
@@ -542,6 +599,121 @@ namespace BubbleTeaShop
             else if (choppingState == PrepStationState.ReadyToCollect)
             {
                 CollectChoppingYield();
+            }
+        }
+
+        private void SpawnJellyBlockOnBoard()
+        {
+            Transform parent = GetChoppingContainer();
+            if (parent == null || rawJellyBlocksIcon == null) return;
+
+            int index = choppingLoadedCount - 1;
+            GameObject blockObj = new GameObject($"JellyBlock_{choppingLoadedCount}", typeof(RectTransform), typeof(Image));
+            blockObj.transform.SetParent(parent, false);
+            var rt = blockObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+
+            float blockSize = 56f;
+            rt.sizeDelta = new Vector2(blockSize, blockSize);
+
+            RectTransform boardRt = (stationChoppingImage != null ? stationChoppingImage.rectTransform : parent as RectTransform);
+            float boardW = boardRt != null && boardRt.rect.width > 20 ? boardRt.rect.width : 220f;
+            float boardH = boardRt != null && boardRt.rect.height > 20 ? boardRt.rect.height : 140f;
+
+            float[] posXFactors = { -0.28f, 0.0f, 0.28f };
+            float[] posYFactors = { -0.05f, 0.10f, -0.05f };
+
+            float factorX = index >= 0 && index < posXFactors.Length ? posXFactors[index] : 0f;
+            float factorY = index >= 0 && index < posYFactors.Length ? posYFactors[index] : 0f;
+
+            float randJitterX = UnityEngine.Random.Range(-4f, 4f);
+            float randJitterY = UnityEngine.Random.Range(-4f, 4f);
+
+            rt.anchoredPosition = new Vector2((boardW * factorX) + randJitterX, (boardH * factorY) + randJitterY);
+            rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-10f, 10f));
+
+            var img = blockObj.GetComponent<Image>();
+            img.sprite = rawJellyBlocksIcon;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
+        private void SpawnChoppedJelliesOnBoard()
+        {
+            ClearChoppingContents();
+            Transform parent = GetChoppingContainer();
+            if (parent == null) return;
+
+            Sprite grassSp = GetGrassJellySprite();
+            Sprite cocoSp = GetCoconutJellySprite();
+
+            int grassCount = choppingLoadedCount * 1;
+            int cocoCount = choppingLoadedCount * 1;
+
+            RectTransform boardRt = (stationChoppingImage != null ? stationChoppingImage.rectTransform : parent as RectTransform);
+            float boardW = boardRt != null && boardRt.rect.width > 20 ? boardRt.rect.width : 220f;
+            float boardH = boardRt != null && boardRt.rect.height > 20 ? boardRt.rect.height : 140f;
+
+            float cubeSize = 42f;
+
+            for (int i = 0; i < grassCount; i++)
+            {
+                if (grassSp == null) break;
+                GameObject cubeObj = new GameObject($"GrassJelly_{i + 1}", typeof(RectTransform), typeof(Image));
+                cubeObj.transform.SetParent(parent, false);
+                var rt = cubeObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(cubeSize, cubeSize);
+
+                float stepX = (i - (grassCount - 1) * 0.5f) * 36f;
+                float posX = -boardW * 0.22f + stepX;
+                float posY = boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
+                rt.anchoredPosition = new Vector2(posX, posY);
+                rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-15f, 15f));
+
+                var img = cubeObj.GetComponent<Image>();
+                img.sprite = grassSp;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+            }
+
+            for (int i = 0; i < cocoCount; i++)
+            {
+                if (cocoSp == null) break;
+                GameObject cubeObj = new GameObject($"CoconutJelly_{i + 1}", typeof(RectTransform), typeof(Image));
+                cubeObj.transform.SetParent(parent, false);
+                var rt = cubeObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(cubeSize, cubeSize);
+
+                float stepX = (i - (cocoCount - 1) * 0.5f) * 36f;
+                float posX = boardW * 0.22f + stepX;
+                float posY = -boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
+                rt.anchoredPosition = new Vector2(posX, posY);
+                rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-15f, 15f));
+
+                var img = cubeObj.GetComponent<Image>();
+                img.sprite = cocoSp;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+            }
+        }
+
+        private void ClearChoppingContents()
+        {
+            Transform parent = GetChoppingContainer();
+            if (parent == null) return;
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                Transform child = parent.GetChild(i);
+                if (stationKnifeImage != null && child == stationKnifeImage.transform) continue;
+                Destroy(child.gameObject);
             }
         }
 
@@ -571,6 +743,7 @@ namespace BubbleTeaShop
                 yield return new WaitForSeconds(1.8f);
             }
 
+            SpawnChoppedJelliesOnBoard();
             choppingState = PrepStationState.ReadyToCollect;
             UpdateChoppingUI();
             HUDController.Instance?.ShowNotification("✨ Chopping complete! Click the board to collect diced jellies!", 3.5f);
@@ -589,6 +762,7 @@ namespace BubbleTeaShop
             PlaySound(collectRewardSound);
             HUDController.Instance?.ShowNotification($"🎉 Collected <color=#2ECC71>+{grassJellyYield} Grass Jelly</color> and <color=#2ECC71>+{coconutJellyYield} Coconut Jelly</color>!", 4f);
 
+            ClearChoppingContents();
             choppingLoadedCount = 0;
             choppingState = PrepStationState.Empty;
             UpdateUnlocksAndDisplay();
@@ -596,17 +770,9 @@ namespace BubbleTeaShop
 
         private void UpdateChoppingUI()
         {
-            if (stationChoppingImage != null)
+            if (stationChoppingImage != null && choppingEmptySprite != null)
             {
-                Sprite target = choppingState switch
-                {
-                    PrepStationState.Empty => choppingEmptySprite,
-                    PrepStationState.Loaded => (choppingLoadedSprite != null ? choppingLoadedSprite : choppingEmptySprite),
-                    PrepStationState.Processing => (choppingChoppedSprite != null ? choppingChoppedSprite : choppingEmptySprite),
-                    PrepStationState.ReadyToCollect => (choppingChoppedSprite != null ? choppingChoppedSprite : choppingEmptySprite),
-                    _ => choppingEmptySprite
-                };
-                if (target != null) stationChoppingImage.sprite = target;
+                stationChoppingImage.sprite = choppingEmptySprite;
             }
         }
 
