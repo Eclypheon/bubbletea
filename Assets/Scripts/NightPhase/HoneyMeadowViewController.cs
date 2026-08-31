@@ -20,7 +20,7 @@ namespace BubbleTeaShop
         [Header("UI Header & Basket")]
         [SerializeField] private TextMeshProUGUI harvestCounterText;
 
-        [Header("Jelly Tree & Branches (Editable)")]
+        [Header("Jelly Tree & Centerpiece")]
         [SerializeField] private Transform jellyTreeContainer;
         [SerializeField] private Image jellyTreeImage;
         [SerializeField] private Sprite jellyTreeSprite;
@@ -32,32 +32,30 @@ namespace BubbleTeaShop
         [Range(2, 8)]
         [SerializeField] private int maxJellyBlocks = 5;
 
+        [Header("Soil Absorption Speed (Editable)")]
+        [Tooltip("Seconds before a fallen jelly block on the floor completely dissolves into the soil.")]
+        [Range(0.5f, 10f)]
+        [SerializeField] private float soilAbsorptionSeconds = 2.0f;
+
         [Header("Audio SFX")]
-        [SerializeField] private AudioClip treeRustleSound;
+        [SerializeField] private AudioClip treeKickSound;
         [SerializeField] private AudioClip harvestCollectSound;
         [SerializeField] private AudioClip completeSound;
 
         public event Action OnHoneyMeadowClosed;
 
         private int sessionCaughtCount = 0;
-        private int remainingHangingBlocks = 0;
+        private int totalSpawnedCount = 0;
         private int remainingActiveGroundBlocks = 0;
         private bool isMeadowOpen = false;
-        private Coroutine treeIdleSwayCoroutine;
-        private List<Coroutine> activePendulumRoutines = new List<Coroutine>();
-        private List<HangingJellyBlock> hangingBlocks = new List<HangingJellyBlock>();
+        private bool hasKickedTree = false;
+        private List<Coroutine> activeDropRoutines = new List<Coroutine>();
+        private Vector2 rootPanelBaseAnchoredPos = Vector2.zero;
 
-        private const string IDLE_HINT = "Honey Meadows: Shake the Jelly Tree to drop ripe Jelly Blocks, then collect them!";
-        private const string DROPPED_HINT = "Ripe Jelly Blocks have fallen onto the meadow! Tap them to collect!";
-        private const string CLEARED_HINT = "You have harvested all the ripe Jelly Blocks! Time to head back.";
-
-        private class HangingJellyBlock
-        {
-            public GameObject gameObject;
-            public RectTransform rectTransform;
-            public Vector2 branchLocalPos;
-            public bool isDislodged;
-        }
+        private const string IDLE_HINT = "Kick the tree hard to dislodge any loose jellies!";
+        private const string DROPPED_HINT = "Quick! Pick up the jellies before they dissolve into the floor";
+        private const string CLEARED_SUCCESS_HINT = "You have successfully collected all of the jelly blocks";
+        private const string CLEARED_CONSUMED_HINT = "The jelly blocks have been consumed by the mysterious soil";
 
         private void Awake()
         {
@@ -83,6 +81,8 @@ namespace BubbleTeaShop
 
             if (honeyMeadowPanelRoot != null)
             {
+                var rt = honeyMeadowPanelRoot.GetComponent<RectTransform>();
+                if (rt != null) rootPanelBaseAnchoredPos = rt.anchoredPosition;
                 honeyMeadowPanelRoot.SetActive(false);
             }
         }
@@ -170,6 +170,7 @@ namespace BubbleTeaShop
             backgroundImage.color = Color.white;
 
             honeyMeadowPanelRoot = rootObj;
+            rootPanelBaseAnchoredPos = rootRt.anchoredPosition;
 
             // Header Harvest Counter
             GameObject counterObj = new GameObject("HarvestCounterText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -242,8 +243,9 @@ namespace BubbleTeaShop
         {
             isMeadowOpen = true;
             sessionCaughtCount = 0;
-            remainingHangingBlocks = 0;
+            totalSpawnedCount = 0;
             remainingActiveGroundBlocks = 0;
+            hasKickedTree = false;
 
             EnsureFallbackAssets();
 
@@ -255,6 +257,8 @@ namespace BubbleTeaShop
             if (honeyMeadowPanelRoot != null)
             {
                 honeyMeadowPanelRoot.SetActive(true);
+                var rt = honeyMeadowPanelRoot.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = rootPanelBaseAnchoredPos;
             }
 
             if (returnToNightHubButton != null)
@@ -273,20 +277,31 @@ namespace BubbleTeaShop
                 jellyTreeImage.sprite = jellyTreeSprite;
             }
 
-            HUDController.Instance?.SetSubscreenMode(true, IDLE_HINT);
+            // Tree stays completely static at the start
+            if (jellyTreeContainer != null)
+            {
+                jellyTreeContainer.localRotation = Quaternion.identity;
+                jellyTreeContainer.localScale = Vector3.one;
+            }
 
+            ClearAllFallenBlocks();
+            HUDController.Instance?.SetSubscreenMode(true, IDLE_HINT);
             UpdateHarvestCounterDisplay();
-            SetupTreeAndHangingBlocks();
-            StartTreeIdleSway();
         }
 
         public void CloseHoneyMeadowView()
         {
             isMeadowOpen = false;
 
-            StopTreeIdleSway();
-            StopAllPendulumRoutines();
-            ClearAllHangingAndGroundBlocks();
+            StopAllDropRoutines();
+            ClearAllFallenBlocks();
+
+            if (honeyMeadowPanelRoot != null)
+            {
+                var rt = honeyMeadowPanelRoot.GetComponent<RectTransform>();
+                if (rt != null) rt.anchoredPosition = rootPanelBaseAnchoredPos;
+                honeyMeadowPanelRoot.SetActive(false);
+            }
 
             if (sessionCaughtCount > 0)
             {
@@ -297,11 +312,6 @@ namespace BubbleTeaShop
             if (returnToNightHubButton != null)
             {
                 returnToNightHubButton.gameObject.SetActive(false);
-            }
-
-            if (honeyMeadowPanelRoot != null)
-            {
-                honeyMeadowPanelRoot.SetActive(false);
             }
 
             HUDController.Instance?.SetSubscreenMode(false);
@@ -317,28 +327,91 @@ namespace BubbleTeaShop
         }
 
         // =========================================================================
-        // JELLY TREE SETUP & IDLE SWAY
+        // KICK TREE & VIOLENT SCREEN SHAKE
         // =========================================================================
-        private void SetupTreeAndHangingBlocks()
+        private void OnTreeClicked()
         {
-            StopAllPendulumRoutines();
-            ClearAllHangingAndGroundBlocks();
+            if (hasKickedTree || !isMeadowOpen) return;
 
-            if (jellyTreeContainer == null) return;
+            hasKickedTree = true;
+            PlaySound(treeKickSound);
 
-            // Ripe branch anchor positions relative to tree center
+            // Violent screen shake and tree impact
+            StartCoroutine(ViolentScreenAndTreeShakeRoutine());
+
+            // Update status hint
+            HUDController.Instance?.SetStatusHint(DROPPED_HINT);
+
+            // Spawn and dislodge all jelly blocks
+            SpawnAndDropJellyBlocks();
+        }
+
+        private IEnumerator ViolentScreenAndTreeShakeRoutine()
+        {
+            RectTransform panelRt = (honeyMeadowPanelRoot != null) ? honeyMeadowPanelRoot.GetComponent<RectTransform>() : null;
+            RectTransform treeRt = jellyTreeContainer as RectTransform;
+
+            float elapsed = 0f;
+            float duration = 0.55f;
+
+            while (elapsed < duration && isMeadowOpen)
+            {
+                elapsed += Time.deltaTime;
+                float progress = elapsed / duration;
+                float intensity = 1f - progress; // Decays over time
+
+                // Violent screen offset
+                if (panelRt != null)
+                {
+                    float shakeX = UnityEngine.Random.Range(-22f, 22f) * intensity;
+                    float shakeY = UnityEngine.Random.Range(-18f, 18f) * intensity;
+                    panelRt.anchoredPosition = rootPanelBaseAnchoredPos + new Vector2(shakeX, shakeY);
+                }
+
+                // Tree violent tilt and recoil
+                if (treeRt != null)
+                {
+                    float angle = Mathf.Sin(elapsed * 55f) * (12f * intensity);
+                    float scaleMod = 1f + (Mathf.Sin(elapsed * 60f) * (0.07f * intensity));
+                    treeRt.localRotation = Quaternion.Euler(0, 0, angle);
+                    treeRt.localScale = new Vector3(scaleMod, scaleMod, 1f);
+                }
+
+                yield return null;
+            }
+
+            // Restore clean transform positions
+            if (panelRt != null) panelRt.anchoredPosition = rootPanelBaseAnchoredPos;
+            if (treeRt != null)
+            {
+                treeRt.localRotation = Quaternion.identity;
+                treeRt.localScale = Vector3.one;
+            }
+        }
+
+        // =========================================================================
+        // JELLY BLOCK DROP & SOIL ABSORPTION
+        // =========================================================================
+        private void SpawnAndDropJellyBlocks()
+        {
+            StopAllDropRoutines();
+            ClearAllFallenBlocks();
+
+            Transform container = (honeyMeadowPanelRoot != null) ? honeyMeadowPanelRoot.transform : transform;
+
+            // Branch origin anchor points
             List<Vector2> branchAnchors = new List<Vector2>
             {
-                new Vector2(-155f, 105f),
-                new Vector2(-75f, 175f),
-                new Vector2(65f, 155f),
-                new Vector2(165f, 95f),
-                new Vector2(0f, 125f),
-                new Vector2(-115f, 40f),
-                new Vector2(115f, 45f)
+                new Vector2(-155f, 95f),
+                new Vector2(-75f, 165f),
+                new Vector2(65f, 145f),
+                new Vector2(165f, 85f),
+                new Vector2(0f, 115f),
+                new Vector2(-115f, 30f),
+                new Vector2(115f, 35f)
             };
 
-            // Shuffle branch positions
+            // Shuffle
             for (int i = 0; i < branchAnchors.Count; i++)
             {
                 int rnd = UnityEngine.Random.Range(i, branchAnchors.Count);
@@ -348,20 +421,21 @@ namespace BubbleTeaShop
             }
 
             int spawnCount = Mathf.Clamp(UnityEngine.Random.Range(minJellyBlocks, maxJellyBlocks + 1), 2, branchAnchors.Count);
-            remainingHangingBlocks = spawnCount;
+            totalSpawnedCount = spawnCount;
+            remainingActiveGroundBlocks = spawnCount;
 
             for (int i = 0; i < spawnCount; i++)
             {
-                Vector2 anchor = branchAnchors[i];
+                Vector2 branchPos = branchAnchors[i];
 
-                GameObject blockObj = new GameObject($"HangingJelly_{i + 1}", typeof(RectTransform), typeof(Image), typeof(Button));
-                blockObj.transform.SetParent(jellyTreeContainer, false);
+                GameObject blockObj = new GameObject($"FallenJelly_{i + 1}", typeof(RectTransform), typeof(Image), typeof(Button));
+                blockObj.transform.SetParent(container, false);
                 var rt = blockObj.GetComponent<RectTransform>();
                 rt.anchorMin = new Vector2(0.5f, 0.5f);
                 rt.anchorMax = new Vector2(0.5f, 0.5f);
-                rt.pivot = new Vector2(0.5f, 0.9f); // pivot at stem top for pendulum swing
-                rt.sizeDelta = new Vector2(62f, 62f);
-                rt.anchoredPosition = anchor;
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(66f, 66f);
+                rt.anchoredPosition = branchPos;
 
                 var img = blockObj.GetComponent<Image>();
                 if (rawJellyBlockSprite != null)
@@ -370,196 +444,55 @@ namespace BubbleTeaShop
                 }
                 img.preserveAspect = true;
 
-                HangingJellyBlock hb = new HangingJellyBlock
-                {
-                    gameObject = blockObj,
-                    rectTransform = rt,
-                    branchLocalPos = anchor,
-                    isDislodged = false
-                };
-                hangingBlocks.Add(hb);
-
                 var btn = blockObj.GetComponent<Button>();
                 btn.transition = Selectable.Transition.None;
-                btn.onClick.AddListener(() => DislodgeHangingBlock(hb));
+                btn.onClick.AddListener(() => OnJellyBlockCollected(blockObj));
 
-                var swingCoroutine = StartCoroutine(PendulumSwingRoutine(rt, 2.2f + (i * 0.4f), i * 1.5f));
-                activePendulumRoutines.Add(swingCoroutine);
+                float staggerDelay = i * 0.06f;
+                var coroutine = StartCoroutine(JellyBlockDropAndAbsorbRoutine(rt, blockObj, branchPos, staggerDelay));
+                activeDropRoutines.Add(coroutine);
             }
         }
 
-        private void StartTreeIdleSway()
-        {
-            StopTreeIdleSway();
-            if (jellyTreeContainer != null)
-            {
-                treeIdleSwayCoroutine = StartCoroutine(TreeIdleSwayRoutine(jellyTreeContainer as RectTransform));
-            }
-        }
-
-        private void StopTreeIdleSway()
-        {
-            if (treeIdleSwayCoroutine != null)
-            {
-                StopCoroutine(treeIdleSwayCoroutine);
-                treeIdleSwayCoroutine = null;
-            }
-        }
-
-        private IEnumerator TreeIdleSwayRoutine(RectTransform treeRt)
-        {
-            if (treeRt == null) yield break;
-            Vector3 baseScale = Vector3.one;
-
-            while (isMeadowOpen && treeRt != null)
-            {
-                float t = Time.time * 1.4f;
-                float angle = Mathf.Sin(t) * 1.6f;
-                float scalePulse = 1f + (Mathf.Sin(t * 2f) * 0.015f);
-
-                treeRt.localRotation = Quaternion.Euler(0, 0, angle);
-                treeRt.localScale = new Vector3(baseScale.x * scalePulse, baseScale.y * scalePulse, 1f);
-                yield return null;
-            }
-        }
-
-        private IEnumerator PendulumSwingRoutine(RectTransform rt, float speed, float phaseOffset)
+        private IEnumerator JellyBlockDropAndAbsorbRoutine(RectTransform rt, GameObject obj, Vector2 branchStartPos, float startDelay)
         {
             if (rt == null) yield break;
 
-            while (isMeadowOpen && rt != null && rt.gameObject.activeInHierarchy)
+            if (startDelay > 0f)
             {
-                float t = (Time.time * speed) + phaseOffset;
-                float angle = Mathf.Sin(t) * 10f;
-                rt.localRotation = Quaternion.Euler(0, 0, angle);
-                yield return null;
-            }
-        }
-
-        private void StopAllPendulumRoutines()
-        {
-            foreach (var routine in activePendulumRoutines)
-            {
-                if (routine != null) StopCoroutine(routine);
-            }
-            activePendulumRoutines.Clear();
-        }
-
-        // =========================================================================
-        // TREE CLICK & SHAKE INTERACTION
-        // =========================================================================
-        private bool isTreeShaking = false;
-
-        private void OnTreeClicked()
-        {
-            if (isTreeShaking || !isMeadowOpen) return;
-
-            PlaySound(treeRustleSound);
-            StartCoroutine(VigorousTreeShakeRoutine());
-        }
-
-        private IEnumerator VigorousTreeShakeRoutine()
-        {
-            isTreeShaking = true;
-            RectTransform treeRt = jellyTreeContainer as RectTransform;
-
-            if (treeRt != null)
-            {
-                float elapsed = 0f;
-                float duration = 0.45f;
-
-                while (elapsed < duration && treeRt != null)
-                {
-                    elapsed += Time.deltaTime;
-                    float angle = Mathf.Sin(elapsed * 45f) * 6.5f;
-                    float scale = 1f + (Mathf.Sin(elapsed * 50f) * 0.04f);
-                    treeRt.localRotation = Quaternion.Euler(0, 0, angle);
-                    treeRt.localScale = new Vector3(scale, scale, 1f);
-                    yield return null;
-                }
-
-                if (treeRt != null)
-                {
-                    treeRt.localRotation = Quaternion.identity;
-                    treeRt.localScale = Vector3.one;
-                }
+                rt.localScale = Vector3.zero;
+                yield return new WaitForSeconds(startDelay);
+                if (rt == null) yield break;
+                rt.localScale = Vector3.one;
             }
 
-            // Dislodge 1 to 2 undisplaced hanging blocks
-            List<HangingJellyBlock> available = hangingBlocks.FindAll(b => !b.isDislodged && b.gameObject != null);
-            if (available.Count > 0)
-            {
-                int countToDrop = Mathf.Clamp(UnityEngine.Random.Range(1, 3), 1, available.Count);
-                for (int i = 0; i < countToDrop; i++)
-                {
-                    DislodgeHangingBlock(available[i]);
-                }
-            }
-
-            isTreeShaking = false;
-        }
-
-        // =========================================================================
-        // DISLODGE & BOUNCE PHYSICS
-        // =========================================================================
-        private void DislodgeHangingBlock(HangingJellyBlock hb)
-        {
-            if (hb == null || hb.isDislodged || hb.gameObject == null) return;
-
-            hb.isDislodged = true;
-            remainingHangingBlocks = Mathf.Max(0, remainingHangingBlocks - 1);
-            remainingActiveGroundBlocks++;
-
-            HUDController.Instance?.SetStatusHint(DROPPED_HINT);
-
-            // Re-parent to meadow panel root so it falls naturally across meadow space
-            Vector3 worldPos = hb.rectTransform.position;
-            hb.gameObject.transform.SetParent(honeyMeadowPanelRoot.transform, true);
-            hb.rectTransform.position = worldPos;
-            hb.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-            var btn = hb.gameObject.GetComponent<Button>();
-            if (btn != null)
-            {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => OnJellyBlockCollected(hb.gameObject));
-            }
-
-            StartCoroutine(JellyBlockDropAndBounceRoutine(hb.rectTransform, hb.gameObject));
-        }
-
-        private IEnumerator JellyBlockDropAndBounceRoutine(RectTransform rt, GameObject obj)
-        {
-            if (rt == null) yield break;
-
-            Vector2 startPos = rt.anchoredPosition;
+            // 1. Initial Parabolic Fall Arc
             float targetGroundY = UnityEngine.Random.Range(-210f, -260f);
-            float targetGroundX = startPos.x + UnityEngine.Random.Range(-80f, 80f);
+            float targetGroundX = branchStartPos.x + UnityEngine.Random.Range(-70f, 70f);
             targetGroundX = Mathf.Clamp(targetGroundX, -380f, 380f);
 
-            float dropDuration = 0.55f;
+            float dropDuration = 0.45f;
             float elapsed = 0f;
-            float spinSpeed = UnityEngine.Random.Range(-180f, 180f);
+            float spinSpeed = UnityEngine.Random.Range(-240f, 240f);
 
-            // 1. Initial fall arc
             while (elapsed < dropDuration && rt != null)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / dropDuration;
-                float curX = Mathf.Lerp(startPos.x, targetGroundX, t);
-                // EaseIn quad for realistic gravity drop
-                float curY = Mathf.Lerp(startPos.y, targetGroundY, t * t);
+                float curX = Mathf.Lerp(branchStartPos.x, targetGroundX, t);
+                // EaseIn quad for accelerating gravity
+                float curY = Mathf.Lerp(branchStartPos.y, targetGroundY, t * t);
 
                 rt.anchoredPosition = new Vector2(curX, curY);
                 rt.localRotation = Quaternion.Euler(0, 0, t * spinSpeed);
                 yield return null;
             }
 
-            // 2. Bounce 1
+            // 2. Bounce on Meadow Floor
             if (rt != null)
             {
-                float bounceHeight = 35f;
-                float bounceDuration = 0.25f;
+                float bounceHeight = 28f;
+                float bounceDuration = 0.20f;
                 elapsed = 0f;
                 Vector2 groundPos = new Vector2(targetGroundX, targetGroundY);
 
@@ -568,38 +501,35 @@ namespace BubbleTeaShop
                     elapsed += Time.deltaTime;
                     float t = elapsed / bounceDuration;
                     float arcY = Mathf.Sin(t * Mathf.PI) * bounceHeight;
-                    rt.anchoredPosition = groundPos + new Vector2(t * 15f, arcY);
+                    rt.anchoredPosition = groundPos + new Vector2(t * 10f, arcY);
                     yield return null;
                 }
             }
 
-            // 3. Bounce 2 (small settle)
-            if (rt != null)
-            {
-                float bounceHeight = 12f;
-                float bounceDuration = 0.18f;
-                elapsed = 0f;
-                Vector2 groundPos = rt.anchoredPosition;
-
-                while (elapsed < bounceDuration && rt != null)
-                {
-                    elapsed += Time.deltaTime;
-                    float t = elapsed / bounceDuration;
-                    float arcY = Mathf.Sin(t * Mathf.PI) * bounceHeight;
-                    rt.anchoredPosition = groundPos + new Vector2(t * 6f, arcY);
-                    yield return null;
-                }
-            }
-
-            // 4. Settled pulse on ground until tapped
+            // 3. Ground Soil Absorption (Shrinking to zero over soilAbsorptionSeconds)
             if (rt != null)
             {
                 rt.localRotation = Quaternion.identity;
-                while (isMeadowOpen && rt != null && rt.gameObject.activeInHierarchy)
+                float absorbDuration = Mathf.Max(0.2f, soilAbsorptionSeconds);
+                elapsed = 0f;
+                Vector3 initialScale = Vector3.one;
+
+                while (elapsed < absorbDuration && rt != null && rt.gameObject.activeInHierarchy)
                 {
-                    float pulse = 1f + (Mathf.Sin(Time.time * 5f) * 0.08f);
-                    rt.localScale = new Vector3(pulse, pulse, 1f);
+                    elapsed += Time.deltaTime;
+                    float shrinkProgress = elapsed / absorbDuration;
+                    float currentScale = Mathf.Clamp01(1f - shrinkProgress);
+
+                    rt.localScale = new Vector3(currentScale, currentScale, 1f);
                     yield return null;
+                }
+
+                // Absorbed into the soil
+                if (rt != null)
+                {
+                    Destroy(rt.gameObject);
+                    remainingActiveGroundBlocks = Mathf.Max(0, remainingActiveGroundBlocks - 1);
+                    CheckAllBlocksResolved();
                 }
             }
         }
@@ -629,16 +559,24 @@ namespace BubbleTeaShop
             }
 
             Destroy(blockObj);
+            CheckAllBlocksResolved();
+        }
 
-            if (remainingHangingBlocks == 0 && remainingActiveGroundBlocks == 0)
+        private void CheckAllBlocksResolved()
+        {
+            if (remainingActiveGroundBlocks <= 0 && hasKickedTree)
             {
-                PlaySound(completeSound);
-                HUDController.Instance?.SetStatusHint(CLEARED_HINT);
-                HUDController.Instance?.ShowNotification($"All Jelly Blocks harvested from Honey Meadows! Total: <color=#2ECC71>{sessionCaughtCount} Jelly Blocks</color>.", 4f);
-            }
-            else if (remainingActiveGroundBlocks == 0)
-            {
-                HUDController.Instance?.SetStatusHint(IDLE_HINT);
+                if (sessionCaughtCount == totalSpawnedCount)
+                {
+                    PlaySound(completeSound);
+                    HUDController.Instance?.SetStatusHint(CLEARED_SUCCESS_HINT);
+                    HUDController.Instance?.ShowNotification($"You have successfully collected all of the jelly blocks! (Harvested: <color=#2ECC71>+{sessionCaughtCount}</color>)", 4f);
+                }
+                else
+                {
+                    HUDController.Instance?.SetStatusHint(CLEARED_CONSUMED_HINT);
+                    HUDController.Instance?.ShowNotification("The jelly blocks have been consumed by the mysterious soil.", 4f);
+                }
             }
         }
 
@@ -678,31 +616,24 @@ namespace BubbleTeaShop
             if (popObj != null) Destroy(popObj);
         }
 
-        private void ClearAllHangingAndGroundBlocks()
+        private void StopAllDropRoutines()
         {
-            hangingBlocks.Clear();
-
-            if (jellyTreeContainer != null)
+            foreach (var routine in activeDropRoutines)
             {
-                for (int i = jellyTreeContainer.childCount - 1; i >= 0; i--)
-                {
-                    Transform child = jellyTreeContainer.GetChild(i);
-                    if (child.name.StartsWith("HangingJelly_"))
-                    {
-                        Destroy(child.gameObject);
-                    }
-                }
+                if (routine != null) StopCoroutine(routine);
             }
+            activeDropRoutines.Clear();
+        }
 
-            if (honeyMeadowPanelRoot != null)
+        private void ClearAllFallenBlocks()
+        {
+            Transform container = (honeyMeadowPanelRoot != null) ? honeyMeadowPanelRoot.transform : transform;
+            for (int i = container.childCount - 1; i >= 0; i--)
             {
-                for (int i = honeyMeadowPanelRoot.transform.childCount - 1; i >= 0; i--)
+                Transform child = container.GetChild(i);
+                if (child.name.StartsWith("FallenJelly_") || child.name.StartsWith("CollectPopText"))
                 {
-                    Transform child = honeyMeadowPanelRoot.transform.GetChild(i);
-                    if (child.name.StartsWith("HangingJelly_") || child.name.StartsWith("CollectPopText"))
-                    {
-                        Destroy(child.gameObject);
-                    }
+                    Destroy(child.gameObject);
                 }
             }
         }
