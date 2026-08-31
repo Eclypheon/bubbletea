@@ -381,7 +381,7 @@ namespace BubbleTeaShop
                                          $"• Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n" +
                                          $"• Sales Revenue: <color=#2ECC71>+${sales:F2}</color>\n" +
                                          $"• Tips Earned: <color=#2ECC71>+${tips:F2}</color>\n" +
-                                         $"• Daily Supplies: <color=#FF4444>-${suppliesExpense:F2}</color> <i>(Tea, Cups, Ice, Sugar)</i>\n" +
+                                         $"• Daily Supplies: <color=#FF4444>-${suppliesExpense:F2}</color>\n" +
                                          $"• Net Daily Profit: {netProfitFormatted}\n" +
                                          $"• Total Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
             }
