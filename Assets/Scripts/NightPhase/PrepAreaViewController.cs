@@ -36,7 +36,6 @@ namespace BubbleTeaShop
         [SerializeField] private Button stationBlenderButton;
         [SerializeField] private Image stationBlenderImage;
         [SerializeField] private Image stationSieveImage;
-        [SerializeField] private TextMeshProUGUI stationBlenderStatusText;
         [SerializeField] private Sprite blenderEmptySprite;
         [SerializeField] private Sprite blenderLoadedSprite;
         [SerializeField] private Sprite blenderBlendedSprite;
@@ -46,7 +45,6 @@ namespace BubbleTeaShop
         [SerializeField] private Button stationChoppingButton;
         [SerializeField] private Image stationChoppingImage;
         [SerializeField] private Image stationKnifeImage;
-        [SerializeField] private TextMeshProUGUI stationChoppingStatusText;
         [SerializeField] private Sprite choppingEmptySprite;
         [SerializeField] private Sprite choppingLoadedSprite;
         [SerializeField] private Sprite choppingChoppedSprite;
@@ -56,7 +54,6 @@ namespace BubbleTeaShop
         [SerializeField] private Button stationCentrifugeButton;
         [SerializeField] private Image stationBucketImage;
         [SerializeField] private Image stationCentrifugeImage;
-        [SerializeField] private TextMeshProUGUI stationCentrifugeStatusText;
         [SerializeField] private Sprite bucketEmptySprite;
         [SerializeField] private Sprite bucketLoadedSprite;
         [SerializeField] private Sprite centrifugeRefinedSprite;
@@ -130,6 +127,7 @@ namespace BubbleTeaShop
             }
 
             UpdateUnlocksAndDisplay();
+            HUDController.Instance?.ShowNotification("Kitchen Prep Area: Click raw cards above to load stations, then tap to process!", 3.5f);
         }
 
         public void ClosePrepAreaView()
@@ -158,7 +156,7 @@ namespace BubbleTeaShop
             if (stationChoppingRoot != null) stationChoppingRoot.SetActive(jelliesUnlocked);
             if (stationCentrifugeRoot != null) stationCentrifugeRoot.SetActive(goldenDewUnlocked);
 
-            // Update Station UI visuals and status texts
+            // Update Station UI visuals
             UpdateBlenderUI();
             UpdateChoppingUI();
             UpdateCentrifugeUI();
@@ -336,7 +334,7 @@ namespace BubbleTeaShop
                         blenderState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Loaded 1 Baby Yippee into the Blender! (Total loaded: {blenderLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Loaded 1 Baby Yippee into the Blender! (Loaded: {blenderLoadedCount})", 2.5f);
                     }
                     break;
 
@@ -352,7 +350,7 @@ namespace BubbleTeaShop
                         choppingState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Placed 1 Jelly Block on the Chopping Board! (Total loaded: {choppingLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Placed 1 Jelly Block on the Chopping Board! (Loaded: {choppingLoadedCount})", 2.5f);
                     }
                     break;
 
@@ -368,7 +366,7 @@ namespace BubbleTeaShop
                         centrifugeState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Poured Golden Dew into the Bucket! (Total loaded: {centrifugeLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Poured Golden Dew into the Bucket! (Loaded: {centrifugeLoadedCount})", 2.5f);
                     }
                     break;
             }
@@ -398,6 +396,7 @@ namespace BubbleTeaShop
             blenderState = PrepStationState.Processing;
             UpdateBlenderUI();
             PlaySound(blendSound);
+            HUDController.Instance?.ShowNotification("🌀 Blending and sieving Baby Yippees...", 2.0f);
 
             // Shaking animation
             if (stationBlenderImage != null)
@@ -422,7 +421,7 @@ namespace BubbleTeaShop
 
             blenderState = PrepStationState.ReadyToCollect;
             UpdateBlenderUI();
-            HUDController.Instance?.ShowNotification("✨ Blending & sieving complete! Click the station to collect fresh Boba!", 3.5f);
+            HUDController.Instance?.ShowNotification("✨ Blending & sieving complete! Click the blender to collect fresh Boba!", 3.5f);
         }
 
         private void CollectBlenderYield()
@@ -445,18 +444,6 @@ namespace BubbleTeaShop
 
         private void UpdateBlenderUI()
         {
-            if (stationBlenderStatusText != null)
-            {
-                stationBlenderStatusText.text = blenderState switch
-                {
-                    PrepStationState.Empty => "<color=#8899AA>Empty (Load Yippees)</color>",
-                    PrepStationState.Loaded => $"<color=#F1C40F>Ready ({blenderLoadedCount} Yippees)\nClick to Blend & Sieve!</color>",
-                    PrepStationState.Processing => "<color=#3498DB>Blending & Sieving...</color>",
-                    PrepStationState.ReadyToCollect => "<color=#2ECC71><b>✨ Click to Collect Boba!</b></color>",
-                    _ => ""
-                };
-            }
-
             if (stationBlenderImage != null)
             {
                 Sprite target = blenderState switch
@@ -495,6 +482,7 @@ namespace BubbleTeaShop
             choppingState = PrepStationState.Processing;
             UpdateChoppingUI();
             PlaySound(chopSound);
+            HUDController.Instance?.ShowNotification("🔪 Chopping Jelly Blocks into cubes...", 1.8f);
 
             if (stationKnifeImage != null)
             {
@@ -540,18 +528,6 @@ namespace BubbleTeaShop
 
         private void UpdateChoppingUI()
         {
-            if (stationChoppingStatusText != null)
-            {
-                stationChoppingStatusText.text = choppingState switch
-                {
-                    PrepStationState.Empty => "<color=#8899AA>Empty (Load Jelly Blocks)</color>",
-                    PrepStationState.Loaded => $"<color=#F1C40F>Ready ({choppingLoadedCount} Blocks)\nClick to Chop!</color>",
-                    PrepStationState.Processing => "<color=#3498DB>Chopping Jellies...</color>",
-                    PrepStationState.ReadyToCollect => "<color=#2ECC71><b>✨ Click to Collect Jellies!</b></color>",
-                    _ => ""
-                };
-            }
-
             if (stationChoppingImage != null)
             {
                 Sprite target = choppingState switch
@@ -590,6 +566,7 @@ namespace BubbleTeaShop
             centrifugeState = PrepStationState.Processing;
             UpdateCentrifugeUI();
             PlaySound(centrifugeSound);
+            HUDController.Instance?.ShowNotification("⚙️ Spinning centrifuge to extract gourmet toppings...", 2.2f);
 
             if (stationCentrifugeImage != null)
             {
@@ -635,18 +612,6 @@ namespace BubbleTeaShop
 
         private void UpdateCentrifugeUI()
         {
-            if (stationCentrifugeStatusText != null)
-            {
-                stationCentrifugeStatusText.text = centrifugeState switch
-                {
-                    PrepStationState.Empty => "<color=#8899AA>Empty (Pour Golden Dew)</color>",
-                    PrepStationState.Loaded => $"<color=#F1C40F>Ready ({centrifugeLoadedCount} Dew)\nClick to Spin Centrifuge!</color>",
-                    PrepStationState.Processing => "<color=#3498DB>Spinning & Separating...</color>",
-                    PrepStationState.ReadyToCollect => "<color=#2ECC71><b>✨ Click to Collect Toppings!</b></color>",
-                    _ => ""
-                };
-            }
-
             if (stationBucketImage != null)
             {
                 Sprite target = centrifugeState switch
