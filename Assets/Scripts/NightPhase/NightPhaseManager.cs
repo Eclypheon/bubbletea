@@ -25,6 +25,7 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI rentStatusText;
         [SerializeField] private Button buyoutShopButton;
         [SerializeField] private TextMeshProUGUI buyoutButtonText;
+        [SerializeField] private Transform ledgerInventoryContainer;
 
         [Header("Foraging Buttons")]
         [SerializeField] private Button forageBambooBtn;
@@ -365,17 +366,38 @@ namespace BubbleTeaShop
 
             if (ledgerSummaryText != null)
             {
+                var rt = ledgerSummaryText.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchorMin = new Vector2(0.5f, 0.5f);
+                    rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
+                    rt.anchoredPosition = new Vector2(-280f, 75f);
+                    rt.sizeDelta = new Vector2(460f, 290f);
+                    ledgerSummaryText.fontSize = 20;
+                }
+
                 ledgerSummaryText.text = $"<b>Day {completedDay} Summary:</b>\n" +
                                          $"• Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n" +
                                          $"• Sales Revenue: <color=#2ECC71>+${sales:F2}</color>\n" +
                                          $"• Tips Earned: <color=#2ECC71>+${tips:F2}</color>\n" +
-                                         $"• Daily Supplies & Utilities: <color=#FF4444>-${suppliesExpense:F2}</color> <i>(Tea, Cups, Ice, Sugar)</i>\n" +
+                                         $"• Daily Supplies: <color=#FF4444>-${suppliesExpense:F2}</color> <i>(Tea, Cups, Ice, Sugar)</i>\n" +
                                          $"• Net Daily Profit: {netProfitFormatted}\n" +
                                          $"• Total Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
             }
 
             if (rentStatusText != null)
             {
+                var rt = rentStatusText.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchorMin = new Vector2(0.5f, 0.5f);
+                    rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
+                    rt.anchoredPosition = new Vector2(-280f, -105f);
+                    rt.sizeDelta = new Vector2(460f, 55f);
+                }
+
                 if (accumulated > 0)
                 {
                     rentStatusText.text = $"Weekly Rent: ${baseRent:F2} + <color=#FF4444>Overdue: ${accumulated:F2}</color> (Total: ${totalRent:F2}) | <color=#FFAA00>Extensions: 1/1 used</color>";
@@ -394,6 +416,15 @@ namespace BubbleTeaShop
 
             if (buyoutShopButton != null)
             {
+                var rt = buyoutShopButton.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    rt.anchorMin = new Vector2(0.5f, 0.5f);
+                    rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
+                    rt.anchoredPosition = new Vector2(-280f, -175f);
+                    rt.sizeDelta = new Vector2(340f, 48f);
+                }
                 buyoutShopButton.interactable = EconomyManager.Instance.CanAfford(EconomyManager.Instance.BuyoutGoal);
             }
 
@@ -402,6 +433,220 @@ namespace BubbleTeaShop
             {
                 HUDController.Instance?.ShowNotification("🏆 Incredible! You have successfully completed the 4-week lease!", 5f);
             }
+
+            // Populate visual inventory cards in Ledger Tab
+            EnsureLedgerInventoryContainer();
+            if (ledgerInventoryContainer != null)
+            {
+                PopulateLedgerInventoryCards(ledgerInventoryContainer);
+            }
+        }
+
+        private void EnsureLedgerInventoryContainer()
+        {
+            if (ledgerInventoryContainer == null && ledgerTabPanel != null)
+            {
+                Transform existing = ledgerTabPanel.transform.Find("LedgerInventoryContainer");
+                if (existing != null)
+                {
+                    ledgerInventoryContainer = existing;
+                }
+                else
+                {
+                    GameObject invObj = new GameObject("LedgerInventoryContainer", typeof(RectTransform));
+                    invObj.transform.SetParent(ledgerTabPanel.transform, false);
+                    var rt = invObj.GetComponent<RectTransform>();
+                    rt.anchorMin = new Vector2(0.5f, 0.5f);
+                    rt.anchorMax = new Vector2(0.5f, 0.5f);
+                    rt.pivot = new Vector2(0.5f, 0.5f);
+                    rt.anchoredPosition = new Vector2(250f, -15f);
+                    rt.sizeDelta = new Vector2(560f, 490f);
+                    ledgerInventoryContainer = invObj.transform;
+                }
+            }
+        }
+
+        private void PopulateLedgerInventoryCards(Transform container)
+        {
+            if (container == null || InventoryManager.Instance == null) return;
+
+            for (int i = container.childCount - 1; i >= 0; i--)
+            {
+                Destroy(container.GetChild(i).gameObject);
+            }
+
+            var milks = new (string key, string name, int count)[]
+            {
+                ("Milk_FreshMilk", "Fresh Milk", InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)),
+                ("Milk_OatMilk", "Oat Milk", InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)),
+                ("Milk_CoconutMilk", "Coconut Milk", InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)),
+                ("Milk_CondensedMilk", "Condensed Milk", InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk))
+            };
+
+            var toppings = new (string key, string name, int count)[]
+            {
+                ("Topping_TapiocaPearls", "Tapioca Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)),
+                ("Topping_PoppingBoba", "Popping Boba", InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)),
+                ("Topping_GrassJelly", "Grass Jelly", InventoryManager.Instance.GetToppingStock(ToppingType.GrassJelly)),
+                ("Topping_EggPudding", "Egg Pudding", InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding)),
+                ("Topping_CoconutJelly", "Coconut Jelly", InventoryManager.Instance.GetToppingStock(ToppingType.CoconutJelly)),
+                ("Topping_CheeseFoam", "Cheese Foam", InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)),
+                ("Topping_GoldenHoneyPearls", "Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))
+            };
+
+            // Left column: Milks (width ~260)
+            GameObject milkCol = new GameObject("MilksCol", typeof(RectTransform));
+            milkCol.transform.SetParent(container, false);
+            var mRt = milkCol.GetComponent<RectTransform>();
+            mRt.anchorMin = new Vector2(0, 0);
+            mRt.anchorMax = new Vector2(0.48f, 1);
+            mRt.offsetMin = Vector2.zero;
+            mRt.offsetMax = Vector2.zero;
+            PopulateLedgerCardList(milkCol.transform, milks, "MILKS");
+
+            // Right column: Toppings (width ~280)
+            GameObject topCol = new GameObject("ToppingsCol", typeof(RectTransform));
+            topCol.transform.SetParent(container, false);
+            var tRt = topCol.GetComponent<RectTransform>();
+            tRt.anchorMin = new Vector2(0.52f, 0);
+            tRt.anchorMax = new Vector2(1, 1);
+            tRt.offsetMin = Vector2.zero;
+            tRt.offsetMax = Vector2.zero;
+            PopulateLedgerCardList(topCol.transform, toppings, "TOPPINGS");
+        }
+
+        private void PopulateLedgerCardList(Transform colTransform, (string key, string name, int count)[] items, string sectionTitle)
+        {
+            float cardHeight = 48f;
+            float spacingY = 6f;
+            float headerHeight = 28f;
+
+            // Header
+            GameObject headerObj = new GameObject($"Header_{sectionTitle}", typeof(RectTransform), typeof(TextMeshProUGUI));
+            headerObj.transform.SetParent(colTransform, false);
+            var headerRt = headerObj.GetComponent<RectTransform>();
+            headerRt.anchorMin = new Vector2(0, 1);
+            headerRt.anchorMax = new Vector2(1, 1);
+            headerRt.pivot = new Vector2(0.5f, 1);
+            headerRt.sizeDelta = new Vector2(0, headerHeight);
+            headerRt.anchoredPosition = new Vector2(0, 0);
+
+            var headerTmp = headerObj.GetComponent<TextMeshProUGUI>();
+            headerTmp.text = $"<b>{sectionTitle}</b>";
+            headerTmp.fontSize = 20;
+            headerTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            headerTmp.color = new Color(0.9f, 0.92f, 1f, 1f);
+
+            // Cards
+            for (int i = 0; i < items.Length; i++)
+            {
+                var item = items[i];
+                Sprite icon = GetIngredientIcon(item.key);
+
+                GameObject cardObj = new GameObject($"Card_{item.key}", typeof(RectTransform), typeof(Image));
+                cardObj.transform.SetParent(colTransform, false);
+                var rt = cardObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0, 1);
+                rt.anchorMax = new Vector2(1, 1);
+                rt.pivot = new Vector2(0.5f, 1);
+                rt.sizeDelta = new Vector2(0, cardHeight);
+                rt.anchoredPosition = new Vector2(0, -(headerHeight + 4f) - (i * (cardHeight + spacingY)));
+
+                var cardImg = cardObj.GetComponent<Image>();
+                cardImg.color = new Color(0.12f, 0.16f, 0.24f, 0.92f);
+
+                // Left Icon
+                float leftOffset = 10f;
+                if (icon != null)
+                {
+                    GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                    iconObj.transform.SetParent(cardObj.transform, false);
+                    var iconRt = iconObj.GetComponent<RectTransform>();
+                    iconRt.anchorMin = new Vector2(0, 0.5f);
+                    iconRt.anchorMax = new Vector2(0, 0.5f);
+                    iconRt.pivot = new Vector2(0.5f, 0.5f);
+                    iconRt.sizeDelta = new Vector2(38, 38);
+                    iconRt.anchoredPosition = new Vector2(6, 0);
+
+                    var img = iconObj.GetComponent<Image>();
+                    img.sprite = icon;
+                    img.preserveAspect = true;
+                    leftOffset = 48f;
+                }
+
+                // Right Count Pill
+                GameObject pillObj = new GameObject("CountPill", typeof(RectTransform), typeof(Image));
+                pillObj.transform.SetParent(cardObj.transform, false);
+                var pillRt = pillObj.GetComponent<RectTransform>();
+                pillRt.anchorMin = new Vector2(1, 0.5f);
+                pillRt.anchorMax = new Vector2(1, 0.5f);
+                pillRt.pivot = new Vector2(1, 0.5f);
+                pillRt.sizeDelta = new Vector2(74, 32);
+                pillRt.anchoredPosition = new Vector2(-6, 0);
+
+                var pillImg = pillObj.GetComponent<Image>();
+                pillImg.color = new Color(0.18f, 0.24f, 0.36f, 0.90f);
+
+                GameObject countTextObj = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                countTextObj.transform.SetParent(pillObj.transform, false);
+                var countTextRt = countTextObj.GetComponent<RectTransform>();
+                countTextRt.anchorMin = Vector2.zero;
+                countTextRt.anchorMax = Vector2.one;
+                countTextRt.offsetMin = Vector2.zero;
+                countTextRt.offsetMax = Vector2.zero;
+
+                var countTmp = countTextObj.GetComponent<TextMeshProUGUI>();
+                countTmp.text = FormatStockCount(item.count);
+                countTmp.fontSize = 17;
+                countTmp.alignment = TextAlignmentOptions.Center;
+
+                // Middle Name
+                GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
+                nameObj.transform.SetParent(cardObj.transform, false);
+                var nameRt = nameObj.GetComponent<RectTransform>();
+                nameRt.anchorMin = new Vector2(0, 0);
+                nameRt.anchorMax = new Vector2(1, 1);
+                nameRt.offsetMin = new Vector2(leftOffset, 0);
+                nameRt.offsetMax = new Vector2(-82, 0);
+
+                var nameTmp = nameObj.GetComponent<TextMeshProUGUI>();
+                nameTmp.text = $"<b>{item.name}</b>";
+                nameTmp.fontSize = 17;
+                nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
+                nameTmp.color = Color.white;
+            }
+        }
+
+        private string FormatStockCount(int count)
+        {
+            string colorHex = count == 0 ? "#FF4444" : (count <= 6 ? "#F1C40F" : "#2ECC71");
+            return $"<color={colorHex}>x {count:D2}</color>";
+        }
+
+        private Sprite GetIngredientIcon(string key)
+        {
+            if (CashRegisterInventoryUI.Instance != null)
+            {
+                var icon = CashRegisterInventoryUI.Instance.GetIngredientIcon(key);
+                if (icon != null) return icon;
+            }
+
+            if (CupStation.Instance != null)
+            {
+                return key switch
+                {
+                    "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
+                    "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
+                    "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
+                    "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
+                    "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
+                    "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
+                    "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
+                    _ => null
+                };
+            }
+
+            return null;
         }
 
         private void OnBuyoutClicked()
