@@ -36,8 +36,8 @@ namespace BubbleTeaShop
         [SerializeField] private Button stationBlenderButton;
         [SerializeField] private Image stationBlenderImage;
         [SerializeField] private Image stationSieveImage;
+        [SerializeField] private Transform blenderContentsContainer;
         [SerializeField] private Sprite blenderEmptySprite;
-        [SerializeField] private Sprite blenderLoadedSprite;
         [SerializeField] private Sprite blenderBlendedSprite;
 
         [Header("Station 2: Chopping Board & Knife (Day 11+)")]
@@ -76,6 +76,7 @@ namespace BubbleTeaShop
         [SerializeField] private PrepStationState centrifugeState = PrepStationState.Empty;
         [SerializeField] private int centrifugeLoadedCount = 0;
 
+        private const int MAX_BLENDER_CAPACITY = 9;
         private int currentDayNumber = 1;
         public event Action OnPrepAreaClosed;
 
@@ -328,13 +329,19 @@ namespace BubbleTeaShop
                         HUDController.Instance?.ShowNotification("Please collect your finished Boba before loading a new batch!", 3f);
                         return;
                     }
+                    if (blenderLoadedCount >= MAX_BLENDER_CAPACITY)
+                    {
+                        HUDController.Instance?.ShowNotification($"The blender is full! (Max {MAX_BLENDER_CAPACITY} Baby Yippees). Click blender to process.", 3f);
+                        return;
+                    }
                     if (InventoryManager.Instance.ConsumeRawStock(RawIngredientType.BabyYippees, 1))
                     {
                         blenderLoadedCount++;
                         blenderState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
+                        SpawnYippeeInBlender();
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Loaded 1 Baby Yippee into the Blender! (Loaded: {blenderLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Loaded a Baby Yippee into the Blender! ({blenderLoadedCount}/{MAX_BLENDER_CAPACITY})", 2f);
                     }
                     break;
 
@@ -391,6 +398,44 @@ namespace BubbleTeaShop
             }
         }
 
+        private void SpawnYippeeInBlender()
+        {
+            if (blenderContentsContainer == null || rawBabyYippeesIcon == null) return;
+
+            GameObject yippeeObj = new GameObject($"Yippee_{blenderContentsContainer.childCount + 1}", typeof(RectTransform), typeof(Image));
+            yippeeObj.transform.SetParent(blenderContentsContainer, false);
+            var rt = yippeeObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+
+            float size = 48f;
+            rt.sizeDelta = new Vector2(size, size);
+
+            RectTransform contRt = blenderContentsContainer as RectTransform;
+            float halfW = contRt != null && contRt.rect.width > 20 ? contRt.rect.width * 0.35f : 35f;
+            float halfH = contRt != null && contRt.rect.height > 20 ? contRt.rect.height * 0.35f : 35f;
+
+            float randX = UnityEngine.Random.Range(-halfW, halfW);
+            float randY = UnityEngine.Random.Range(-halfH, halfH);
+            rt.anchoredPosition = new Vector2(randX, randY);
+            rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-45f, 45f));
+
+            var img = yippeeObj.GetComponent<Image>();
+            img.sprite = rawBabyYippeesIcon;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
+        private void ClearBlenderContents()
+        {
+            if (blenderContentsContainer == null) return;
+            for (int i = blenderContentsContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(blenderContentsContainer.GetChild(i).gameObject);
+            }
+        }
+
         private IEnumerator ProcessBlenderRoutine()
         {
             blenderState = PrepStationState.Processing;
@@ -398,27 +443,27 @@ namespace BubbleTeaShop
             PlaySound(blendSound);
             HUDController.Instance?.ShowNotification("🌀 Blending and sieving Baby Yippees...", 2.0f);
 
-            // Shaking animation
-            if (stationBlenderImage != null)
+            Vector3 origBlenderPos = stationBlenderImage != null ? stationBlenderImage.rectTransform.localPosition : Vector3.zero;
+            Vector3 origContentsPos = blenderContentsContainer != null ? blenderContentsContainer.localPosition : Vector3.zero;
+
+            float elapsed = 0f;
+            float duration = 2.0f;
+            while (elapsed < duration)
             {
-                Vector3 origPos = stationBlenderImage.rectTransform.localPosition;
-                float elapsed = 0f;
-                float duration = 2.0f;
-                while (elapsed < duration)
-                {
-                    elapsed += Time.deltaTime;
-                    float offsetX = UnityEngine.Random.Range(-4f, 4f);
-                    float offsetY = UnityEngine.Random.Range(-4f, 4f);
-                    stationBlenderImage.rectTransform.localPosition = origPos + new Vector3(offsetX, offsetY, 0);
-                    yield return null;
-                }
-                stationBlenderImage.rectTransform.localPosition = origPos;
-            }
-            else
-            {
-                yield return new WaitForSeconds(2.0f);
+                elapsed += Time.deltaTime;
+                float offsetX = UnityEngine.Random.Range(-5f, 5f);
+                float offsetY = UnityEngine.Random.Range(-5f, 5f);
+
+                if (stationBlenderImage != null) stationBlenderImage.rectTransform.localPosition = origBlenderPos + new Vector3(offsetX, offsetY, 0);
+                if (blenderContentsContainer != null) blenderContentsContainer.localPosition = origContentsPos + new Vector3(offsetX, offsetY, 0);
+
+                yield return null;
             }
 
+            if (stationBlenderImage != null) stationBlenderImage.rectTransform.localPosition = origBlenderPos;
+            if (blenderContentsContainer != null) blenderContentsContainer.localPosition = origContentsPos;
+
+            ClearBlenderContents();
             blenderState = PrepStationState.ReadyToCollect;
             UpdateBlenderUI();
             HUDController.Instance?.ShowNotification("✨ Blending & sieving complete! Click the blender to collect fresh Boba!", 3.5f);
@@ -437,6 +482,7 @@ namespace BubbleTeaShop
             PlaySound(collectRewardSound);
             HUDController.Instance?.ShowNotification($"🎉 Collected <color=#2ECC71>+{tapiocaYield} Tapioca Pearls</color> and <color=#2ECC71>+{poppingBobaYield} Popping Boba</color>!", 4f);
 
+            ClearBlenderContents();
             blenderLoadedCount = 0;
             blenderState = PrepStationState.Empty;
             UpdateUnlocksAndDisplay();
@@ -449,7 +495,7 @@ namespace BubbleTeaShop
                 Sprite target = blenderState switch
                 {
                     PrepStationState.Empty => blenderEmptySprite,
-                    PrepStationState.Loaded => (blenderLoadedSprite != null ? blenderLoadedSprite : blenderEmptySprite),
+                    PrepStationState.Loaded => blenderEmptySprite,
                     PrepStationState.Processing => (blenderBlendedSprite != null ? blenderBlendedSprite : blenderEmptySprite),
                     PrepStationState.ReadyToCollect => (blenderBlendedSprite != null ? blenderBlendedSprite : blenderEmptySprite),
                     _ => blenderEmptySprite
