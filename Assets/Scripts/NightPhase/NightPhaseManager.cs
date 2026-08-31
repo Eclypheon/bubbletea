@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -104,6 +105,7 @@ namespace BubbleTeaShop
                     UpdateTabsState(day);
                     UpdateForagingButtons(day);
                     UpdateLedger();
+                    StartPrepAreaButtonPulse();
                 };
             }
 
@@ -130,6 +132,11 @@ namespace BubbleTeaShop
         {
             bool isNight = (state == GameState.NightPhase);
             if (nightPanelRoot != null) nightPanelRoot.SetActive(isNight);
+
+            if (!isNight)
+            {
+                StopPrepAreaButtonPulse();
+            }
 
             if (isNight)
             {
@@ -377,8 +384,66 @@ namespace BubbleTeaShop
             if (ledgerTabPanel != null) ledgerTabPanel.SetActive(tabIndex == 3);
         }
 
+        private Coroutine prepAreaPulseRoutine;
+        private Vector3 prepAreaBaseScale = Vector3.one;
+        private Color prepAreaBaseColor = Color.white;
+
+        public void StartPrepAreaButtonPulse()
+        {
+            if (prepAreaButton == null || !prepAreaButton.interactable) return;
+            if (prepAreaPulseRoutine != null) StopCoroutine(prepAreaPulseRoutine);
+            prepAreaPulseRoutine = StartCoroutine(PrepAreaButtonPulseRoutine());
+        }
+
+        public void StopPrepAreaButtonPulse()
+        {
+            if (prepAreaPulseRoutine != null)
+            {
+                StopCoroutine(prepAreaPulseRoutine);
+                prepAreaPulseRoutine = null;
+            }
+            if (prepAreaButton != null)
+            {
+                prepAreaButton.transform.localScale = prepAreaBaseScale;
+                var img = prepAreaButton.GetComponent<Image>();
+                if (img != null) img.color = prepAreaBaseColor;
+            }
+        }
+
+        private IEnumerator PrepAreaButtonPulseRoutine()
+        {
+            if (prepAreaButton == null) yield break;
+
+            prepAreaBaseScale = prepAreaButton.transform.localScale;
+            var img = prepAreaButton.GetComponent<Image>();
+            if (img != null) prepAreaBaseColor = img.color;
+
+            while (prepAreaButton != null && prepAreaButton.gameObject.activeInHierarchy)
+            {
+                float t = Time.time * 3.5f;
+                float pulse = (Mathf.Sin(t) + 1f) * 0.5f; // 0 to 1
+
+                prepAreaButton.transform.localScale = prepAreaBaseScale * (1f + (pulse * 0.08f));
+
+                if (img != null)
+                {
+                    img.color = Color.Lerp(prepAreaBaseColor, new Color(1f, 0.92f, 0.55f, 1f), pulse);
+                }
+
+                yield return null;
+            }
+
+            if (prepAreaButton != null)
+            {
+                prepAreaButton.transform.localScale = prepAreaBaseScale;
+                if (img != null) img.color = prepAreaBaseColor;
+            }
+            prepAreaPulseRoutine = null;
+        }
+
         public void OpenPrepArea()
         {
+            StopPrepAreaButtonPulse();
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             if (PrepAreaViewController.Instance != null)
             {

@@ -116,6 +116,7 @@ namespace BubbleTeaShop
             HUDController.Instance?.SetSubscreenMode(true, IDLE_HINT);
 
             UpdateHarvestCounterDisplay();
+            EnsureTimerBarUI();
             SetupGrassPatches();
         }
 
@@ -363,22 +364,29 @@ namespace BubbleTeaShop
             if (timerBarRoot != null) return;
             if (bambooGrovePanelRoot == null) return;
 
-            // Create sleek timer bar near the top
-            timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image));
+            // Create sleek timer bar near the top with highest sorting order
+            timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image), typeof(Canvas), typeof(GraphicRaycaster));
             timerBarRoot.transform.SetParent(bambooGrovePanelRoot.transform, false);
+
+            var canvas = timerBarRoot.GetComponent<Canvas>();
+            if (canvas != null)
+            {
+                canvas.overrideSorting = true;
+                canvas.sortingOrder = 400;
+            }
 
             var rootRt = timerBarRoot.GetComponent<RectTransform>();
             rootRt.anchorMin = new Vector2(0.5f, 1f);
             rootRt.anchorMax = new Vector2(0.5f, 1f);
             rootRt.pivot = new Vector2(0.5f, 1f);
-            rootRt.anchoredPosition = new Vector2(0f, -50f);
-            rootRt.sizeDelta = new Vector2(340f, 22f);
+            rootRt.anchoredPosition = new Vector2(0f, -80f);
+            rootRt.sizeDelta = new Vector2(360f, 26f);
 
             var bgImg = timerBarRoot.GetComponent<Image>();
-            bgImg.color = new Color(0.10f, 0.08f, 0.06f, 0.90f);
+            bgImg.color = new Color(0.10f, 0.08f, 0.06f, 0.95f);
             bgImg.raycastTarget = false;
 
-            // Border
+            // Golden Border
             GameObject borderObj = new GameObject("Border", typeof(RectTransform), typeof(Image));
             borderObj.transform.SetParent(timerBarRoot.transform, false);
             var borderRt = borderObj.GetComponent<RectTransform>();
@@ -387,7 +395,7 @@ namespace BubbleTeaShop
             borderRt.offsetMin = new Vector2(-2, -2);
             borderRt.offsetMax = new Vector2(2, 2);
             var borderImg = borderObj.GetComponent<Image>();
-            borderImg.color = new Color(0.35f, 0.28f, 0.18f, 0.85f);
+            borderImg.color = new Color(0.85f, 0.70f, 0.25f, 0.95f);
             borderImg.raycastTarget = false;
             borderObj.transform.SetAsFirstSibling();
 
@@ -404,7 +412,7 @@ namespace BubbleTeaShop
             timerBarFill.type = Image.Type.Filled;
             timerBarFill.fillMethod = Image.FillMethod.Horizontal;
             timerBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
-            timerBarFill.color = new Color(0.18f, 0.80f, 0.44f, 1f);
+            timerBarFill.color = new Color(0.18f, 0.85f, 0.45f, 1f);
             timerBarFill.raycastTarget = false;
 
             // Label Text
@@ -418,7 +426,7 @@ namespace BubbleTeaShop
 
             timerText = labelObj.GetComponent<TextMeshProUGUI>();
             timerText.text = $"Escape in: {scurryDurationSeconds:F1}s";
-            timerText.fontSize = 13;
+            timerText.fontSize = 15;
             timerText.fontStyle = FontStyles.Bold;
             timerText.alignment = TextAlignmentOptions.Center;
             timerText.color = Color.white;
