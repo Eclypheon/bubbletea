@@ -55,8 +55,7 @@ namespace BubbleTeaShop
 
         private const string IDLE_HINT = "Kick the tree hard to dislodge any loose jellies!";
         private const string DROPPED_HINT = "Quick! Pick up the jellies before they dissolve into the floor";
-        private const string CLEARED_SUCCESS_HINT = "You have successfully collected all of the jelly blocks";
-        private const string CLEARED_CONSUMED_HINT = "The jelly blocks have been consumed by the mysterious soil";
+        private const string CLEARED_HINT = "The remaining jellies seem firmly attached, its time to return";
 
         private void Awake()
         {
@@ -650,15 +649,15 @@ namespace BubbleTeaShop
         {
             if (remainingActiveGroundBlocks <= 0 && hasKickedTree)
             {
+                HUDController.Instance?.SetStatusHint(CLEARED_HINT);
+
                 if (sessionCaughtCount == totalSpawnedCount)
                 {
                     PlaySound(completeSound);
-                    HUDController.Instance?.SetStatusHint(CLEARED_SUCCESS_HINT);
                     HUDController.Instance?.ShowNotification($"You have successfully collected all of the jelly blocks! (Harvested: <color=#2ECC71>+{sessionCaughtCount}</color>)", 4f);
                 }
                 else
                 {
-                    HUDController.Instance?.SetStatusHint(CLEARED_CONSUMED_HINT);
                     HUDController.Instance?.ShowNotification("The jelly blocks have been consumed by the mysterious soil.", 4f);
                 }
             }
