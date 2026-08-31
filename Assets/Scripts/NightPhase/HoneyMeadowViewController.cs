@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace BubbleTeaShop
 {
-    public class HoneyMeadowViewController : MonoBehaviour
+    public class HoneyMeadowViewController : MonoBehaviour, IPointerClickHandler
     {
         public static HoneyMeadowViewController Instance { get; private set; }
 
@@ -66,6 +67,7 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
+            ResolveComponentReferences();
             EnsureFallbackAssets();
 
             if (honeyMeadowPanelRoot == null)
@@ -73,17 +75,93 @@ namespace BubbleTeaShop
                 EnsureMeadowPanelHierarchy();
             }
 
-            if (returnToNightHubButton != null)
-            {
-                returnToNightHubButton.onClick.AddListener(CloseHoneyMeadowView);
-                returnToNightHubButton.gameObject.SetActive(false);
-            }
+            WireTreeAndButtonListeners();
 
             if (honeyMeadowPanelRoot != null)
             {
                 var rt = honeyMeadowPanelRoot.GetComponent<RectTransform>();
                 if (rt != null) rootPanelBaseAnchoredPos = rt.anchoredPosition;
                 honeyMeadowPanelRoot.SetActive(false);
+            }
+        }
+
+        private void Start()
+        {
+            WireTreeAndButtonListeners();
+        }
+
+        private void ResolveComponentReferences()
+        {
+            if (honeyMeadowPanelRoot == null) honeyMeadowPanelRoot = gameObject;
+            if (backgroundImage == null && honeyMeadowPanelRoot != null)
+            {
+                backgroundImage = honeyMeadowPanelRoot.GetComponent<Image>();
+            }
+            if (jellyTreeContainer == null)
+            {
+                Transform t = transform.Find("JellyTree");
+                if (t != null) jellyTreeContainer = t;
+            }
+            if (jellyTreeImage == null && jellyTreeContainer != null)
+            {
+                jellyTreeImage = jellyTreeContainer.GetComponent<Image>();
+            }
+            if (harvestCounterText == null && honeyMeadowPanelRoot != null)
+            {
+                harvestCounterText = honeyMeadowPanelRoot.GetComponentInChildren<TextMeshProUGUI>();
+            }
+            if (returnToNightHubButton == null && honeyMeadowPanelRoot != null)
+            {
+                var btns = honeyMeadowPanelRoot.GetComponentsInChildren<Button>(true);
+                foreach (var b in btns)
+                {
+                    if (b.gameObject.name.ToLower().Contains("return") || b.gameObject.name.ToLower().Contains("hub"))
+                    {
+                        returnToNightHubButton = b;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void WireTreeAndButtonListeners()
+        {
+            ResolveComponentReferences();
+
+            GameObject treeTarget = null;
+            if (jellyTreeContainer != null) treeTarget = jellyTreeContainer.gameObject;
+            else if (jellyTreeImage != null) treeTarget = jellyTreeImage.gameObject;
+
+            if (treeTarget != null)
+            {
+                var img = treeTarget.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.raycastTarget = true;
+                    if (jellyTreeSprite != null && img.sprite == null) img.sprite = jellyTreeSprite;
+                }
+
+                var btn = treeTarget.GetComponent<Button>();
+                if (btn == null) btn = treeTarget.AddComponent<Button>();
+                btn.transition = Selectable.Transition.None;
+                btn.interactable = true;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(OnTreeClicked);
+            }
+
+            if (returnToNightHubButton != null)
+            {
+                returnToNightHubButton.onClick.RemoveAllListeners();
+                returnToNightHubButton.onClick.AddListener(CloseHoneyMeadowView);
+            }
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            // If the player clicks anywhere in the panel before kicking the tree, trigger tree kick!
+            if (isMeadowOpen && !hasKickedTree)
+            {
+                OnTreeClicked();
             }
         }
 
@@ -168,6 +246,7 @@ namespace BubbleTeaShop
                 backgroundImage.sprite = honeyMeadowBackgroundSprite;
             }
             backgroundImage.color = Color.white;
+            backgroundImage.raycastTarget = true;
 
             honeyMeadowPanelRoot = rootObj;
             rootPanelBaseAnchoredPos = rootRt.anchoredPosition;
@@ -232,6 +311,7 @@ namespace BubbleTeaShop
                 jellyTreeImage.sprite = jellyTreeSprite;
             }
             jellyTreeImage.preserveAspect = true;
+            jellyTreeImage.raycastTarget = true;
             jellyTreeContainer = treeObj.transform;
 
             var treeBtn = treeObj.GetComponent<Button>();
@@ -247,12 +327,15 @@ namespace BubbleTeaShop
             remainingActiveGroundBlocks = 0;
             hasKickedTree = false;
 
+            ResolveComponentReferences();
             EnsureFallbackAssets();
 
             if (honeyMeadowPanelRoot == null)
             {
                 EnsureMeadowPanelHierarchy();
             }
+
+            WireTreeAndButtonListeners();
 
             if (honeyMeadowPanelRoot != null)
             {
@@ -275,6 +358,7 @@ namespace BubbleTeaShop
             if (jellyTreeImage != null && jellyTreeSprite != null)
             {
                 jellyTreeImage.sprite = jellyTreeSprite;
+                jellyTreeImage.raycastTarget = true;
             }
 
             // Tree stays completely static at the start
@@ -329,7 +413,7 @@ namespace BubbleTeaShop
         // =========================================================================
         // KICK TREE & VIOLENT SCREEN SHAKE
         // =========================================================================
-        private void OnTreeClicked()
+        public void OnTreeClicked()
         {
             if (hasKickedTree || !isMeadowOpen) return;
 
@@ -443,6 +527,7 @@ namespace BubbleTeaShop
                     img.sprite = rawJellyBlockSprite;
                 }
                 img.preserveAspect = true;
+                img.raycastTarget = true;
 
                 var btn = blockObj.GetComponent<Button>();
                 btn.transition = Selectable.Transition.None;
@@ -512,7 +597,6 @@ namespace BubbleTeaShop
                 rt.localRotation = Quaternion.identity;
                 float absorbDuration = Mathf.Max(0.2f, soilAbsorptionSeconds);
                 elapsed = 0f;
-                Vector3 initialScale = Vector3.one;
 
                 while (elapsed < absorbDuration && rt != null && rt.gameObject.activeInHierarchy)
                 {
