@@ -194,6 +194,8 @@ namespace BubbleTeaShop
         {
             if (topRawCardsContainer == null || InventoryManager.Instance == null) return;
 
+            topRawCardsContainer.SetAsLastSibling();
+
             // Clear existing cards
             for (int i = topRawCardsContainer.childCount - 1; i >= 0; i--)
             {
@@ -247,6 +249,7 @@ namespace BubbleTeaShop
 
                 var cardImg = cardObj.GetComponent<Image>();
                 cardImg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
+                cardImg.raycastTarget = true;
 
                 // Left: Raw Ingredient Icon
                 float leftOffset = 12f;
@@ -265,6 +268,7 @@ namespace BubbleTeaShop
                     var img = iconObj.GetComponent<Image>();
                     img.sprite = item.icon;
                     img.preserveAspect = true;
+                    img.raycastTarget = false;
                     leftOffset = iconSize + 20f;
                 }
 
@@ -280,6 +284,7 @@ namespace BubbleTeaShop
 
                 var pillImg = pillObj.GetComponent<Image>();
                 pillImg.color = new Color(0.18f, 0.24f, 0.36f, 0.90f);
+                pillImg.raycastTarget = false;
 
                 GameObject countTextObj = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
                 countTextObj.transform.SetParent(pillObj.transform, false);
@@ -294,6 +299,7 @@ namespace BubbleTeaShop
                 countTmp.fontSize = 18;
                 countTmp.alignment = TextAlignmentOptions.Center;
                 countTmp.enableWordWrapping = false;
+                countTmp.raycastTarget = false;
 
                 // Middle: Item Name and Action Subtitle
                 GameObject textObj = new GameObject("TextInfo", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -310,6 +316,7 @@ namespace BubbleTeaShop
                 tmp.alignment = TextAlignmentOptions.MidlineLeft;
                 tmp.color = Color.white;
                 tmp.enableWordWrapping = false;
+                tmp.raycastTarget = false;
 
                 // Button Click -> Deposit Raw Ingredient
                 var btn = cardObj.GetComponent<Button>();
@@ -615,7 +622,7 @@ namespace BubbleTeaShop
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
 
-            float blockSize = 56f;
+            float blockSize = 68f;
             rt.sizeDelta = new Vector2(blockSize, blockSize);
 
             RectTransform boardRt = (stationChoppingImage != null ? stationChoppingImage.rectTransform : parent as RectTransform);
@@ -656,7 +663,7 @@ namespace BubbleTeaShop
             float boardW = boardRt != null && boardRt.rect.width > 20 ? boardRt.rect.width : 220f;
             float boardH = boardRt != null && boardRt.rect.height > 20 ? boardRt.rect.height : 140f;
 
-            float cubeSize = 42f;
+            float cubeSize = 50f;
 
             for (int i = 0; i < grassCount; i++)
             {
@@ -669,7 +676,7 @@ namespace BubbleTeaShop
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.sizeDelta = new Vector2(cubeSize, cubeSize);
 
-                float stepX = (i - (grassCount - 1) * 0.5f) * 36f;
+                float stepX = (i - (grassCount - 1) * 0.5f) * 40f;
                 float posX = -boardW * 0.22f + stepX;
                 float posY = boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
                 rt.anchoredPosition = new Vector2(posX, posY);
@@ -692,7 +699,7 @@ namespace BubbleTeaShop
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.sizeDelta = new Vector2(cubeSize, cubeSize);
 
-                float stepX = (i - (cocoCount - 1) * 0.5f) * 36f;
+                float stepX = (i - (cocoCount - 1) * 0.5f) * 40f;
                 float posX = boardW * 0.22f + stepX;
                 float posY = -boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
                 rt.anchoredPosition = new Vector2(posX, posY);
@@ -727,16 +734,44 @@ namespace BubbleTeaShop
             if (stationKnifeImage != null)
             {
                 Vector3 origPos = stationKnifeImage.rectTransform.localPosition;
+                Quaternion origRot = stationKnifeImage.rectTransform.localRotation;
                 float elapsed = 0f;
                 float duration = 1.8f;
+                float sweepDistance = 140f;
+
                 while (elapsed < duration)
                 {
                     elapsed += Time.deltaTime;
-                    float chopOffset = Mathf.Sin(elapsed * 18f) * 12f;
-                    stationKnifeImage.rectTransform.localPosition = origPos + new Vector3(0, chopOffset, 0);
+                    float progress = elapsed / duration;
+
+                    float currentX;
+                    float chopY;
+                    float tiltZ;
+
+                    if (progress < 0.75f)
+                    {
+                        // Active chopping sweep: right to left across the cutting board
+                        float cutProgress = progress / 0.75f;
+                        currentX = origPos.x - (cutProgress * sweepDistance);
+                        chopY = Mathf.Abs(Mathf.Sin(cutProgress * Mathf.PI * 6f)) * 26f;
+                        tiltZ = Mathf.Sin(cutProgress * Mathf.PI * 6f) * 12f;
+                    }
+                    else
+                    {
+                        // Return smoothly back to the right
+                        float returnProgress = (progress - 0.75f) / 0.25f;
+                        currentX = Mathf.Lerp(origPos.x - sweepDistance, origPos.x, returnProgress);
+                        chopY = Mathf.Lerp(20f, 0f, returnProgress);
+                        tiltZ = Mathf.Lerp(10f, 0f, returnProgress);
+                    }
+
+                    stationKnifeImage.rectTransform.localPosition = new Vector3(currentX, origPos.y + chopY, origPos.z);
+                    stationKnifeImage.rectTransform.localRotation = Quaternion.Euler(0, 0, tiltZ);
                     yield return null;
                 }
+
                 stationKnifeImage.rectTransform.localPosition = origPos;
+                stationKnifeImage.rectTransform.localRotation = origRot;
             }
             else
             {

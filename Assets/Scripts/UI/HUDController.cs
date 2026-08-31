@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace BubbleTeaShop
 {
@@ -24,11 +25,13 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+            DisableRaycasts();
             BringToFront();
         }
 
         private void Start()
         {
+            DisableRaycasts();
             BringToFront();
             if (EconomyManager.Instance != null)
             {
@@ -92,6 +95,17 @@ namespace BubbleTeaShop
 
         private bool isSubscreenActive = false;
         private string defaultSubscreenHint = "";
+
+        public void DisableRaycasts()
+        {
+            var img = GetComponent<Image>();
+            if (img != null) img.raycastTarget = false;
+            if (statusHintText != null) statusHintText.raycastTarget = false;
+            if (dayText != null) dayText.raycastTarget = false;
+            if (cashText != null) cashText.raycastTarget = false;
+            if (rentTimerText != null) rentTimerText.raycastTarget = false;
+            if (customerCountText != null) customerCountText.raycastTarget = false;
+        }
 
         public void BringToFront()
         {
