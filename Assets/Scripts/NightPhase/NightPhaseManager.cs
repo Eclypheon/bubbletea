@@ -833,7 +833,7 @@ namespace BubbleTeaShop
             headerRt.anchorMin = new Vector2(0.5f, 1f);
             headerRt.anchorMax = new Vector2(0.5f, 1f);
             headerRt.pivot = new Vector2(0.5f, 1f);
-            headerRt.anchoredPosition = new Vector2(0, 50f);
+            headerRt.anchoredPosition = new Vector2(0, -6f);
             headerRt.sizeDelta = new Vector2(980f, 32f);
 
             upgradesWalletText = headerObj.GetComponent<TextMeshProUGUI>();
@@ -847,7 +847,7 @@ namespace BubbleTeaShop
             scrollRt.anchorMin = new Vector2(0.5f, 0.5f);
             scrollRt.anchorMax = new Vector2(0.5f, 0.5f);
             scrollRt.pivot = new Vector2(0.5f, 0.5f);
-            scrollRt.anchoredPosition = new Vector2(0, -10f);
+            scrollRt.anchoredPosition = new Vector2(0, -25f);
             scrollRt.sizeDelta = new Vector2(1000f, 440f);
 
             var scrollImg = scrollObj.GetComponent<Image>();
@@ -869,9 +869,9 @@ namespace BubbleTeaShop
             GameObject contentObj = new GameObject("Content", typeof(RectTransform));
             contentObj.transform.SetParent(viewportObj.transform, false);
             var contentRt = contentObj.GetComponent<RectTransform>();
-            contentRt.anchorMin = new Vector2(0, 1);
-            contentRt.anchorMax = new Vector2(1, 1);
-            contentRt.pivot = new Vector2(0.5f, 1);
+            contentRt.anchorMin = new Vector2(0.5f, 1f);
+            contentRt.anchorMax = new Vector2(0.5f, 1f);
+            contentRt.pivot = new Vector2(0.5f, 1f);
             contentRt.anchoredPosition = Vector2.zero;
 
             var scrollRect = scrollObj.GetComponent<ScrollRect>();
@@ -912,18 +912,19 @@ namespace BubbleTeaShop
 
             float totalWidth = 980f;
             float paddingX = 10f;
-            float paddingY = 10f;
+            float paddingY = 12f;
             float spacingX = 20f;
             float spacingY = 14f;
 
             float cardWidth = (totalWidth - (paddingX * 2) - spacingX) / cols; // ~470f
-            float cardHeight = 112f;
+            float cardHeight = 120f;
 
             float totalHeight = (paddingY * 2) + (totalRows * cardHeight) + ((totalRows - 1) * spacingY);
             RectTransform contentRt = upgradesScrollContainer as RectTransform;
             if (contentRt != null)
             {
                 contentRt.sizeDelta = new Vector2(totalWidth, totalHeight);
+                contentRt.anchoredPosition = Vector2.zero;
             }
 
             float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
@@ -943,6 +944,9 @@ namespace BubbleTeaShop
                 GameObject cardObj = new GameObject($"Card_{u.type}", typeof(RectTransform), typeof(Image));
                 cardObj.transform.SetParent(upgradesScrollContainer, false);
                 var rt = cardObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 1f);
+                rt.anchorMax = new Vector2(0.5f, 1f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.sizeDelta = new Vector2(cardWidth, cardHeight);
                 rt.anchoredPosition = pos;
 
@@ -957,7 +961,7 @@ namespace BubbleTeaShop
                 buyRt.anchorMin = new Vector2(1, 0.5f);
                 buyRt.anchorMax = new Vector2(1, 0.5f);
                 buyRt.pivot = new Vector2(1, 0.5f);
-                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 16f);
+                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 18f);
                 buyRt.anchoredPosition = new Vector2(-10, 0);
 
                 var buyImg = buyBtnObj.GetComponent<Image>();
@@ -983,7 +987,7 @@ namespace BubbleTeaShop
                 buyTextRt.offsetMax = new Vector2(-4, -2);
 
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
-                buyTmp.fontSize = 19f;
+                buyTmp.fontSize = 18f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
                 buyTmp.enableWordWrapping = false;
                 buyTmp.lineSpacing = -8f;
@@ -1007,7 +1011,7 @@ namespace BubbleTeaShop
                 infoRt.offsetMax = new Vector2(-(buyButtonWidth + 18f), -6f);
 
                 var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
-                infoTmp.fontSize = 17f;
+                infoTmp.fontSize = 16f;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 infoTmp.enableWordWrapping = true;
                 infoTmp.lineSpacing = -2f;
