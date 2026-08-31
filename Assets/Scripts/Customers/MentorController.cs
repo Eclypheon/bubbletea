@@ -13,14 +13,23 @@ namespace BubbleTeaShop
         [SerializeField] private bool hasCompletedDay1Briefing = false;
         [SerializeField] private bool hasCompletedDay2Briefing = false;
         [SerializeField] private bool hasCompletedDay5Briefing = false;
+        [SerializeField] private bool hasCompletedDay8Briefing = false;
+        [SerializeField] private bool hasCompletedDay11Briefing = false;
+        [SerializeField] private bool hasCompletedDay18Briefing = false;
 
         public bool HasCompletedDay1Briefing => hasCompletedDay1Briefing;
         public bool HasCompletedDay2Briefing => hasCompletedDay2Briefing;
         public bool HasCompletedDay5Briefing => hasCompletedDay5Briefing;
+        public bool HasCompletedDay8Briefing => hasCompletedDay8Briefing;
+        public bool HasCompletedDay11Briefing => hasCompletedDay11Briefing;
+        public bool HasCompletedDay18Briefing => hasCompletedDay18Briefing;
 
         public event Action OnDay1BriefingCompleted;
         public event Action OnDay2BriefingCompleted;
         public event Action OnDay5BriefingCompleted;
+        public event Action OnDay8BriefingCompleted;
+        public event Action OnDay11BriefingCompleted;
+        public event Action OnDay18BriefingCompleted;
 
         private void Awake()
         {
@@ -155,6 +164,122 @@ namespace BubbleTeaShop
             else
             {
                 OnDay5BriefingCompleted?.Invoke();
+                onFinished?.Invoke();
+            }
+        }
+
+        public void TriggerDay8NightBriefing(CustomerController customerController, Action onFinished = null)
+        {
+            if (hasCompletedDay8Briefing)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            hasCompletedDay8Briefing = true;
+
+            string[] briefingLines = new string[]
+            {
+                "Ahh I see you've met our landlady Chubi, quite a character isn't she?",
+                "...Anyways, if you've made enough cash, you can actually start to purchase some upgrades for your shop!",
+                "You can inspect available upgrades to speed up dispensing, enhance customer patience, or boost your earnings.",
+                "Keep up the great work, I'm sure you'll be able to buy over this shop some day!",
+                "Close the shutter whenever you're ready to start the night phase!"
+            };
+
+            if (customerController != null)
+            {
+                customerController.SpawnMentorSequence(
+                    briefingLines,
+                    3.5f,
+                    mentorSprite,
+                    () =>
+                    {
+                        OnDay8BriefingCompleted?.Invoke();
+                        onFinished?.Invoke();
+                    }
+                );
+            }
+            else
+            {
+                OnDay8BriefingCompleted?.Invoke();
+                onFinished?.Invoke();
+            }
+        }
+
+        public void TriggerDay11NightBriefing(CustomerController customerController, Action onFinished = null)
+        {
+            if (hasCompletedDay11Briefing)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            hasCompletedDay11Briefing = true;
+
+            string[] briefingLines = new string[]
+            {
+                "You're doing fantastic! Store sales and reputation are climbing steadily.",
+                "Tonight, I'm passing you a Chopping Board and Knife for your Kitchen Prep Area!",
+                "With these tools, you can slice up raw Jelly Blocks into fresh toppings like Coconut Jelly, Grass Jelly, and Lychee Jelly.",
+                "Prepping a diverse topping selection helps satisfy all your customers' unique orders!",
+                "Close the shutter whenever you're ready to head into the night!"
+            };
+
+            if (customerController != null)
+            {
+                customerController.SpawnMentorSequence(
+                    briefingLines,
+                    3.5f,
+                    mentorSprite,
+                    () =>
+                    {
+                        OnDay11BriefingCompleted?.Invoke();
+                        onFinished?.Invoke();
+                    }
+                );
+            }
+            else
+            {
+                OnDay11BriefingCompleted?.Invoke();
+                onFinished?.Invoke();
+            }
+        }
+
+        public void TriggerDay18NightBriefing(CustomerController customerController, Action onFinished = null)
+        {
+            if (hasCompletedDay18Briefing)
+            {
+                onFinished?.Invoke();
+                return;
+            }
+
+            hasCompletedDay18Briefing = true;
+
+            string[] briefingLines = new string[]
+            {
+                "Incredible work! You've really mastered the rhythm of running this bubble tea shop.",
+                "Tonight, I'm delivering our highest-grade preparation equipment: a collection Bucket and high-speed Centrifuge!",
+                "You can use the centrifuge in the Kitchen Prep Area to spin and refine raw Golden Dew into gourmet, high-value specialty toppings.",
+                "We're getting closer to buying out the shop for good! Close the shutter whenever you're ready to start the night!"
+            };
+
+            if (customerController != null)
+            {
+                customerController.SpawnMentorSequence(
+                    briefingLines,
+                    3.5f,
+                    mentorSprite,
+                    () =>
+                    {
+                        OnDay18BriefingCompleted?.Invoke();
+                        onFinished?.Invoke();
+                    }
+                );
+            }
+            else
+            {
+                OnDay18BriefingCompleted?.Invoke();
                 onFinished?.Invoke();
             }
         }

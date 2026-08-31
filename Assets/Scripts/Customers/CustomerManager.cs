@@ -216,6 +216,21 @@ namespace BubbleTeaShop
                     if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
                     mentorArrivalRoutine = StartCoroutine(DelayedDay5MentorArrivalRoutine(0.6f));
                 }
+                else if (currentDay == 8 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay8Briefing && customerController != null)
+                {
+                    if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
+                    mentorArrivalRoutine = StartCoroutine(DelayedDay8MentorArrivalRoutine(0.6f));
+                }
+                else if (currentDay == 11 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay11Briefing && customerController != null)
+                {
+                    if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
+                    mentorArrivalRoutine = StartCoroutine(DelayedDay11MentorArrivalRoutine(0.6f));
+                }
+                else if (currentDay == 18 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay18Briefing && customerController != null)
+                {
+                    if (mentorArrivalRoutine != null) StopCoroutine(mentorArrivalRoutine);
+                    mentorArrivalRoutine = StartCoroutine(DelayedDay18MentorArrivalRoutine(0.6f));
+                }
                 else if (isRentDay && !rentEncounterTriggeredToday && customerController != null)
                 {
                     rentEncounterTriggeredToday = true;
@@ -248,6 +263,36 @@ namespace BubbleTeaShop
         {
             yield return new WaitForSeconds(delay);
             MentorController.Instance?.TriggerDay5NightBriefing(customerController, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
+        }
+
+        private IEnumerator DelayedDay8MentorArrivalRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            MentorController.Instance?.TriggerDay8NightBriefing(customerController, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
+        }
+
+        private IEnumerator DelayedDay11MentorArrivalRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            MentorController.Instance?.TriggerDay11NightBriefing(customerController, () =>
+            {
+                GameManager.Instance?.SetState(GameState.ShopClosing);
+                OnAllDailyCustomersFinished?.Invoke();
+            });
+        }
+
+        private IEnumerator DelayedDay18MentorArrivalRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            MentorController.Instance?.TriggerDay18NightBriefing(customerController, () =>
             {
                 GameManager.Instance?.SetState(GameState.ShopClosing);
                 OnAllDailyCustomersFinished?.Invoke();

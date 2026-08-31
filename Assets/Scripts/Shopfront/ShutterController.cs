@@ -128,11 +128,18 @@ namespace BubbleTeaShop
 
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
-                // 2. Block closing on Day 2 if Day 2 mentor briefing hasn't arrived yet
-                if (currentDay == 2 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay2Briefing)
+                // 2. Block closing on briefing days if the Mentor briefing hasn't arrived yet
+                if (MentorController.Instance != null)
                 {
-                    HUDController.Instance?.ShowNotification("Your Mentor is arriving to speak with you before closing!");
-                    return;
+                    if ((currentDay == 2 && !MentorController.Instance.HasCompletedDay2Briefing) ||
+                        (currentDay == 5 && !MentorController.Instance.HasCompletedDay5Briefing) ||
+                        (currentDay == 8 && !MentorController.Instance.HasCompletedDay8Briefing) ||
+                        (currentDay == 11 && !MentorController.Instance.HasCompletedDay11Briefing) ||
+                        (currentDay == 18 && !MentorController.Instance.HasCompletedDay18Briefing))
+                    {
+                        HUDController.Instance?.ShowNotification("Your Mentor is arriving to speak with you before closing!");
+                        return;
+                    }
                 }
 
                 // 3. Block closing if it is a rent day and the rent encounter hasn't settled yet
