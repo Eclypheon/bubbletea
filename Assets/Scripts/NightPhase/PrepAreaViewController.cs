@@ -737,7 +737,7 @@ namespace BubbleTeaShop
                 Quaternion origRot = stationKnifeImage.rectTransform.localRotation;
                 float elapsed = 0f;
                 float duration = 1.8f;
-                float sweepDistance = 140f;
+                float sweepDistance = 350f;
 
                 while (elapsed < duration)
                 {
@@ -753,8 +753,8 @@ namespace BubbleTeaShop
                         // Active chopping sweep: right to left across the cutting board
                         float cutProgress = progress / 0.75f;
                         currentX = origPos.x - (cutProgress * sweepDistance);
-                        chopY = Mathf.Abs(Mathf.Sin(cutProgress * Mathf.PI * 6f)) * 26f;
-                        tiltZ = Mathf.Sin(cutProgress * Mathf.PI * 6f) * 12f;
+                        chopY = Mathf.Abs(Mathf.Sin(cutProgress * Mathf.PI * 8f)) * 28f;
+                        tiltZ = Mathf.Sin(cutProgress * Mathf.PI * 8f) * 14f;
                     }
                     else
                     {
