@@ -375,6 +375,8 @@ namespace BubbleTeaShop
                 {
                     timerBarRoot.transform.SetParent(targetParent, false);
                 }
+                var existingRt = timerBarRoot.GetComponent<RectTransform>();
+                if (existingRt != null) existingRt.anchoredPosition = new Vector2(0f, 370f);
                 return;
             }
 
@@ -386,7 +388,7 @@ namespace BubbleTeaShop
             rootRt.anchorMin = new Vector2(0.5f, 0.5f);
             rootRt.anchorMax = new Vector2(0.5f, 0.5f);
             rootRt.pivot = new Vector2(0.5f, 0.5f);
-            rootRt.anchoredPosition = new Vector2(0f, 220f); // Prominently displayed in upper-center above grass patches
+            rootRt.anchoredPosition = new Vector2(0f, 370f); // Shifted up by 150px to sit cleanly at top
             rootRt.sizeDelta = new Vector2(360f, 28f);
 
             var bgImg = timerBarRoot.GetComponent<Image>();
