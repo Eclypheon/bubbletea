@@ -19,6 +19,38 @@ namespace BubbleTeaShop
         [SerializeField] private bool hasPremiumMilkDispenser = false;
         public bool HasPremiumMilkDispenser => hasPremiumMilkDispenser;
 
+        [Header("Live Stock (Editable in Inspector at Runtime)")]
+        [Header("Raw Foraged Ingredients")]
+        [SerializeField] private int rawBabyYippees = 0;
+        [SerializeField] private int rawJellyBlocks = 0;
+        [SerializeField] private int rawGoldenDew = 0;
+
+        [Header("Toppings")]
+        [SerializeField] private int toppingTapiocaPearls = 0;
+        [SerializeField] private int toppingPoppingBoba = 0;
+        [SerializeField] private int toppingGrassJelly = 0;
+        [SerializeField] private int toppingEggPudding = 0;
+        [SerializeField] private int toppingCoconutJelly = 0;
+        [SerializeField] private int toppingCheeseFoam = 0;
+        [SerializeField] private int toppingGoldenHoneyPearls = 0;
+
+        [Header("Milks")]
+        [SerializeField] private int milkFreshMilk = 0;
+        [SerializeField] private int milkOatMilk = 0;
+        [SerializeField] private int milkCoconutMilk = 0;
+        [SerializeField] private int milkCondensedMilk = 0;
+
+        [Header("Base Supplies & Teas")]
+        [SerializeField] private int cups = 0;
+        [SerializeField] private int sugar = 0;
+        [SerializeField] private int ice = 0;
+        [SerializeField] private int teaBlack = 0;
+        [SerializeField] private int teaGreen = 0;
+        [SerializeField] private int teaOolong = 0;
+        [SerializeField] private int teaThai = 0;
+        [SerializeField] private int teaTaro = 0;
+        [SerializeField] private int teaWildMountain = 0;
+
         private Dictionary<string, int> stock = new Dictionary<string, int>();
 
         public event Action OnInventoryUpdated;
@@ -32,6 +64,103 @@ namespace BubbleTeaShop
             }
             Instance = this;
             InitializeStock();
+        }
+
+        private void Update()
+        {
+            CheckInspectorModifications();
+        }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying && stock.Count > 0)
+            {
+                CheckInspectorModifications();
+            }
+        }
+
+        private void SyncDictionaryToInspector()
+        {
+            rawBabyYippees = GetStock($"Raw_{RawIngredientType.BabyYippees}");
+            rawJellyBlocks = GetStock($"Raw_{RawIngredientType.JellyBlocks}");
+            rawGoldenDew = GetStock($"Raw_{RawIngredientType.GoldenDew}");
+
+            toppingTapiocaPearls = GetStock($"Topping_{ToppingType.TapiocaPearls}");
+            toppingPoppingBoba = GetStock($"Topping_{ToppingType.PoppingBoba}");
+            toppingGrassJelly = GetStock($"Topping_{ToppingType.GrassJelly}");
+            toppingEggPudding = GetStock($"Topping_{ToppingType.EggPudding}");
+            toppingCoconutJelly = GetStock($"Topping_{ToppingType.CoconutJelly}");
+            toppingCheeseFoam = GetStock($"Topping_{ToppingType.CheeseFoam}");
+            toppingGoldenHoneyPearls = GetStock($"Topping_{ToppingType.GoldenHoneyPearls}");
+
+            milkFreshMilk = GetStock($"Milk_{MilkType.FreshMilk}");
+            milkOatMilk = GetStock($"Milk_{MilkType.OatMilk}");
+            milkCoconutMilk = GetStock($"Milk_{MilkType.CoconutMilk}");
+            milkCondensedMilk = GetStock($"Milk_{MilkType.CondensedMilk}");
+
+            cups = GetStock("Cup");
+            sugar = GetStock("Sugar");
+            ice = GetStock("Ice");
+
+            teaBlack = GetStock($"Tea_{TeaBase.BlackTea}");
+            teaGreen = GetStock($"Tea_{TeaBase.GreenTea}");
+            teaOolong = GetStock($"Tea_{TeaBase.OolongTea}");
+            teaThai = GetStock($"Tea_{TeaBase.ThaiTea}");
+            teaTaro = GetStock($"Tea_{TeaBase.TaroTea}");
+            teaWildMountain = GetStock($"Tea_{TeaBase.WildMountainTea}");
+        }
+
+        private void CheckInspectorModifications()
+        {
+            if (stock.Count == 0) return;
+
+            bool changed = false;
+
+            changed |= UpdateKeyIfDifferent($"Raw_{RawIngredientType.BabyYippees}", rawBabyYippees);
+            changed |= UpdateKeyIfDifferent($"Raw_{RawIngredientType.JellyBlocks}", rawJellyBlocks);
+            changed |= UpdateKeyIfDifferent($"Raw_{RawIngredientType.GoldenDew}", rawGoldenDew);
+
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.TapiocaPearls}", toppingTapiocaPearls);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.PoppingBoba}", toppingPoppingBoba);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.GrassJelly}", toppingGrassJelly);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.EggPudding}", toppingEggPudding);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.CoconutJelly}", toppingCoconutJelly);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.CheeseFoam}", toppingCheeseFoam);
+            changed |= UpdateKeyIfDifferent($"Topping_{ToppingType.GoldenHoneyPearls}", toppingGoldenHoneyPearls);
+
+            changed |= UpdateKeyIfDifferent($"Milk_{MilkType.FreshMilk}", milkFreshMilk);
+            changed |= UpdateKeyIfDifferent($"Milk_{MilkType.OatMilk}", milkOatMilk);
+            changed |= UpdateKeyIfDifferent($"Milk_{MilkType.CoconutMilk}", milkCoconutMilk);
+            changed |= UpdateKeyIfDifferent($"Milk_{MilkType.CondensedMilk}", milkCondensedMilk);
+
+            changed |= UpdateKeyIfDifferent("Cup", cups);
+            changed |= UpdateKeyIfDifferent("Sugar", sugar);
+            changed |= UpdateKeyIfDifferent("Ice", ice);
+
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.BlackTea}", teaBlack);
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.GreenTea}", teaGreen);
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.OolongTea}", teaOolong);
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.ThaiTea}", teaThai);
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.TaroTea}", teaTaro);
+            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.WildMountainTea}", teaWildMountain);
+
+            if (changed)
+            {
+                OnInventoryUpdated?.Invoke();
+                PrepAreaViewController.Instance?.UpdateUnlocksAndDisplay();
+                CashRegisterInventoryUI.Instance?.UpdateInventoryDisplay();
+            }
+        }
+
+        private bool UpdateKeyIfDifferent(string key, int inspectorValue)
+        {
+            int current = GetStock(key);
+            if (current != inspectorValue)
+            {
+                stock[key] = Mathf.Max(0, inspectorValue);
+                return true;
+            }
+            return false;
         }
 
         public void SetupDay1StarterStock()
@@ -70,6 +199,7 @@ namespace BubbleTeaShop
             stock[$"Raw_{RawIngredientType.GoldenDew}"] = 0;
 
             hasPremiumMilkDispenser = false;
+            SyncDictionaryToInspector();
             OnInventoryUpdated?.Invoke();
         }
 
@@ -109,6 +239,7 @@ namespace BubbleTeaShop
             if (current >= quantity)
             {
                 stock[key] = current - quantity;
+                SyncDictionaryToInspector();
                 OnInventoryUpdated?.Invoke();
                 return true;
             }
@@ -120,6 +251,7 @@ namespace BubbleTeaShop
             if (quantity <= 0) return;
             if (!stock.ContainsKey(key)) stock[key] = 0;
             stock[key] += quantity;
+            SyncDictionaryToInspector();
             OnInventoryUpdated?.Invoke();
         }
 
