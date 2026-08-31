@@ -88,19 +88,19 @@ namespace BubbleTeaShop
             // Week 1 (Days 2-7)
             allMarketItems.Add(new MarketItem { stockKey = "Milk_FreshMilk", displayName = "Fresh Whole Milk", price = 6.00f, bundleQuantity = 8 });
             allMarketItems.Add(new MarketItem { stockKey = "Milk_OatMilk", displayName = "Barista Oat Milk", price = 9.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_TapiocaPearls", displayName = "Raw Tapioca Pearls", price = 6.50f, bundleQuantity = 10 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_PoppingBoba", displayName = "Mango Popping Boba", price = 8.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_GrassJelly", displayName = "Herbal Grass Jelly", price = 6.50f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_TapiocaPearls", displayName = "Raw Tapioca Pearls", price = 5.60f, bundleQuantity = 10 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_PoppingBoba", displayName = "Mango Popping Boba", price = 7.00f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_GrassJelly", displayName = "Herbal Grass Jelly", price = 9.00f, bundleQuantity = 8 });
 
             // Week 2 (Days 8-14)
-            allMarketItems.Add(new MarketItem { stockKey = "Milk_CoconutMilk", displayName = "Organic Coconut Milk", price = 10.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_EggPudding", displayName = "Silky Egg Custard", price = 9.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_CoconutJelly", displayName = "Sweet Coconut Jelly", price = 8.00f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Milk_CoconutMilk", displayName = "Organic Coconut Milk", price = 10.80f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_CoconutJelly", displayName = "Sweet Coconut Jelly", price = 11.50f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_EggPudding", displayName = "Silky Egg Custard", price = 14.50f, bundleQuantity = 8 });
 
             // Week 3 (Days 15-21)
-            allMarketItems.Add(new MarketItem { stockKey = "Milk_CondensedMilk", displayName = "Sweet Condensed Milk", price = 9.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_CheeseFoam", displayName = "Salted Cheese Foam Powder", price = 12.00f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_GoldenHoneyPearls", displayName = "Golden Honey Pearls", price = 15.00f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Milk_CondensedMilk", displayName = "Sweet Condensed Milk", price = 12.00f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_CheeseFoam", displayName = "Salted Cheese Foam Powder", price = 18.50f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_GoldenHoneyPearls", displayName = "Golden Honey Pearls", price = 23.50f, bundleQuantity = 8 });
         }
 
         public bool BuyItem(MarketItem item)
