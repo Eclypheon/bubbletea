@@ -330,7 +330,14 @@ namespace BubbleTeaShop
         private void SpawnCrittersFromPatch(Vector3 spawnWorldPos)
         {
             Transform container = crittersContainer != null ? crittersContainer : bambooGrovePanelRoot.transform;
-            int countToSpawn = UnityEngine.Random.Range(minYippeesPerPatch, maxYippeesPerPatch + 1); // 1-3 critters per patch
+            int minSpawn = minYippeesPerPatch;
+            int maxSpawn = maxYippeesPerPatch;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.YippeePheromones))
+            {
+                minSpawn += 1;
+                maxSpawn += 1;
+            }
+            int countToSpawn = UnityEngine.Random.Range(minSpawn, maxSpawn + 1);
 
             HUDController.Instance?.SetStatusHint(SCATTERED_HINT);
 

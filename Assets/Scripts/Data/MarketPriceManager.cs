@@ -135,10 +135,20 @@ namespace BubbleTeaShop
 
             if (order.targetToppings != null)
             {
+                bool hasJelly = false;
                 foreach (var topping in order.targetToppings)
                 {
                     // Toppings scale customer drink price according to rarity
                     basePrice += GetToppingCost(topping) * 2.2f;
+                    if (topping == ToppingType.GrassJelly || topping == ToppingType.CoconutJelly)
+                    {
+                        hasJelly = true;
+                    }
+                }
+
+                if (hasJelly && UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.MarketingIntern))
+                {
+                    basePrice *= 1.10f;
                 }
             }
 

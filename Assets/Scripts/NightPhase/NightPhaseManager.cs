@@ -119,10 +119,35 @@ namespace BubbleTeaShop
 
         private int lastDeductedDay = 0;
 
-        public void RecordActivity(NightActivityType activity)
+        public void RecordActivity(NightActivityType activity, string subZone = "")
         {
             performedActivityTonight = activity;
-            DayManager.Instance?.RecordNightActivity();
+            
+            bool waivePenalty = false;
+            if (UpgradeManager.Instance != null)
+            {
+                if (activity == NightActivityType.Market && UpgradeManager.Instance.HasUpgrade(UpgradeType.NightChauffeur))
+                {
+                    waivePenalty = true;
+                }
+                else if (activity == NightActivityType.Foraging)
+                {
+                    if (subZone == "BambooGrove" && UpgradeManager.Instance.HasUpgrade(UpgradeType.BambooGroveTrailMap)) waivePenalty = true;
+                    else if (subZone == "HoneyMeadow" && UpgradeManager.Instance.HasUpgrade(UpgradeType.HoneyMeadowsTrailMap)) waivePenalty = true;
+                    else if (subZone == "MistMountain" && UpgradeManager.Instance.HasUpgrade(UpgradeType.MistyMountainsTrailMap)) waivePenalty = true;
+                    else if (string.IsNullOrEmpty(subZone) && UpgradeManager.Instance.HasUpgrade(UpgradeType.BambooGroveTrailMap)) waivePenalty = true;
+                }
+            }
+
+            if (!waivePenalty)
+            {
+                DayManager.Instance?.RecordNightActivity();
+            }
+            else
+            {
+                Debug.Log($"[NightPhaseManager] Late opening penalty waived by upgrade for {activity} ({subZone})!");
+            }
+
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             UpdateTabsState(day);
             UpdateForagingButtons(day);
@@ -154,6 +179,7 @@ namespace BubbleTeaShop
                 UpdateTabsState(currentDay);
                 UpdateForagingButtons(currentDay);
                 UpdateMarketTab(currentDay);
+                UpdateUpgradesTab();
                 UpdateLedger();
                 SwitchTab(3); // Start on Ledger
             }
@@ -372,10 +398,14 @@ namespace BubbleTeaShop
                 }
             }
 
-            if (tabIndex == 2 && day < 8)
+            if (tabIndex == 2)
             {
-                HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!");
-                return;
+                if (day < 8)
+                {
+                    HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!");
+                    return;
+                }
+                UpdateUpgradesTab();
             }
 
             if (marketTabPanel != null) marketTabPanel.SetActive(tabIndex == 0);
@@ -458,7 +488,7 @@ namespace BubbleTeaShop
                 return;
             }
 
-            RecordActivity(NightActivityType.Foraging);
+            RecordActivity(NightActivityType.Foraging, "BambooGrove");
             ForagingManager.Instance?.SetForagedTonight();
 
             if (BambooGroveViewController.Instance != null)
@@ -484,7 +514,7 @@ namespace BubbleTeaShop
 
             float sales = DayManager.Instance.DailySalesTotal;
             float tips = DayManager.Instance.DailyTipsTotal;
-            float suppliesExpense = EconomyManager.DailySuppliesExpense;
+            float suppliesExpense = EconomyManager.Instance.CurrentDailySuppliesExpense;
             float netProfit = sales + tips - suppliesExpense;
             string netProfitFormatted = netProfit >= 0
                 ? $"<color=#2ECC71>+${netProfit:F2}</color>"
@@ -773,6 +803,238 @@ namespace BubbleTeaShop
             }
 
             return null;
+        }
+
+        private Transform upgradesScrollContainer;
+        private TextMeshProUGUI upgradesWalletText;
+
+        public void UpdateUpgradesTab()
+        {
+            if (upgradesTabPanel == null || UpgradeManager.Instance == null) return;
+
+            EnsureUpgradesTabUI();
+            PopulateUpgradesCards();
+        }
+
+        private void EnsureUpgradesTabUI()
+        {
+            if (upgradesScrollContainer != null) return;
+
+            // Clear any old placeholder children
+            for (int i = upgradesTabPanel.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(upgradesTabPanel.transform.GetChild(i).gameObject);
+            }
+
+            // Top Header (Wallet & Title)
+            GameObject headerObj = new GameObject("UpgradesHeader", typeof(RectTransform), typeof(TextMeshProUGUI));
+            headerObj.transform.SetParent(upgradesTabPanel.transform, false);
+            var headerRt = headerObj.GetComponent<RectTransform>();
+            headerRt.anchorMin = new Vector2(0.5f, 1f);
+            headerRt.anchorMax = new Vector2(0.5f, 1f);
+            headerRt.pivot = new Vector2(0.5f, 1f);
+            headerRt.anchoredPosition = new Vector2(0, 50f);
+            headerRt.sizeDelta = new Vector2(980f, 32f);
+
+            upgradesWalletText = headerObj.GetComponent<TextMeshProUGUI>();
+            upgradesWalletText.fontSize = 20f;
+            upgradesWalletText.alignment = TextAlignmentOptions.MidlineLeft;
+
+            // Scroll View Root
+            GameObject scrollObj = new GameObject("UpgradesScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
+            scrollObj.transform.SetParent(upgradesTabPanel.transform, false);
+            var scrollRt = scrollObj.GetComponent<RectTransform>();
+            scrollRt.anchorMin = new Vector2(0.5f, 0.5f);
+            scrollRt.anchorMax = new Vector2(0.5f, 0.5f);
+            scrollRt.pivot = new Vector2(0.5f, 0.5f);
+            scrollRt.anchoredPosition = new Vector2(0, -10f);
+            scrollRt.sizeDelta = new Vector2(1000f, 440f);
+
+            var scrollImg = scrollObj.GetComponent<Image>();
+            scrollImg.color = new Color(0, 0, 0, 0.01f);
+
+            // Viewport
+            GameObject viewportObj = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            viewportObj.transform.SetParent(scrollObj.transform, false);
+            var viewRt = viewportObj.GetComponent<RectTransform>();
+            viewRt.anchorMin = Vector2.zero;
+            viewRt.anchorMax = Vector2.one;
+            viewRt.offsetMin = Vector2.zero;
+            viewRt.offsetMax = Vector2.zero;
+
+            var mask = viewportObj.GetComponent<Mask>();
+            mask.showMaskGraphic = false;
+
+            // Content
+            GameObject contentObj = new GameObject("Content", typeof(RectTransform));
+            contentObj.transform.SetParent(viewportObj.transform, false);
+            var contentRt = contentObj.GetComponent<RectTransform>();
+            contentRt.anchorMin = new Vector2(0, 1);
+            contentRt.anchorMax = new Vector2(1, 1);
+            contentRt.pivot = new Vector2(0.5f, 1);
+            contentRt.anchoredPosition = Vector2.zero;
+
+            var scrollRect = scrollObj.GetComponent<ScrollRect>();
+            scrollRect.content = contentRt;
+            scrollRect.viewport = viewRt;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.scrollSensitivity = 35f;
+
+            upgradesScrollContainer = contentObj.transform;
+        }
+
+        private void PopulateUpgradesCards()
+        {
+            if (upgradesScrollContainer == null || UpgradeManager.Instance == null) return;
+
+            var upgrades = UpgradeManager.Instance.Upgrades;
+            int purchasedCount = 0;
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                if (upgrades[i].isPurchased) purchasedCount++;
+            }
+
+            if (upgradesWalletText != null && EconomyManager.Instance != null)
+            {
+                upgradesWalletText.text = $"<b>SHOP UPGRADES</b>  |  Wallet: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>  |  <color=#FFAA00>{purchasedCount}/{upgrades.Count} Active</color>";
+            }
+
+            // Clear old cards
+            for (int i = upgradesScrollContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(upgradesScrollContainer.GetChild(i).gameObject);
+            }
+
+            int cols = 2;
+            int totalRows = Mathf.CeilToInt((float)upgrades.Count / cols);
+
+            float totalWidth = 980f;
+            float paddingX = 10f;
+            float paddingY = 10f;
+            float spacingX = 20f;
+            float spacingY = 14f;
+
+            float cardWidth = (totalWidth - (paddingX * 2) - spacingX) / cols; // ~470f
+            float cardHeight = 112f;
+
+            float totalHeight = (paddingY * 2) + (totalRows * cardHeight) + ((totalRows - 1) * spacingY);
+            RectTransform contentRt = upgradesScrollContainer as RectTransform;
+            if (contentRt != null)
+            {
+                contentRt.sizeDelta = new Vector2(totalWidth, totalHeight);
+            }
+
+            float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
+            float startY = -paddingY - (cardHeight * 0.5f);
+
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                var u = upgrades[i];
+                bool isOwned = u.isPurchased;
+                bool canAfford = EconomyManager.Instance != null && EconomyManager.Instance.CanAfford(u.cost);
+
+                int row = i / cols;
+                int col = i % cols;
+                Vector2 pos = new Vector2(startX + col * (cardWidth + spacingX), startY - row * (cardHeight + spacingY));
+
+                // Container card
+                GameObject cardObj = new GameObject($"Card_{u.type}", typeof(RectTransform), typeof(Image));
+                cardObj.transform.SetParent(upgradesScrollContainer, false);
+                var rt = cardObj.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(cardWidth, cardHeight);
+                rt.anchoredPosition = pos;
+
+                var img = cardObj.GetComponent<Image>();
+                img.color = isOwned ? new Color(0.10f, 0.20f, 0.16f, 0.95f) : new Color(0.12f, 0.16f, 0.24f, 0.95f);
+
+                // Right Buy Button
+                float buyButtonWidth = 115f;
+                GameObject buyBtnObj = new GameObject("BuyButton", typeof(RectTransform), typeof(Image), typeof(Button));
+                buyBtnObj.transform.SetParent(cardObj.transform, false);
+                var buyRt = buyBtnObj.GetComponent<RectTransform>();
+                buyRt.anchorMin = new Vector2(1, 0.5f);
+                buyRt.anchorMax = new Vector2(1, 0.5f);
+                buyRt.pivot = new Vector2(1, 0.5f);
+                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 16f);
+                buyRt.anchoredPosition = new Vector2(-10, 0);
+
+                var buyImg = buyBtnObj.GetComponent<Image>();
+                var buyBtn = buyBtnObj.GetComponent<Button>();
+
+                if (isOwned)
+                {
+                    buyImg.color = new Color(0.15f, 0.28f, 0.20f, 0.85f);
+                    buyBtn.interactable = false;
+                }
+                else
+                {
+                    buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.35f, 0.35f, 0.35f, 0.65f);
+                    buyBtn.interactable = canAfford;
+                }
+
+                GameObject buyTextObj = new GameObject("BuyText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                buyTextObj.transform.SetParent(buyBtnObj.transform, false);
+                var buyTextRt = buyTextObj.GetComponent<RectTransform>();
+                buyTextRt.anchorMin = Vector2.zero;
+                buyTextRt.anchorMax = Vector2.one;
+                buyTextRt.offsetMin = new Vector2(4, 2);
+                buyTextRt.offsetMax = new Vector2(-4, -2);
+
+                var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
+                buyTmp.fontSize = 19f;
+                buyTmp.alignment = TextAlignmentOptions.Center;
+                buyTmp.enableWordWrapping = false;
+                buyTmp.lineSpacing = -8f;
+
+                if (isOwned)
+                {
+                    buyTmp.text = "<color=#2ECC71><b>OWNED</b></color>\n<size=15><color=#A8D5BA>Active</color></size>";
+                }
+                else
+                {
+                    buyTmp.text = $"<b>BUY</b>\n<size=16>${u.cost:F2}</size>";
+                }
+
+                // Left: 3 Fields (Name, Description, Effect)
+                GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                infoTextObj.transform.SetParent(cardObj.transform, false);
+                var infoRt = infoTextObj.GetComponent<RectTransform>();
+                infoRt.anchorMin = new Vector2(0, 0);
+                infoRt.anchorMax = new Vector2(1, 1);
+                infoRt.offsetMin = new Vector2(14f, 6f);
+                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 18f), -6f);
+
+                var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
+                infoTmp.fontSize = 17f;
+                infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
+                infoTmp.enableWordWrapping = true;
+                infoTmp.lineSpacing = -2f;
+
+                string titleHeader = isOwned
+                    ? $"<color=#2ECC71><b>{u.title}</b></color> <size=13><color=#A8D5BA>[OWNED]</color></size>"
+                    : $"<b>{u.title}</b>";
+
+                infoTmp.text = $"{titleHeader}\n" +
+                               $"<size=14><color=#BDC3C7>{u.description}</color></size>\n" +
+                               $"<size=14><color=#FFAA00><b>Effect:</b> {u.effect}</color></size>";
+
+                if (!isOwned && canAfford)
+                {
+                    UpgradeType upgType = u.type;
+                    string upgTitle = u.title;
+                    buyBtn.onClick.AddListener(() =>
+                    {
+                        if (UpgradeManager.Instance.TryPurchaseUpgrade(upgType))
+                        {
+                            PopulateUpgradesCards();
+                            UpdateLedger();
+                            HUDController.Instance?.ShowNotification($"Purchased {upgTitle}!", 3f);
+                        }
+                    });
+                }
+            }
         }
 
         private void OnBuyoutClicked()

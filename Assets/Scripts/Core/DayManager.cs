@@ -63,10 +63,20 @@ namespace BubbleTeaShop
             dailySalesTotal = 0f;
             dailyTipsTotal = 0f;
 
-            // Check if storefront sign upgrade increases customer traffic
-            bool hasSign = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.StorefrontSign);
-            int min = hasSign ? 5 : minCustomersPerDay;
-            int max = hasSign ? 8 : maxCustomersPerDay;
+            // Check if upgrades increase customer traffic
+            int min = minCustomersPerDay;
+            int max = maxCustomersPerDay;
+
+            if (UpgradeManager.Instance != null)
+            {
+                if (UpgradeManager.Instance.HasUpgrade(UpgradeType.StorefrontBeautification)) min += 1;
+                if (UpgradeManager.Instance.HasUpgrade(UpgradeType.Advertisements)) max += 1;
+                if (UpgradeManager.Instance.HasUpgrade(UpgradeType.StorefrontSign))
+                {
+                    min = Mathf.Max(min, 5);
+                    max = Mathf.Max(max, 8);
+                }
+            }
 
             int rolled = UnityEngine.Random.Range(min, max + 1);
 

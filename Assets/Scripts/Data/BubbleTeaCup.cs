@@ -134,6 +134,10 @@ namespace BubbleTeaShop
                 // Tip is scaled by accuracy and remaining patience speed bonus
                 float speedBonus = Mathf.Max(0f, patienceRemainingPercent * 0.5f);
                 result.tip = (result.accuracy >= 0.85f) ? (order.basePrice * (0.2f + speedBonus)) : 0f;
+                if (result.tip > 0f && UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat))
+                {
+                    result.tip *= 1.30f;
+                }
                 result.tip = (float)Math.Round(result.tip, 2);
             }
             else

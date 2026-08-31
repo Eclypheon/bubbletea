@@ -80,6 +80,21 @@ namespace BubbleTeaShop
         AutoSealer,
         FastChiller,
         CozyDecor,
-        StorefrontSign
+        StorefrontSign,
+        Advertisements,
+        StorefrontBeautification,
+        YippeePheromones,
+        SwitchSupplyContract,
+        LuckyCat,
+        BambooGroveTrailMap,
+        HoneyMeadowsTrailMap,
+        MistyMountainsTrailMap,
+        ImproveStoreAmbience,
+        ArtisanalTeaMenu,
+        LuckyPoppingBobaBracelet,
+        ChefsHoningSteel,
+        DowsingRods,
+        NightChauffeur,
+        MarketingIntern
     }
 }

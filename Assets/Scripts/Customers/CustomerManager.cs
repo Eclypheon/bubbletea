@@ -368,19 +368,21 @@ namespace BubbleTeaShop
                 List<ToppingType> availableToppings = new List<ToppingType> { ToppingType.TapiocaPearls, ToppingType.PoppingBoba, ToppingType.GrassJelly };
                 int maxToppings = 1;
 
-                if (currentDay >= 8) // Week 2+
+                bool hasArtisanalMenu = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.ArtisanalTeaMenu);
+
+                if (currentDay >= 8 || hasArtisanalMenu) // Week 2+ or Artisanal Menu
                 {
-                    availableMilks.Add(MilkType.CoconutMilk);
-                    availableToppings.Add(ToppingType.EggPudding);
-                    availableToppings.Add(ToppingType.CoconutJelly);
+                    if (!availableMilks.Contains(MilkType.CoconutMilk)) availableMilks.Add(MilkType.CoconutMilk);
+                    if (!availableToppings.Contains(ToppingType.EggPudding)) availableToppings.Add(ToppingType.EggPudding);
+                    if (!availableToppings.Contains(ToppingType.CoconutJelly)) availableToppings.Add(ToppingType.CoconutJelly);
                     maxToppings = 2;
                 }
 
-                if (currentDay >= 15) // Week 3+ (Rare & Foraged)
+                if (currentDay >= 15 || hasArtisanalMenu) // Week 3+ (Rare & Foraged)
                 {
-                    availableMilks.Add(MilkType.CondensedMilk);
-                    availableToppings.Add(ToppingType.CheeseFoam);
-                    availableToppings.Add(ToppingType.GoldenHoneyPearls);
+                    if (!availableMilks.Contains(MilkType.CondensedMilk)) availableMilks.Add(MilkType.CondensedMilk);
+                    if (!availableToppings.Contains(ToppingType.CheeseFoam)) availableToppings.Add(ToppingType.CheeseFoam);
+                    if (!availableToppings.Contains(ToppingType.GoldenHoneyPearls)) availableToppings.Add(ToppingType.GoldenHoneyPearls);
                 }
 
                 // Randomly construct the drink from available ingredients
@@ -392,8 +394,9 @@ namespace BubbleTeaShop
                 order.targetSweetnessPercent = availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
                 order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
 
-                // Toppings: 65% chance of topping(s), 35% chance of no toppings
-                if (UnityEngine.Random.value < 0.65f && availableToppings.Count > 0)
+                // Toppings: 65% base chance (85% with Artisanal Menu)
+                float toppingChance = hasArtisanalMenu ? 0.85f : 0.65f;
+                if (UnityEngine.Random.value < toppingChance && availableToppings.Count > 0)
                 {
                     int toppingsCount = UnityEngine.Random.Range(1, maxToppings + 1);
                     List<ToppingType> toppingPool = new List<ToppingType>(availableToppings);

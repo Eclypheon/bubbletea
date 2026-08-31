@@ -60,7 +60,7 @@ namespace BubbleTeaShop
             }
 
             hasForagedTonight = true;
-            NightPhaseManager.Instance?.RecordActivity(NightPhaseManager.NightActivityType.Foraging);
+            NightPhaseManager.Instance?.RecordActivity(NightPhaseManager.NightActivityType.Foraging, zone);
             string resultMessage = "";
 
             if (zone == "BambooGrove")

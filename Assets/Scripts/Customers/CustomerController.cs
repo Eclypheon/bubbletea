@@ -93,6 +93,22 @@ namespace BubbleTeaShop
 
             if (!isWaiting) return;
 
+            bool hasInfiniteAmbience = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.ImproveStoreAmbience);
+
+            if (hasInfiniteAmbience)
+            {
+                // Hide patience bar entirely
+                if (patienceFillImage != null && patienceFillImage.transform.parent != null)
+                {
+                    if (patienceFillImage.transform.parent.gameObject.activeSelf)
+                    {
+                        patienceFillImage.transform.parent.gameObject.SetActive(false);
+                    }
+                }
+                currentPatience = maxPatience;
+                return;
+            }
+
             // Continually refresh hierarchy positioning and visibility of patience bar during day phase
             if (patienceFillImage != null)
             {

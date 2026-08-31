@@ -523,9 +523,15 @@ namespace BubbleTeaShop
             int poppingBobaYield = 0;
             int tapiocaYield = 0;
 
+            float poppingChance = 0.40f;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyPoppingBobaBracelet))
+            {
+                poppingChance = 0.75f;
+            }
+
             for (int i = 0; i < totalItems; i++)
             {
-                if (UnityEngine.Random.value < 0.40f)
+                if (UnityEngine.Random.value < poppingChance)
                 {
                     poppingBobaYield++;
                 }
@@ -836,10 +842,28 @@ namespace BubbleTeaShop
                 }
             }
 
+            bool doubledYield = false;
+            if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.ChefsHoningSteel))
+            {
+                if (UnityEngine.Random.value < 0.25f)
+                {
+                    rolledGrassJellyYield *= 2;
+                    rolledCoconutJellyYield *= 2;
+                    doubledYield = true;
+                }
+            }
+
             SpawnChoppedJelliesOnBoard();
             choppingState = PrepStationState.ReadyToCollect;
             UpdateChoppingUI();
-            HUDController.Instance?.ShowNotification("Chopping complete! Click the board to collect diced jellies!", 3.5f);
+            if (doubledYield)
+            {
+                HUDController.Instance?.ShowNotification("Razor-sharp precision! Chef's Honing Steel doubled the topping yield!", 4f);
+            }
+            else
+            {
+                HUDController.Instance?.ShowNotification("Chopping complete! Click the board to collect diced jellies!", 3.5f);
+            }
         }
 
         private void CollectChoppingYield()
@@ -934,20 +958,41 @@ namespace BubbleTeaShop
             int foamYield = 0;
             int honeyPearlsYield = 0;
 
+            bool hasDowsingRods = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.DowsingRods);
+
             for (int i = 0; i < totalItems; i++)
             {
                 float roll = UnityEngine.Random.value;
-                if (roll < 0.50f)
+                if (hasDowsingRods)
                 {
-                    puddingYield++;
-                }
-                else if (roll < 0.90f)
-                {
-                    foamYield++;
+                    // Dowsing rods attune to Golden Dew: 35% chance of rare Honey Pearls (vs 10% base)
+                    if (roll < 0.35f)
+                    {
+                        puddingYield++;
+                    }
+                    else if (roll < 0.65f)
+                    {
+                        foamYield++;
+                    }
+                    else
+                    {
+                        honeyPearlsYield++;
+                    }
                 }
                 else
                 {
-                    honeyPearlsYield++;
+                    if (roll < 0.50f)
+                    {
+                        puddingYield++;
+                    }
+                    else if (roll < 0.90f)
+                    {
+                        foamYield++;
+                    }
+                    else
+                    {
+                        honeyPearlsYield++;
+                    }
                 }
             }
 

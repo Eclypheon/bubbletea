@@ -95,13 +95,16 @@ namespace BubbleTeaShop
             return mod == 0 ? 0 : (rentCycleDays - mod);
         }
 
+        public float CurrentDailySuppliesExpense => (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.SwitchSupplyContract)) ? 3.00f : DailySuppliesExpense;
+
         public void DeductDailySupplies(int dayNumber)
         {
-            currentCash -= DailySuppliesExpense;
+            float expense = CurrentDailySuppliesExpense;
+            currentCash -= expense;
             currentCash = (float)Math.Round(currentCash, 2);
             OnCashChanged?.Invoke(currentCash);
-            OnTransactionOccurred?.Invoke(-DailySuppliesExpense, $"Daily Supplies & Utilities (Day {dayNumber})");
-            Debug.Log($"[Economy] Deducted ${DailySuppliesExpense:F2} for daily supplies on Day {dayNumber}. Remaining cash: ${currentCash:F2}");
+            OnTransactionOccurred?.Invoke(-expense, $"Daily Supplies & Utilities (Day {dayNumber})");
+            Debug.Log($"[Economy] Deducted ${expense:F2} for daily supplies on Day {dayNumber}. Remaining cash: ${currentCash:F2}");
         }
 
         public void AddCash(float amount, string reason = "Sale")
