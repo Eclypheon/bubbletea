@@ -88,6 +88,15 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+
+            if (prepAreaPanelRoot == null)
+            {
+                prepAreaPanelRoot = gameObject;
+            }
+            if (returnToNightHubButton != null)
+            {
+                returnToNightHubButton.gameObject.SetActive(false);
+            }
         }
 
         private void Start()
@@ -95,6 +104,7 @@ namespace BubbleTeaShop
             if (returnToNightHubButton != null)
             {
                 returnToNightHubButton.onClick.AddListener(ClosePrepAreaView);
+                returnToNightHubButton.gameObject.SetActive(false);
             }
 
             if (prepAreaBackgroundImage != null && prepAreaInteriorSprite != null)
@@ -122,6 +132,11 @@ namespace BubbleTeaShop
                 prepAreaPanelRoot.SetActive(true);
             }
 
+            if (returnToNightHubButton != null)
+            {
+                returnToNightHubButton.gameObject.SetActive(true);
+            }
+
             if (prepAreaBackgroundImage != null && prepAreaInteriorSprite != null)
             {
                 prepAreaBackgroundImage.sprite = prepAreaInteriorSprite;
@@ -136,6 +151,11 @@ namespace BubbleTeaShop
             if (prepAreaPanelRoot != null)
             {
                 prepAreaPanelRoot.SetActive(false);
+            }
+
+            if (returnToNightHubButton != null)
+            {
+                returnToNightHubButton.gameObject.SetActive(false);
             }
 
             OnPrepAreaClosed?.Invoke();
