@@ -38,6 +38,11 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+
+            if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.title) || string.IsNullOrEmpty(activeEvent.eventId)))
+            {
+                activeEvent = null;
+            }
         }
 
         private void Start()

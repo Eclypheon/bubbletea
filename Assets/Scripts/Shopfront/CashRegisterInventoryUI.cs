@@ -220,14 +220,14 @@ namespace BubbleTeaShop
 
             if (marketNewsText != null)
             {
-                if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null)
+                if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null && !string.IsNullOrEmpty(MarketEventManager.Instance.ActiveEvent.title))
                 {
                     var ev = MarketEventManager.Instance.ActiveEvent;
                     marketNewsText.text = $"<b>Market News:</b> <color=#FFAA00>{ev.title}</color> ({ev.daysRemaining}d left)\n<i>{ev.description}</i>";
                 }
                 else
                 {
-                    marketNewsText.text = "<b>Market News:</b> <i>Wholesale prices are stable today.</i>";
+                    marketNewsText.text = "<b>Market News:</b> <i>There is no significant news affecting the markets.</i>";
                 }
             }
         }
