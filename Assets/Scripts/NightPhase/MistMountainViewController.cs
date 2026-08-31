@@ -14,7 +14,7 @@ namespace BubbleTeaShop
 
         public enum MistMountainStage
         {
-            PanoramaApproach, // Viewing wide mountain and clicking rock shelves
+            PanoramaApproach, // Viewing wide mountain and clicking the pulsing rock shelf
             RockWallCatching  // Close-up rock wall and bucket catching minigame
         }
 
@@ -31,9 +31,9 @@ namespace BubbleTeaShop
         [Header("UI Header & Harvest Counter")]
         [SerializeField] private TextMeshProUGUI harvestCounterText;
 
-        [Header("Stage 1: Panorama Rock Shelves")]
+        [Header("Stage 1: Panorama Rock Shelf")]
         [SerializeField] private Transform rockShelvesContainer;
-        [SerializeField] private List<Button> rockShelfButtons = new List<Button>();
+        [SerializeField] private Button pulsingRockShelfButton;
 
         [Header("Stage 2: Close-up Rock Wall & Bucket Catching")]
         [SerializeField] private Transform rockWallContainer;
@@ -61,11 +61,12 @@ namespace BubbleTeaShop
         private bool isMountainOpen = false;
         private bool hasKickedWall = false;
         private bool isDraggingBucket = false;
+        private Coroutine pulsingShelfCoroutine;
         private List<Coroutine> activeDewDropRoutines = new List<Coroutine>();
         private List<GameObject> activeDewDropObjects = new List<GameObject>();
         private Vector2 rootPanelBaseAnchoredPos = Vector2.zero;
 
-        private const string PANORAMA_HINT = "Misty Mountains: Select a mineral-rich rock shelf to approach the cliffside!";
+        private const string PANORAMA_HINT = "Tap the rock shelf to approach the cliff face!";
         private const string WALL_IDLE_HINT = "Kick the rock wall hard to dislodge the glistening Golden Dew!";
         private const string WALL_CATCHING_HINT = "Quick! Drag your bucket to catch the falling Golden Dew!";
         private const string CLEARED_HINT = "The remaining dew has settled into the mountain stone, its time to return";
@@ -397,6 +398,7 @@ namespace BubbleTeaShop
         {
             isMountainOpen = false;
 
+            StopPulsingShelf();
             StopAllDewRoutines();
             ClearAllDewDrops();
 
@@ -431,11 +433,12 @@ namespace BubbleTeaShop
         }
 
         // =========================================================================
-        // STAGE 1: PANORAMA ROCK SHELVES
+        // STAGE 1: PANORAMA APPROACH & PULSING ROCK SHELF
         // =========================================================================
         private void SetupPanoramaApproachStage()
         {
             currentStage = MistMountainStage.PanoramaApproach;
+            StopPulsingShelf();
 
             if (backgroundImage != null && mountainPanoramaSprite != null)
             {
@@ -446,13 +449,13 @@ namespace BubbleTeaShop
             if (rockShelvesContainer != null)
             {
                 rockShelvesContainer.gameObject.SetActive(true);
-                BuildInteractiveRockShelves();
+                BuildPulsingRockShelf();
             }
 
             HUDController.Instance?.SetSubscreenMode(true, PANORAMA_HINT);
         }
 
-        private void BuildInteractiveRockShelves()
+        private void BuildPulsingRockShelf()
         {
             if (rockShelvesContainer == null) return;
 
@@ -461,62 +464,61 @@ namespace BubbleTeaShop
             {
                 Destroy(rockShelvesContainer.GetChild(i).gameObject);
             }
-            rockShelfButtons.Clear();
 
-            // 3 rock shelf locations on the mountain path
-            Vector2[] shelfPositions = new Vector2[]
-            {
-                new Vector2(-260f, -80f),
-                new Vector2(40f, 20f),
-                new Vector2(280f, 130f)
-            };
+            // 1 Single Prominent Pulsing Rock Shelf
+            GameObject shelfObj = new GameObject("PulsingRockShelf", typeof(RectTransform), typeof(Image), typeof(Button));
+            shelfObj.transform.SetParent(rockShelvesContainer, false);
+            var rt = shelfObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(0f, -40f);
+            rt.sizeDelta = new Vector2(270f, 140f);
 
-            for (int i = 0; i < shelfPositions.Length; i++)
-            {
-                int shelfIndex = i + 1;
-                Vector2 pos = shelfPositions[i];
+            var img = shelfObj.GetComponent<Image>();
+            if (rockShelfSprite != null) img.sprite = rockShelfSprite;
+            img.preserveAspect = true;
+            img.raycastTarget = true;
 
-                GameObject shelfObj = new GameObject($"RockShelf_{shelfIndex}", typeof(RectTransform), typeof(Image), typeof(Button));
-                shelfObj.transform.SetParent(rockShelvesContainer, false);
-                var rt = shelfObj.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0.5f, 0.5f);
-                rt.anchorMax = new Vector2(0.5f, 0.5f);
-                rt.pivot = new Vector2(0.5f, 0.5f);
-                rt.anchoredPosition = pos;
-                rt.sizeDelta = new Vector2(210f, 110f);
+            pulsingRockShelfButton = shelfObj.GetComponent<Button>();
+            pulsingRockShelfButton.transition = Selectable.Transition.None;
+            pulsingRockShelfButton.onClick.AddListener(OnRockShelfSelected);
 
-                var img = shelfObj.GetComponent<Image>();
-                if (rockShelfSprite != null) img.sprite = rockShelfSprite;
-                img.preserveAspect = true;
-                img.raycastTarget = true;
-
-                var btn = shelfObj.GetComponent<Button>();
-                btn.transition = Selectable.Transition.None;
-                btn.onClick.AddListener(() => OnRockShelfSelected(shelfIndex));
-                rockShelfButtons.Add(btn);
-
-                // Subtle floating breathing animation
-                StartCoroutine(ShelfHoverRoutine(rt, 1.8f + (i * 0.3f), i * 1.2f));
-            }
+            pulsingShelfCoroutine = StartCoroutine(PulsingShelfRoutine(rt));
         }
 
-        private IEnumerator ShelfHoverRoutine(RectTransform rt, float speed, float phaseOffset)
+        private IEnumerator PulsingShelfRoutine(RectTransform rt)
         {
             if (rt == null) yield break;
             Vector2 basePos = rt.anchoredPosition;
 
             while (isMountainOpen && currentStage == MistMountainStage.PanoramaApproach && rt != null)
             {
-                float offset = Mathf.Sin((Time.time * speed) + phaseOffset) * 6f;
-                rt.anchoredPosition = basePos + new Vector2(0, offset);
+                float scalePulse = 1f + (Mathf.Sin(Time.time * 3.8f) * 0.08f);
+                float bobbing = Mathf.Sin(Time.time * 2.2f) * 5f;
+
+                rt.localScale = new Vector3(scalePulse, scalePulse, 1f);
+                rt.anchoredPosition = basePos + new Vector2(0f, bobbing);
                 yield return null;
+            }
+
+            if (rt != null) rt.localScale = Vector3.one;
+        }
+
+        private void StopPulsingShelf()
+        {
+            if (pulsingShelfCoroutine != null)
+            {
+                StopCoroutine(pulsingShelfCoroutine);
+                pulsingShelfCoroutine = null;
             }
         }
 
-        private void OnRockShelfSelected(int shelfIndex)
+        private void OnRockShelfSelected()
         {
             if (currentStage != MistMountainStage.PanoramaApproach) return;
             PlaySound(rockKickSound);
+            StopPulsingShelf();
             TransitionToRockWallStage();
         }
 
@@ -813,11 +815,7 @@ namespace BubbleTeaShop
             }
             else if (currentStage == MistMountainStage.PanoramaApproach)
             {
-                // If clicked somewhere near a shelf or background, trigger shelf selection
-                if (rockShelfButtons.Count > 0 && rockShelfButtons[0] != null)
-                {
-                    OnRockShelfSelected(1);
-                }
+                OnRockShelfSelected();
             }
         }
 
