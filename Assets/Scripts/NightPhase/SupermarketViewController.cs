@@ -125,7 +125,7 @@ namespace BubbleTeaShop
 
             if (marketAisleTitleText != null)
             {
-                marketAisleTitleText.text = $"Wholesale Supermarket — Day {dayNumber}";
+                marketAisleTitleText.text = $"Wholesale Supermarket - Day {dayNumber}";
             }
 
             UpdateSupermarketDisplay(dayNumber);

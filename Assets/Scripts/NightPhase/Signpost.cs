@@ -23,7 +23,7 @@ namespace BubbleTeaShop
         [SerializeField] private Button backdropCloseButton;
 
         [Header("Lore Content")]
-        [SerializeField] private string defaultTitle = "🎋 Bamboo Grove Notice";
+        [SerializeField] private string defaultTitle = "Bamboo Grove Notice";
         [TextArea(4, 10)]
         [SerializeField] private string defaultLore = "<i>\"To travelers and tea brewers: The Bamboo Grove is home to timid Baby Yippees nesting beneath the brush.\n\nRustle the grass piles to startle them into the open, and catch them swiftly before they burrow away!\"</i>";
 

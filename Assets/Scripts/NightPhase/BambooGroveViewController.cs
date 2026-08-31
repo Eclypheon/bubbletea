@@ -79,6 +79,9 @@ namespace BubbleTeaShop
             }
         }
 
+        private const string IDLE_HINT = "Bamboo Grove: Tap the rustling grass to flush out wild Baby Yippees, then catch them!";
+        private const string SCATTERED_HINT = "Wild Baby Yippees have scattered into the bamboo! Tap them quickly!";
+
         public void OpenBambooGroveView(int dayNumber)
         {
             isGroveOpen = true;
@@ -101,7 +104,7 @@ namespace BubbleTeaShop
                 backgroundImage.sprite = bambooGroveBackgroundSprite;
             }
 
-            HUDController.Instance?.SetSubscreenMode(true, "🎋 Bamboo Grove: Tap the rustling grass to flush out wild Baby Yippees, then catch them!");
+            HUDController.Instance?.SetSubscreenMode(true, IDLE_HINT);
 
             UpdateHarvestCounterDisplay();
             SetupGrassPatches();
@@ -121,7 +124,7 @@ namespace BubbleTeaShop
             if (sessionCaughtCount > 0)
             {
                 PlaySound(completeSound);
-                HUDController.Instance?.ShowNotification($"🎉 Foraging completed! Bagged <color=#2ECC71>+{sessionCaughtCount} Baby Yippees</color> in your expedition!", 4.5f);
+                HUDController.Instance?.ShowNotification($"Foraging completed! Bagged <color=#2ECC71>+{sessionCaughtCount} Baby Yippees</color> in your expedition!", 4.5f);
             }
 
             if (returnToNightHubButton != null)
@@ -304,7 +307,7 @@ namespace BubbleTeaShop
             Transform container = crittersContainer != null ? crittersContainer : bambooGrovePanelRoot.transform;
             int countToSpawn = UnityEngine.Random.Range(minYippeesPerPatch, maxYippeesPerPatch + 1); // 1-3 critters per patch
 
-            HUDController.Instance?.ShowNotification($"💨 Wild Baby Yippees scattered into the bamboo! Tap them quickly!", 2.5f);
+            HUDController.Instance?.SetStatusHint(SCATTERED_HINT);
 
             for (int i = 0; i < countToSpawn; i++)
             {
@@ -387,6 +390,7 @@ namespace BubbleTeaShop
             {
                 remainingActiveCritters = Mathf.Max(0, remainingActiveCritters - 1);
                 Destroy(rt.gameObject);
+                HUDController.Instance?.ShowNotification("The baby yippees have escaped successfully!", 3f);
             }
         }
 
@@ -410,7 +414,7 @@ namespace BubbleTeaShop
 
             if (remainingActiveCritters == 0)
             {
-                HUDController.Instance?.ShowNotification($"🌟 All critters caught from this patch! Total: <color=#2ECC71>{sessionCaughtCount} Baby Yippees</color>.", 3f);
+                HUDController.Instance?.ShowNotification($"All critters caught from this patch! Total: <color=#2ECC71>{sessionCaughtCount} Baby Yippees</color>.", 3f);
             }
         }
 

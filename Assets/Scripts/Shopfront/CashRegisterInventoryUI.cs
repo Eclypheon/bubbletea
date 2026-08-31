@@ -186,7 +186,7 @@ namespace BubbleTeaShop
                 string text = "<b>MILKS</b>\n";
                 foreach (var m in milks)
                 {
-                    text += $"• {m.name}  {FormatStockCount(m.count)}\n";
+                    text += $"- {m.name}  {FormatStockCount(m.count)}\n";
                 }
                 milkStockText.text = text.TrimEnd();
             }
@@ -196,7 +196,7 @@ namespace BubbleTeaShop
                 string text = "<b>TOPPINGS</b>\n";
                 foreach (var t in toppings)
                 {
-                    text += $"• {t.name}  {FormatStockCount(t.count)}\n";
+                    text += $"- {t.name}  {FormatStockCount(t.count)}\n";
                 }
                 toppingStockText.text = text.TrimEnd();
             }

@@ -209,7 +209,7 @@ namespace BubbleTeaShop
             AddMilkStock(MilkType.OatMilk, 1);
             AddMilkStock(MilkType.CoconutMilk, 1);
             AddMilkStock(MilkType.CondensedMilk, 1);
-            HUDController.Instance?.ShowNotification("🌟 Premium Milk Dispenser Unlocked (+1 sample of Oat, Coconut, Condensed Milk)!", 4f);
+            HUDController.Instance?.ShowNotification("Premium Milk Dispenser Unlocked (+1 sample of Oat, Coconut, Condensed Milk)!", 4f);
             OnInventoryUpdated?.Invoke();
         }
 

@@ -487,7 +487,7 @@ namespace BubbleTeaShop
             blenderState = PrepStationState.Processing;
             UpdateBlenderUI();
             PlaySound(blendSound);
-            HUDController.Instance?.ShowNotification("🌀 Blending and sieving Baby Yippees...", 2.0f);
+            HUDController.Instance?.ShowNotification("Blending and sieving Baby Yippees...", 2.0f);
 
             Vector3 origBlenderPos = stationBlenderImage != null ? stationBlenderImage.rectTransform.localPosition : Vector3.zero;
             Vector3 origContentsPos = blenderContentsContainer != null ? blenderContentsContainer.localPosition : Vector3.zero;
@@ -512,7 +512,7 @@ namespace BubbleTeaShop
             ClearBlenderContents();
             blenderState = PrepStationState.ReadyToCollect;
             UpdateBlenderUI();
-            HUDController.Instance?.ShowNotification("✨ Blending & sieving complete! Click the blender to collect fresh Boba!", 3.5f);
+            HUDController.Instance?.ShowNotification("Blending and sieving complete! Click the blender to collect fresh Boba!", 3.5f);
         }
 
         private void CollectBlenderYield()
@@ -545,7 +545,7 @@ namespace BubbleTeaShop
             if (poppingBobaYield > 0) parts.Add($"<color=#2ECC71>+{poppingBobaYield} Popping Boba</color>");
             string summary = string.Join(" and ", parts);
 
-            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4f);
+            HUDController.Instance?.ShowNotification($"Collected {summary}!", 4f);
 
             ClearBlenderContents();
             blenderLoadedCount = 0;
@@ -770,7 +770,7 @@ namespace BubbleTeaShop
             choppingState = PrepStationState.Processing;
             UpdateChoppingUI();
             PlaySound(chopSound);
-            HUDController.Instance?.ShowNotification("🔪 Chopping Jelly Blocks into cubes...", 1.8f);
+            HUDController.Instance?.ShowNotification("Chopping Jelly Blocks into cubes...", 1.8f);
 
             if (stationKnifeImage != null)
             {
@@ -839,7 +839,7 @@ namespace BubbleTeaShop
             SpawnChoppedJelliesOnBoard();
             choppingState = PrepStationState.ReadyToCollect;
             UpdateChoppingUI();
-            HUDController.Instance?.ShowNotification("✨ Chopping complete! Click the board to collect diced jellies!", 3.5f);
+            HUDController.Instance?.ShowNotification("Chopping complete! Click the board to collect diced jellies!", 3.5f);
         }
 
         private void CollectChoppingYield()
@@ -859,7 +859,7 @@ namespace BubbleTeaShop
             if (coconutJellyYield > 0) parts.Add($"<color=#2ECC71>+{coconutJellyYield} Coconut Jelly</color>");
             string summary = string.Join(" and ", parts);
 
-            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4f);
+            HUDController.Instance?.ShowNotification($"Collected {summary}!", 4f);
 
             ClearChoppingContents();
             choppingLoadedCount = 0;
@@ -901,7 +901,7 @@ namespace BubbleTeaShop
             centrifugeState = PrepStationState.Processing;
             UpdateCentrifugeUI();
             PlaySound(centrifugeSound);
-            HUDController.Instance?.ShowNotification("⚙️ Spinning centrifuge to extract gourmet toppings...", 2.2f);
+            HUDController.Instance?.ShowNotification("Spinning centrifuge to extract gourmet toppings...", 2.2f);
 
             if (stationCentrifugeImage != null)
             {
@@ -922,7 +922,7 @@ namespace BubbleTeaShop
 
             centrifugeState = PrepStationState.ReadyToCollect;
             UpdateCentrifugeUI();
-            HUDController.Instance?.ShowNotification("✨ Centrifuge separation complete! Click to collect gourmet toppings!", 3.5f);
+            HUDController.Instance?.ShowNotification("Centrifuge separation complete! Click to collect gourmet toppings!", 3.5f);
         }
 
         private void CollectCentrifugeYield()
@@ -963,7 +963,7 @@ namespace BubbleTeaShop
             if (honeyPearlsYield > 0) parts.Add($"<color=#2ECC71>+{honeyPearlsYield} Honey Pearls</color>");
             string summary = string.Join(", ", parts);
 
-            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4.5f);
+            HUDController.Instance?.ShowNotification($"Collected {summary}!", 4.5f);
 
             centrifugeLoadedCount = 0;
             centrifugeState = PrepStationState.Empty;

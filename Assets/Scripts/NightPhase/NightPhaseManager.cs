@@ -218,7 +218,7 @@ namespace BubbleTeaShop
                 bool prepUnlocked = (day >= 5);
                 prepAreaButton.interactable = prepUnlocked;
                 var t = prepAreaButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = prepUnlocked ? "Kitchen Prep Area →" : "Prep Area (Day 5)";
+                if (t != null) t.text = prepUnlocked ? "Kitchen Prep Area ->" : "Prep Area (Day 5)";
             }
         }
 
@@ -450,12 +450,12 @@ namespace BubbleTeaShop
                 }
 
                 ledgerSummaryText.text = $"<b>Day {completedDay} Summary:</b>\n" +
-                                         $"• Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n" +
-                                         $"• Sales Revenue: <color=#2ECC71>+${sales:F2}</color>\n" +
-                                         $"• Tips Earned: <color=#2ECC71>+${tips:F2}</color>\n" +
-                                         $"• Daily Supplies: <color=#FF4444>-${suppliesExpense:F2}</color>\n" +
-                                         $"• Net Daily Profit: {netProfitFormatted}\n" +
-                                         $"• Total Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
+                                         $"- Customers Served: {DayManager.Instance.CustomersServedToday}/{DayManager.Instance.TotalCustomersToday}\n" +
+                                         $"- Sales Revenue: <color=#2ECC71>+${sales:F2}</color>\n" +
+                                         $"- Tips Earned: <color=#2ECC71>+${tips:F2}</color>\n" +
+                                         $"- Daily Supplies: <color=#FF4444>-${suppliesExpense:F2}</color>\n" +
+                                         $"- Net Daily Profit: {netProfitFormatted}\n" +
+                                         $"- Total Shop Balance: <color=#2ECC71>${EconomyManager.Instance.CurrentCash:F2}</color>";
             }
 
             if (rentStatusText != null)
@@ -503,7 +503,7 @@ namespace BubbleTeaShop
             // Check 4-Week Lease Victory (Day 28 completion)
             if (completedDay >= 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
             {
-                HUDController.Instance?.ShowNotification("🏆 Incredible! You have successfully completed the 4-week lease!", 5f);
+                HUDController.Instance?.ShowNotification("Incredible! You have successfully completed the 4-week lease!", 5f);
             }
 
             // Populate visual inventory cards in Ledger Tab

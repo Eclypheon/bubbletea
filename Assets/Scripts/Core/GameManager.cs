@@ -85,7 +85,7 @@ namespace BubbleTeaShop
         public void TriggerGameWon()
         {
             SetState(GameState.GameWon);
-            Debug.Log("🎉 [VICTORY] You bought out the location! You are now the master of Bubble Tea!");
+            Debug.Log("[VICTORY] You bought out the location! You are now the master of Bubble Tea!");
         }
     }
 }

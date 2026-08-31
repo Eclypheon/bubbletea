@@ -134,7 +134,7 @@ namespace BubbleTeaShop
                 "You've made remarkable progress managing the store through your first 5 days!",
                 "Starting tonight, you can embark on Foraging Expeditions to find rare wild toppings like Golden Honey Pearls and fresh herbs.",
                 "Remember: foraging is also a late-night activity that will cause you to open late and lose 1 customer tomorrow.",
-                "Also, you can only do ONE night activity per night—either visit the Market OR go Foraging, but never both in the same night.",
+                "Also, you can only do ONE night activity per night - either visit the Market OR go Foraging, but never both in the same night.",
                 "Close the shutter whenever you're ready to head into the night!"
             };
 

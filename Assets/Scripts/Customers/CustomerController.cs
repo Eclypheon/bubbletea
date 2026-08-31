@@ -540,7 +540,7 @@ namespace BubbleTeaShop
                     {
                         speechBubble.ShowMessage("W-wait... Is this Oolong Milk Tea with tapioca pearls, 100% sugar and 50% ice?! ...O-okay, fine! Just for this once, I'll lower your rent by 10%! But don't get the wrong idea, baka!");
                     }
-                    HUDController.Instance?.ShowNotification("💖 Landlord loved her favorite drink! Rent reduced by 10%!", 4f);
+                    HUDController.Instance?.ShowNotification("Landlord loved her favorite drink! Rent reduced by 10%!", 4f);
                 }
             }
             else

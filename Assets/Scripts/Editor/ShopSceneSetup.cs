@@ -380,7 +380,7 @@ namespace BubbleTeaShop.Editor
             SetSerializedProperty(modalCtrl, "restartButton", restartBtn.GetComponent<Button>());
 
             EditorUtility.SetDirty(canvasObj);
-            Debug.Log("🎉 [ShopSceneSetup] Complete Bubble Tea Game Scene setup successfully!");
+            Debug.Log("[ShopSceneSetup] Complete Bubble Tea Game Scene setup successfully!");
         }
 
         private static GameObject CreateUIElement(string name, Transform parent)
