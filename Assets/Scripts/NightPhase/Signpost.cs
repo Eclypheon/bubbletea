@@ -35,12 +35,21 @@ namespace BubbleTeaShop
         [SerializeField] private bool enablePulsingGlow = true;
         [SerializeField] private Image glowAuraImage;
 
+        private const string PREFS_KEY_SIGN_VIEWED = "BubbleTea_BambooSign_Viewed";
+        private bool hasBeenViewed = false;
+
         private Coroutine zoomRoutine;
         private Coroutine pulseRoutine;
         private Vector3 baseScale = Vector3.one;
 
         private void Awake()
         {
+            hasBeenViewed = (PlayerPrefs.GetInt(PREFS_KEY_SIGN_VIEWED, 0) == 1);
+            if (hasBeenViewed)
+            {
+                enablePulsingGlow = false;
+            }
+
             if (signpostButton == null)
             {
                 signpostButton = GetComponent<Button>();
@@ -82,13 +91,33 @@ namespace BubbleTeaShop
             }
 
             baseScale = transform.localScale;
-            CreateGlowAura();
+
+            if (!hasBeenViewed && enablePulsingGlow)
+            {
+                CreateGlowAura();
+            }
         }
 
         private void OnEnable()
         {
-            if (enablePulsingGlow)
+            hasBeenViewed = (PlayerPrefs.GetInt(PREFS_KEY_SIGN_VIEWED, 0) == 1);
+            if (hasBeenViewed || !enablePulsingGlow)
             {
+                enablePulsingGlow = false;
+                if (pulseRoutine != null)
+                {
+                    StopCoroutine(pulseRoutine);
+                    pulseRoutine = null;
+                }
+                if (glowAuraImage != null)
+                {
+                    glowAuraImage.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                CreateGlowAura();
+                if (glowAuraImage != null) glowAuraImage.gameObject.SetActive(true);
                 if (pulseRoutine != null) StopCoroutine(pulseRoutine);
                 pulseRoutine = StartCoroutine(SignPulseGlowRoutine());
             }
@@ -106,6 +135,7 @@ namespace BubbleTeaShop
 
         private void CreateGlowAura()
         {
+            if (hasBeenViewed) return;
             if (glowAuraImage != null) return;
 
             GameObject auraObj = new GameObject("SignGlowAura", typeof(RectTransform), typeof(Image));
@@ -131,13 +161,13 @@ namespace BubbleTeaShop
             // Keep the signpost itself completely stationary and static
             transform.localScale = baseScale;
 
-            while (enabled)
+            while (enabled && !hasBeenViewed && enablePulsingGlow)
             {
                 float t = Time.time * 2.2f;
                 float pulse = (Mathf.Sin(t) + 1f) * 0.2f; // 0 to 1
 
                 // Only pulse the surrounding outer glow aura
-                if (glowAuraImage != null)
+                if (glowAuraImage != null && glowAuraImage.gameObject.activeInHierarchy)
                 {
                     float alpha = Mathf.Lerp(0.12f, 0.42f, pulse);
                     glowAuraImage.color = new Color(1f, 0.90f, 0.45f, alpha);
@@ -145,6 +175,11 @@ namespace BubbleTeaShop
                 }
 
                 yield return null;
+            }
+
+            if (glowAuraImage != null)
+            {
+                glowAuraImage.gameObject.SetActive(false);
             }
         }
 
@@ -156,6 +191,22 @@ namespace BubbleTeaShop
 
         public void OpenSignInspection()
         {
+            // Permanently mark signpost as viewed so it never glows again
+            PlayerPrefs.SetInt(PREFS_KEY_SIGN_VIEWED, 1);
+            PlayerPrefs.Save();
+            hasBeenViewed = true;
+            enablePulsingGlow = false;
+
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+                pulseRoutine = null;
+            }
+            if (glowAuraImage != null)
+            {
+                glowAuraImage.gameObject.SetActive(false);
+            }
+
             if (zoomModalRoot == null)
             {
                 CreateAutoModal();
@@ -181,7 +232,7 @@ namespace BubbleTeaShop
             if (modalContentTransform != null)
             {
                 if (zoomRoutine != null) StopCoroutine(zoomRoutine);
-                zoomRoutine = StartCoroutine(AnimateZoom(0f, 1f, 0.25f));
+                zoomRoutine = StartCoroutine(AnimateZoom(0f, 1f, 0.22f, () => { zoomRoutine = null; }));
             }
         }
 
@@ -189,17 +240,28 @@ namespace BubbleTeaShop
         {
             PlaySound(closeSignSound);
 
-            if (modalContentTransform != null && zoomModalRoot != null && zoomModalRoot.activeSelf)
+            if (zoomRoutine != null)
             {
-                if (zoomRoutine != null) StopCoroutine(zoomRoutine);
-                zoomRoutine = StartCoroutine(AnimateZoom(1f, 0f, 0.18f, () =>
+                StopCoroutine(zoomRoutine);
+                zoomRoutine = null;
+            }
+
+            if (modalContentTransform != null && zoomModalRoot != null && zoomModalRoot.activeInHierarchy)
+            {
+                float currentScale = modalContentTransform.localScale.x;
+                if (currentScale < 0.1f) currentScale = 1f;
+
+                zoomRoutine = StartCoroutine(AnimateZoom(currentScale, 0f, 0.14f, () =>
                 {
                     if (zoomModalRoot != null) zoomModalRoot.SetActive(false);
+                    if (modalContentTransform != null) modalContentTransform.localScale = Vector3.one;
+                    zoomRoutine = null;
                 }));
             }
             else if (zoomModalRoot != null)
             {
                 zoomModalRoot.SetActive(false);
+                if (modalContentTransform != null) modalContentTransform.localScale = Vector3.one;
             }
         }
 
@@ -215,8 +277,8 @@ namespace BubbleTeaShop
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 float curve = (targetScale > startScale)
-                    ? Mathf.Sin(t * Mathf.PI * 0.5f) + (Mathf.Sin(t * Mathf.PI) * 0.1f)
-                    : Mathf.SmoothStep(startScale, targetScale, t);
+                    ? Mathf.Sin(t * Mathf.PI * 0.5f) + (Mathf.Sin(t * Mathf.PI) * 0.08f)
+                    : Mathf.SmoothStep(0f, 1f, t);
 
                 modalContentTransform.localScale = Vector3.one * Mathf.Lerp(startScale, targetScale, curve);
                 yield return null;
@@ -312,6 +374,7 @@ namespace BubbleTeaShop
             loreTitleText.fontSize = 40;
             loreTitleText.alignment = TextAlignmentOptions.Center;
             loreTitleText.color = new Color(1f, 0.88f, 0.55f);
+            loreTitleText.raycastTarget = false;
 
             // 2x Larger Body Text with Word Wrapping
             GameObject bodyObj = new GameObject("BodyText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -328,8 +391,40 @@ namespace BubbleTeaShop
             loreBodyText.lineSpacing = 16;
             loreBodyText.alignment = TextAlignmentOptions.TopLeft;
             loreBodyText.color = new Color(0.96f, 0.96f, 0.94f, 1f);
+            loreBodyText.raycastTarget = false;
 
-            // 2x Larger Close Button
+            // Top-Right X Close Button
+            GameObject xCloseObj = new GameObject("TopRightCloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            xCloseObj.transform.SetParent(cardObj.transform, false);
+            var xRt = xCloseObj.GetComponent<RectTransform>();
+            xRt.anchorMin = new Vector2(1, 1);
+            xRt.anchorMax = new Vector2(1, 1);
+            xRt.pivot = new Vector2(1, 1);
+            xRt.anchoredPosition = new Vector2(-20, -20);
+            xRt.sizeDelta = new Vector2(52, 52);
+
+            var xImg = xCloseObj.GetComponent<Image>();
+            xImg.color = new Color(0.35f, 0.28f, 0.20f, 0.95f);
+
+            GameObject xTextObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            xTextObj.transform.SetParent(xCloseObj.transform, false);
+            var xtRt = xTextObj.GetComponent<RectTransform>();
+            xtRt.anchorMin = Vector2.zero;
+            xtRt.anchorMax = Vector2.one;
+            xtRt.offsetMin = Vector2.zero;
+            xtRt.offsetMax = Vector2.zero;
+            var xTmp = xTextObj.GetComponent<TextMeshProUGUI>();
+            xTmp.text = "X";
+            xTmp.fontSize = 26;
+            xTmp.fontStyle = FontStyles.Bold;
+            xTmp.alignment = TextAlignmentOptions.Center;
+            xTmp.color = Color.white;
+            xTmp.raycastTarget = false;
+
+            var xBtn = xCloseObj.GetComponent<Button>();
+            xBtn.onClick.AddListener(CloseSignInspection);
+
+            // 2x Larger Bottom Close Button
             GameObject closeObj = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeObj.transform.SetParent(cardObj.transform, false);
             var closeRt = closeObj.GetComponent<RectTransform>();
@@ -354,6 +449,7 @@ namespace BubbleTeaShop
             cTmp.fontSize = 26;
             cTmp.alignment = TextAlignmentOptions.Center;
             cTmp.color = Color.white;
+            cTmp.raycastTarget = false;
 
             closeModalButton = closeObj.GetComponent<Button>();
             closeModalButton.onClick.AddListener(CloseSignInspection);

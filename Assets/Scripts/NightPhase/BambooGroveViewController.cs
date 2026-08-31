@@ -44,7 +44,7 @@ namespace BubbleTeaShop
         [Header("Critter Scurry Duration & Timer HUD (Editable)")]
         [Tooltip("Seconds the Baby Yippees will scurry on screen before escaping.")]
         [Range(3f, 30f)]
-        [SerializeField] private float scurryDurationSeconds = 12f;
+        [SerializeField] private float scurryDurationSeconds = 8f;
         [SerializeField] private GameObject timerBarRoot;
         [SerializeField] private Image timerBarFill;
         [SerializeField] private TextMeshProUGUI timerText;
