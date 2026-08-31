@@ -379,6 +379,12 @@ namespace BubbleTeaShop.Editor
             SetSerializedProperty(modalCtrl, "messageText", modMsg);
             SetSerializedProperty(modalCtrl, "restartButton", restartBtn.GetComponent<Button>());
 
+            // 9. Honey Meadow View Controller
+            GameObject meadowObj = CreateUIElement("HoneyMeadowViewController", canvasObj.transform);
+            SetFullStretch(meadowObj.GetComponent<RectTransform>());
+            var meadowCtrl = meadowObj.AddComponent<HoneyMeadowViewController>();
+            meadowObj.SetActive(false);
+
             EditorUtility.SetDirty(canvasObj);
             Debug.Log("[ShopSceneSetup] Complete Bubble Tea Game Scene setup successfully!");
         }
