@@ -142,7 +142,7 @@ namespace BubbleTeaShop
             {
                 "You've made remarkable progress managing the store through your first 5 days!",
                 "Starting tonight, you can embark on Foraging Expeditions to find rare wild ingredients and toppings.",
-                "I'm also passing you a Blender and a Sieve so you can process the raw ingredients found while foraging in the Kitchen Prep Area!",
+                "I'm also passing you a Blender, Sieve, and a Bucket so you can process the raw ingredients found while foraging in the Kitchen Prep Area!",
                 "Remember: foraging is also a late-night activity that will cause you to open late and lose 1 customer tomorrow.",
                 "Also, you can only do ONE night activity per night: either visit the Market OR go Foraging, but never both in the same night.",
                 "Close the shutter whenever you're ready to head into the night!"
