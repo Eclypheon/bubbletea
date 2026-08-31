@@ -182,7 +182,7 @@ namespace BubbleTeaShop
             {
                 "Ahh I see you've met our landlady Chubi, quite a character isn't she?",
                 "...Anyways, if you've made enough cash, you can actually start to purchase some upgrades for your shop!",
-                "You can inspect available upgrades to speed up dispensing, enhance customer patience, or boost your earnings.",
+                "You can inspect available upgrades to attract more customers, enhance customer patience, or boost your earnings.",
                 "Keep up the great work, I'm sure you'll be able to buy over this shop some day!",
                 "Close the shutter whenever you're ready to start the night phase!"
             };
@@ -221,7 +221,7 @@ namespace BubbleTeaShop
             {
                 "You're doing fantastic! Store sales and reputation are climbing steadily.",
                 "Tonight, I'm passing you a Chopping Board and Knife for your Kitchen Prep Area!",
-                "With these tools, you can slice up raw Jelly Blocks into fresh toppings like Coconut Jelly, Grass Jelly, and Lychee Jelly.",
+                "I found an interesting tree in the nearby Honey Meadows, here's the location, take a look if you have time and you may find something worthwhile!",
                 "Prepping a diverse topping selection helps satisfy all your customers' unique orders!",
                 "Close the shutter whenever you're ready to head into the night!"
             };
@@ -260,7 +260,7 @@ namespace BubbleTeaShop
             {
                 "Incredible work! You've really mastered the rhythm of running this bubble tea shop.",
                 "Tonight, I'm delivering our highest-grade preparation equipment: a collection Bucket and high-speed Centrifuge!",
-                "You can use the centrifuge in the Kitchen Prep Area to spin and refine raw Golden Dew into gourmet, high-value specialty toppings.",
+                "They recently opened up the path to the Misty Mountains again for merchants, you really should head over to take a look, there might be some special ingredients you can use to really elevate your tea!",
                 "We're getting closer to buying out the shop for good! Close the shutter whenever you're ready to start the night!"
             };
 
