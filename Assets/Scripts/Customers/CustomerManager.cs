@@ -119,6 +119,12 @@ namespace BubbleTeaShop
                 return false;
             }
 
+            if (customerController != null && customerController.IsMentorTalking)
+            {
+                HUDController.Instance?.ShowNotification("Listen to your Mentor's advice first!");
+                return false;
+            }
+
             if (customerController != null && customerController.IsMentorActive)
             {
                 customerController.DismissMentor();

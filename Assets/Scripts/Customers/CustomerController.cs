@@ -302,6 +302,8 @@ namespace BubbleTeaShop
             }
 
             isWaiting = false;
+            isMentorTalking = false;
+            if (mentorNavPanel != null) mentorNavPanel.SetActive(false);
             OrderTicketUI.Instance?.HideTicket();
             if (speechBubble != null) speechBubble.HideBubbleInstant();
             if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
@@ -312,7 +314,99 @@ namespace BubbleTeaShop
 
         private bool isMentorActive = false;
         public bool IsMentorActive => isMentorActive;
-        private Coroutine mentorRoutine;
+        private bool isMentorTalking = false;
+        public bool IsMentorTalking => isMentorTalking;
+
+        private GameObject mentorNavPanel;
+        private Button mentorNextButton;
+        private TMPro.TextMeshProUGUI mentorNextButtonText;
+        private Button mentorSkipButton;
+        private TMPro.TextMeshProUGUI mentorSkipButtonText;
+        private string[] activeMentorLines;
+        private int currentMentorLineIndex = 0;
+        private Action onActiveMentorCompleted;
+
+        private void EnsureMentorNavUI()
+        {
+            if (mentorNavPanel != null) return;
+            Transform parent = (speechBubble != null) ? speechBubble.transform : transform;
+
+            mentorNavPanel = new GameObject("MentorNavPanel", typeof(RectTransform));
+            mentorNavPanel.transform.SetParent(parent, false);
+
+            var navRt = mentorNavPanel.GetComponent<RectTransform>();
+            navRt.anchorMin = new Vector2(0.5f, 0f);
+            navRt.anchorMax = new Vector2(0.5f, 0f);
+            navRt.pivot = new Vector2(0.5f, 1f);
+            navRt.anchoredPosition = new Vector2(0f, -8f);
+            navRt.sizeDelta = new Vector2(360f, 44f);
+
+            // 1. Skip Button (Left)
+            GameObject skipObj = new GameObject("SkipButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            skipObj.transform.SetParent(mentorNavPanel.transform, false);
+            var skipRt = skipObj.GetComponent<RectTransform>();
+            skipRt.anchorMin = new Vector2(0f, 0.5f);
+            skipRt.anchorMax = new Vector2(0f, 0.5f);
+            skipRt.pivot = new Vector2(0f, 0.5f);
+            skipRt.anchoredPosition = new Vector2(10f, 0f);
+            skipRt.sizeDelta = new Vector2(140f, 40f);
+
+            var skipImg = skipObj.GetComponent<Image>();
+            skipImg.color = new Color(0.32f, 0.32f, 0.35f, 0.95f);
+
+            GameObject skipTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+            skipTextObj.transform.SetParent(skipObj.transform, false);
+            var stRt = skipTextObj.GetComponent<RectTransform>();
+            stRt.anchorMin = Vector2.zero;
+            stRt.anchorMax = Vector2.one;
+            stRt.offsetMin = Vector2.zero;
+            stRt.offsetMax = Vector2.zero;
+
+            mentorSkipButtonText = skipTextObj.GetComponent<TMPro.TextMeshProUGUI>();
+            mentorSkipButtonText.text = "Skip >>";
+            mentorSkipButtonText.fontSize = 17;
+            mentorSkipButtonText.fontStyle = TMPro.FontStyles.Bold;
+            mentorSkipButtonText.alignment = TMPro.TextAlignmentOptions.Center;
+            mentorSkipButtonText.color = Color.white;
+            mentorSkipButtonText.raycastTarget = false;
+
+            mentorSkipButton = skipObj.GetComponent<Button>();
+            mentorSkipButton.onClick.AddListener(OnMentorSkipClicked);
+
+            // 2. Next Button (Right)
+            GameObject nextObj = new GameObject("NextButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            nextObj.transform.SetParent(mentorNavPanel.transform, false);
+            var nextRt = nextObj.GetComponent<RectTransform>();
+            nextRt.anchorMin = new Vector2(1f, 0.5f);
+            nextRt.anchorMax = new Vector2(1f, 0.5f);
+            nextRt.pivot = new Vector2(1f, 0.5f);
+            nextRt.anchoredPosition = new Vector2(-10f, 0f);
+            nextRt.sizeDelta = new Vector2(170f, 40f);
+
+            var nextImg = nextObj.GetComponent<Image>();
+            nextImg.color = new Color(0.20f, 0.68f, 0.38f, 0.95f);
+
+            GameObject nextTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+            nextTextObj.transform.SetParent(nextObj.transform, false);
+            var ntRt = nextTextObj.GetComponent<RectTransform>();
+            ntRt.anchorMin = Vector2.zero;
+            ntRt.anchorMax = Vector2.one;
+            ntRt.offsetMin = Vector2.zero;
+            ntRt.offsetMax = Vector2.zero;
+
+            mentorNextButtonText = nextTextObj.GetComponent<TMPro.TextMeshProUGUI>();
+            mentorNextButtonText.text = "Next >";
+            mentorNextButtonText.fontSize = 17;
+            mentorNextButtonText.fontStyle = TMPro.FontStyles.Bold;
+            mentorNextButtonText.alignment = TMPro.TextAlignmentOptions.Center;
+            mentorNextButtonText.color = Color.white;
+            mentorNextButtonText.raycastTarget = false;
+
+            mentorNextButton = nextObj.GetComponent<Button>();
+            mentorNextButton.onClick.AddListener(OnMentorNextClicked);
+
+            mentorNavPanel.SetActive(false);
+        }
 
         public void SpawnMentorSequence(string[] lines, float delayPerLine, Sprite mentorSpriteParam, Action onCompletedSequence = null)
         {
@@ -322,15 +416,13 @@ namespace BubbleTeaShop
                 leaveRoutine = null;
             }
 
-            if (mentorRoutine != null)
-            {
-                StopCoroutine(mentorRoutine);
-                mentorRoutine = null;
-            }
-
             isMentorActive = true;
+            isMentorTalking = true;
             isWaiting = false;
             activeOrder = null;
+            activeMentorLines = lines;
+            currentMentorLineIndex = 0;
+            onActiveMentorCompleted = onCompletedSequence;
 
             if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(false);
 
@@ -343,45 +435,85 @@ namespace BubbleTeaShop
             gameObject.SetActive(true);
             OrderTicketUI.Instance?.HideTicket();
             HUDController.Instance?.SetStatusHint("Listen to your Mentor's advice...");
-            mentorRoutine = StartCoroutine(MentorDialogueSequenceRoutine(lines, delayPerLine, onCompletedSequence));
-        }
 
-        private IEnumerator MentorDialogueSequenceRoutine(string[] lines, float delayPerLine, Action onCompletedSequence)
-        {
-            if (lines == null || lines.Length == 0) yield break;
-
-            for (int i = 0; i < lines.Length; i++)
+            EnsureMentorNavUI();
+            if (mentorNavPanel != null)
             {
-                string line = lines[i];
-                if (speechBubble != null)
-                {
-                    speechBubble.ShowMessage(line);
-                }
-
-                // If mentioning cash register -> trigger attention pulse on register button
-                if (line.Contains("Cash Register"))
-                {
-                    CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
-                }
-
-                // If explicitly asking player to ring the desk bell -> start attention wiggle on desk bell
-                if (line.Contains("desk bell") || line.Contains("Desk Bell"))
-                {
-                    DeskBell.Instance?.StartAttentionWiggle();
-                }
-
-                if (i < lines.Length - 1)
-                {
-                    yield return new WaitForSeconds(delayPerLine);
-                }
+                mentorNavPanel.SetActive(true);
+                mentorNavPanel.transform.SetAsLastSibling();
             }
 
-            bool isBellPrompt = lines.Length > 0 && (lines[lines.Length - 1].Contains("desk bell") || lines[lines.Length - 1].Contains("Desk Bell"));
+            DisplayCurrentMentorLine();
+        }
+
+        private void DisplayCurrentMentorLine()
+        {
+            if (activeMentorLines == null || activeMentorLines.Length == 0)
+            {
+                FinishMentorDialogue();
+                return;
+            }
+
+            string line = activeMentorLines[currentMentorLineIndex];
+            if (speechBubble != null)
+            {
+                speechBubble.ShowMessage(line);
+            }
+
+            bool isLastLine = (currentMentorLineIndex == activeMentorLines.Length - 1);
+            if (mentorNextButtonText != null)
+            {
+                mentorNextButtonText.text = isLastLine ? "Got it! >" : "Next >";
+            }
+
+            if (line.Contains("Cash Register"))
+            {
+                CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
+            }
+            if (line.Contains("desk bell") || line.Contains("Desk Bell"))
+            {
+                DeskBell.Instance?.StartAttentionWiggle();
+            }
+        }
+
+        private void OnMentorNextClicked()
+        {
+            if (!isMentorTalking || activeMentorLines == null) return;
+
+            currentMentorLineIndex++;
+            if (currentMentorLineIndex < activeMentorLines.Length)
+            {
+                DisplayCurrentMentorLine();
+            }
+            else
+            {
+                FinishMentorDialogue();
+            }
+        }
+
+        private void OnMentorSkipClicked()
+        {
+            if (!isMentorTalking) return;
+            FinishMentorDialogue();
+        }
+
+        private void FinishMentorDialogue()
+        {
+            isMentorTalking = false;
+
+            if (mentorNavPanel != null)
+            {
+                mentorNavPanel.SetActive(false);
+            }
+
+            bool isBellPrompt = activeMentorLines != null && activeMentorLines.Length > 0 &&
+                (activeMentorLines[activeMentorLines.Length - 1].Contains("desk bell") || activeMentorLines[activeMentorLines.Length - 1].Contains("Desk Bell"));
 
             if (isBellPrompt)
             {
                 HUDController.Instance?.SetStatusHint("Ring the desk bell to call your first customer!");
-                // Keeps isMentorActive = true so ringing the bell dismisses him
+                DeskBell.Instance?.StartAttentionWiggle();
+                // Keeps isMentorActive = true so ringing the bell calls customer and dismisses mentor
             }
             else
             {
@@ -390,18 +522,16 @@ namespace BubbleTeaShop
                 HUDController.Instance?.SetStatusHint("Close the shutter to start the Night Phase!");
             }
 
-            onCompletedSequence?.Invoke();
+            var callback = onActiveMentorCompleted;
+            onActiveMentorCompleted = null;
+            callback?.Invoke();
         }
 
         public void DismissMentor()
         {
-            if (mentorRoutine != null)
-            {
-                StopCoroutine(mentorRoutine);
-                mentorRoutine = null;
-            }
-
             isMentorActive = false;
+            isMentorTalking = false;
+            if (mentorNavPanel != null) mentorNavPanel.SetActive(false);
             if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(true);
             DismissCustomer();
             if (GameManager.Instance != null)

@@ -116,6 +116,13 @@ namespace BubbleTeaShop
                 return;
             }
 
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsMentorTalking)
+            {
+                HUDController.Instance?.ShowNotification("Listen to your Mentor's advice first!");
+                HUDController.Instance?.SetStatusHint("Listen to your Mentor's advice...");
+                return;
+            }
+
             if (GameManager.Instance != null && (GameManager.Instance.CurrentState == GameState.ShopOpen || GameManager.Instance.CurrentState == GameState.CustomerWaiting))
             {
                 CustomerManager.Instance?.TryCallNextCustomer();
