@@ -633,12 +633,11 @@ namespace BubbleTeaShop
             UpdateHarvestCounterDisplay();
             SpawnCollectPopText(blockObj.transform.position, "+1 Raw Jelly Block!");
 
-            // 15% rare bonus loot roll (Wild Honeycomb / Golden Dew)
+            // 15% rare bonus loot roll (Wild Meadow Cash Discovery)
             if (UnityEngine.Random.value < 0.15f)
             {
-                InventoryManager.Instance?.AddToppingStock(ToppingType.GoldenHoneyPearls, 1);
                 EconomyManager.Instance?.AddCash(5.00f, "Wild Honey Meadow Discovery");
-                SpawnCollectPopText(blockObj.transform.position + new Vector3(0, 30f, 0), "<color=#F1C40F>+Wild Honey Pearls (+$5.00)</color>");
+                SpawnCollectPopText(blockObj.transform.position + new Vector3(0, 30f, 0), "<color=#F1C40F>+Wild Discovery (+$5.00)</color>");
             }
 
             Destroy(blockObj);
