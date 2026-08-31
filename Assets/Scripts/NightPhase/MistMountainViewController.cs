@@ -14,8 +14,8 @@ namespace BubbleTeaShop
 
         public enum MistMountainStage
         {
-            PanoramaApproach, // Viewing wide mountain and clicking the pulsing rock shelf
-            RockWallCatching  // Close-up rock wall and bucket catching minigame
+            PanoramaApproach, // Wide mountain view with pulsing rock shelf
+            RockWallCatching  // Full-screen close-up rock wall with bucket minigame
         }
 
         [Header("Root & Screen Panels")]
@@ -32,11 +32,12 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI harvestCounterText;
 
         [Header("Stage 1: Panorama Rock Shelf")]
-        [SerializeField] private Transform rockShelvesContainer;
-        [SerializeField] private Button pulsingRockShelfButton;
+        [SerializeField] private GameObject rockShelfObject;
+        [SerializeField] private Button rockShelfButton;
+        [SerializeField] private RectTransform rockShelfRectTransform;
 
-        [Header("Stage 2: Close-up Rock Wall & Bucket Catching")]
-        [SerializeField] private Transform rockWallContainer;
+        [Header("Stage 2: Close-up Rock Wall & Minigame")]
+        [SerializeField] private GameObject rockWallObject;
         [SerializeField] private Image rockWallImage;
         [SerializeField] private RectTransform bucketRectTransform;
         [SerializeField] private Image bucketImage;
@@ -129,27 +130,51 @@ namespace BubbleTeaShop
                 }
             }
 
-            if (rockShelvesContainer == null && mistMountainPanelRoot != null)
+            if (rockShelfObject == null && mistMountainPanelRoot != null)
             {
-                Transform t = mistMountainPanelRoot.transform.Find("RockShelvesContainer");
-                if (t != null) rockShelvesContainer = t;
+                Transform t = mistMountainPanelRoot.transform.Find("RockShelf");
+                if (t == null) t = mistMountainPanelRoot.transform.Find("PulsingRockShelf");
+                if (t != null)
+                {
+                    rockShelfObject = t.gameObject;
+                    rockShelfButton = t.GetComponent<Button>();
+                    rockShelfRectTransform = t.GetComponent<RectTransform>();
+                }
+            }
+            else if (rockShelfObject != null)
+            {
+                if (rockShelfButton == null) rockShelfButton = rockShelfObject.GetComponent<Button>();
+                if (rockShelfRectTransform == null) rockShelfRectTransform = rockShelfObject.GetComponent<RectTransform>();
             }
 
-            if (rockWallContainer == null && mistMountainPanelRoot != null)
+            if (rockWallObject == null && mistMountainPanelRoot != null)
             {
-                Transform t = mistMountainPanelRoot.transform.Find("RockWallContainer");
-                if (t != null) rockWallContainer = t;
+                Transform t = mistMountainPanelRoot.transform.Find("RockWall");
+                if (t == null) t = mistMountainPanelRoot.transform.Find("RockWallContainer");
+                if (t != null)
+                {
+                    rockWallObject = t.gameObject;
+                    rockWallImage = t.GetComponent<Image>();
+                }
+            }
+            else if (rockWallObject != null)
+            {
+                if (rockWallImage == null) rockWallImage = rockWallObject.GetComponent<Image>();
             }
 
             if (bucketRectTransform == null && mistMountainPanelRoot != null)
             {
                 Transform b = mistMountainPanelRoot.transform.Find("CatchBucket");
-                if (b == null && rockWallContainer != null) b = rockWallContainer.Find("CatchBucket");
+                if (b == null && rockWallObject != null) b = rockWallObject.transform.Find("CatchBucket");
                 if (b != null)
                 {
                     bucketRectTransform = b.GetComponent<RectTransform>();
                     bucketImage = b.GetComponent<Image>();
                 }
+            }
+            else if (bucketRectTransform != null && bucketImage == null)
+            {
+                bucketImage = bucketRectTransform.GetComponent<Image>();
             }
         }
 
@@ -292,18 +317,28 @@ namespace BubbleTeaShop
             retTmp.alignment = TextAlignmentOptions.Center;
             retTmp.color = Color.white;
 
-            // 4. Stage 1: Rock Shelves Container
-            GameObject shelvesObj = new GameObject("RockShelvesContainer", typeof(RectTransform));
-            shelvesObj.transform.SetParent(rootObj.transform, false);
-            var shelvesRt = shelvesObj.GetComponent<RectTransform>();
-            shelvesRt.anchorMin = Vector2.zero;
-            shelvesRt.anchorMax = Vector2.one;
-            shelvesRt.offsetMin = Vector2.zero;
-            shelvesRt.offsetMax = Vector2.zero;
-            rockShelvesContainer = shelvesObj.transform;
+            // 4. Stage 1: Pulsing Rock Shelf
+            GameObject shelfObj = new GameObject("RockShelf", typeof(RectTransform), typeof(Image), typeof(Button));
+            shelfObj.transform.SetParent(rootObj.transform, false);
+            rockShelfRectTransform = shelfObj.GetComponent<RectTransform>();
+            rockShelfRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            rockShelfRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            rockShelfRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            rockShelfRectTransform.anchoredPosition = new Vector2(0f, -40f);
+            rockShelfRectTransform.sizeDelta = new Vector2(270f, 140f);
+
+            var shelfImg = shelfObj.GetComponent<Image>();
+            if (rockShelfSprite != null) shelfImg.sprite = rockShelfSprite;
+            shelfImg.preserveAspect = true;
+            shelfImg.raycastTarget = true;
+
+            rockShelfButton = shelfObj.GetComponent<Button>();
+            rockShelfButton.transition = Selectable.Transition.None;
+            rockShelfButton.onClick.AddListener(OnRockShelfClicked);
+            rockShelfObject = shelfObj;
 
             // 5. Stage 2: Rock Wall Container
-            GameObject wallObj = new GameObject("RockWallContainer", typeof(RectTransform), typeof(Image), typeof(Button));
+            GameObject wallObj = new GameObject("RockWall", typeof(RectTransform), typeof(Image), typeof(Button));
             wallObj.transform.SetParent(rootObj.transform, false);
             var wallRt = wallObj.GetComponent<RectTransform>();
             wallRt.anchorMin = Vector2.zero;
@@ -315,13 +350,13 @@ namespace BubbleTeaShop
             if (rockWallSprite != null) rockWallImage.sprite = rockWallSprite;
             rockWallImage.color = Color.white;
             rockWallImage.raycastTarget = true;
-            rockWallContainer = wallObj.transform;
+            rockWallObject = wallObj;
 
             var wallBtn = wallObj.GetComponent<Button>();
             wallBtn.transition = Selectable.Transition.None;
             wallBtn.onClick.AddListener(OnRockWallClicked);
 
-            // 6. Catch Bucket inside RockWallContainer
+            // 6. Catch Bucket inside RockWall
             GameObject bucketObj = new GameObject("CatchBucket", typeof(RectTransform), typeof(Image));
             bucketObj.transform.SetParent(wallObj.transform, false);
             bucketRectTransform = bucketObj.GetComponent<RectTransform>();
@@ -347,14 +382,31 @@ namespace BubbleTeaShop
                 returnToNightHubButton.onClick.AddListener(CloseMistMountainView);
             }
 
-            if (rockWallContainer != null)
+            if (rockShelfObject != null)
             {
-                var btn = rockWallContainer.GetComponent<Button>();
-                if (btn == null) btn = rockWallContainer.gameObject.AddComponent<Button>();
+                var btn = rockShelfObject.GetComponent<Button>();
+                if (btn == null) btn = rockShelfObject.AddComponent<Button>();
+                btn.transition = Selectable.Transition.None;
+                btn.interactable = true;
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(OnRockShelfClicked);
+                rockShelfButton = btn;
+
+                var img = rockShelfObject.GetComponent<Image>();
+                if (img != null) img.raycastTarget = true;
+            }
+
+            if (rockWallObject != null)
+            {
+                var btn = rockWallObject.GetComponent<Button>();
+                if (btn == null) btn = rockWallObject.AddComponent<Button>();
                 btn.transition = Selectable.Transition.None;
                 btn.interactable = true;
                 btn.onClick.RemoveAllListeners();
                 btn.onClick.AddListener(OnRockWallClicked);
+
+                var img = rockWallObject.GetComponent<Image>();
+                if (img != null) img.raycastTarget = true;
             }
         }
 
@@ -445,46 +497,19 @@ namespace BubbleTeaShop
                 backgroundImage.sprite = mountainPanoramaSprite;
             }
 
-            if (rockWallContainer != null) rockWallContainer.gameObject.SetActive(false);
-            if (rockShelvesContainer != null)
+            if (rockWallObject != null) rockWallObject.SetActive(false);
+
+            if (rockShelfObject != null)
             {
-                rockShelvesContainer.gameObject.SetActive(true);
-                BuildPulsingRockShelf();
+                rockShelfObject.SetActive(true);
+                var rt = rockShelfObject.GetComponent<RectTransform>();
+                if (rt != null)
+                {
+                    pulsingShelfCoroutine = StartCoroutine(PulsingShelfRoutine(rt));
+                }
             }
 
             HUDController.Instance?.SetSubscreenMode(true, PANORAMA_HINT);
-        }
-
-        private void BuildPulsingRockShelf()
-        {
-            if (rockShelvesContainer == null) return;
-
-            // Clear old children
-            for (int i = rockShelvesContainer.childCount - 1; i >= 0; i--)
-            {
-                Destroy(rockShelvesContainer.GetChild(i).gameObject);
-            }
-
-            // 1 Single Prominent Pulsing Rock Shelf
-            GameObject shelfObj = new GameObject("PulsingRockShelf", typeof(RectTransform), typeof(Image), typeof(Button));
-            shelfObj.transform.SetParent(rockShelvesContainer, false);
-            var rt = shelfObj.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.anchoredPosition = new Vector2(0f, -40f);
-            rt.sizeDelta = new Vector2(270f, 140f);
-
-            var img = shelfObj.GetComponent<Image>();
-            if (rockShelfSprite != null) img.sprite = rockShelfSprite;
-            img.preserveAspect = true;
-            img.raycastTarget = true;
-
-            pulsingRockShelfButton = shelfObj.GetComponent<Button>();
-            pulsingRockShelfButton.transition = Selectable.Transition.None;
-            pulsingRockShelfButton.onClick.AddListener(OnRockShelfSelected);
-
-            pulsingShelfCoroutine = StartCoroutine(PulsingShelfRoutine(rt));
         }
 
         private IEnumerator PulsingShelfRoutine(RectTransform rt)
@@ -514,7 +539,7 @@ namespace BubbleTeaShop
             }
         }
 
-        private void OnRockShelfSelected()
+        public void OnRockShelfClicked()
         {
             if (currentStage != MistMountainStage.PanoramaApproach) return;
             PlaySound(rockKickSound);
@@ -530,11 +555,11 @@ namespace BubbleTeaShop
             currentStage = MistMountainStage.RockWallCatching;
             hasKickedWall = false;
 
-            if (rockShelvesContainer != null) rockShelvesContainer.gameObject.SetActive(false);
+            if (rockShelfObject != null) rockShelfObject.SetActive(false);
 
-            if (rockWallContainer != null)
+            if (rockWallObject != null)
             {
-                rockWallContainer.gameObject.SetActive(true);
+                rockWallObject.SetActive(true);
                 if (rockWallImage != null && rockWallSprite != null)
                 {
                     rockWallImage.sprite = rockWallSprite;
@@ -567,7 +592,7 @@ namespace BubbleTeaShop
         private IEnumerator ViolentRockWallShakeRoutine()
         {
             RectTransform panelRt = (mistMountainPanelRoot != null) ? mistMountainPanelRoot.GetComponent<RectTransform>() : null;
-            RectTransform wallRt = rockWallContainer as RectTransform;
+            RectTransform wallRt = (rockWallObject != null) ? rockWallObject.GetComponent<RectTransform>() : null;
 
             float elapsed = 0f;
             float duration = 0.55f;
@@ -606,7 +631,7 @@ namespace BubbleTeaShop
             StopAllDewRoutines();
             ClearAllDewDrops();
 
-            Transform container = (rockWallContainer != null) ? rockWallContainer : mistMountainPanelRoot.transform;
+            Transform container = (rockWallObject != null) ? rockWallObject.transform : mistMountainPanelRoot.transform;
 
             int spawnCount = Mathf.Clamp(UnityEngine.Random.Range(minDewDrops, maxDewDrops + 1), 3, 10);
             totalSpawnedCount = spawnCount;
@@ -672,7 +697,7 @@ namespace BubbleTeaShop
                     Vector2 bucketPos = bucketRectTransform.anchoredPosition;
                     float bucketCatchTopY = bucketPos.y + 45f;
                     float bucketCatchBottomY = bucketPos.y - 35f;
-                    float bucketCatchRadiusX = 65f; // Catch zone horizontal tolerance
+                    float bucketCatchRadiusX = 65f;
 
                     if (currentY <= bucketCatchTopY && currentY >= bucketCatchBottomY)
                     {
@@ -815,7 +840,7 @@ namespace BubbleTeaShop
             }
             else if (currentStage == MistMountainStage.PanoramaApproach)
             {
-                OnRockShelfSelected();
+                OnRockShelfClicked();
             }
         }
 
@@ -872,7 +897,7 @@ namespace BubbleTeaShop
             }
             activeDewDropObjects.Clear();
 
-            Transform container = (rockWallContainer != null) ? rockWallContainer : mistMountainPanelRoot.transform;
+            Transform container = (rockWallObject != null) ? rockWallObject.transform : mistMountainPanelRoot.transform;
             for (int i = container.childCount - 1; i >= 0; i--)
             {
                 Transform child = container.GetChild(i);
