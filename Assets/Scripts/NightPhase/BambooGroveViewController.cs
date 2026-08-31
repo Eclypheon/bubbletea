@@ -40,7 +40,6 @@ namespace BubbleTeaShop
         [SerializeField] private Transform crittersContainer;
         [SerializeField] private Sprite[] babyYippeeRunSprites;
         [SerializeField] private Sprite babyYippeeStaticSprite;
-        [SerializeField] private RuntimeAnimatorController babyYippeeAnimatorController;
 
         [Header("Audio SFX")]
         [SerializeField] private AudioClip grassRustleSound;
@@ -325,12 +324,6 @@ namespace BubbleTeaShop
 
                 img.sprite = critterSprite;
                 img.preserveAspect = true;
-
-                if (babyYippeeAnimatorController != null)
-                {
-                    var anim = critterObj.AddComponent<Animator>();
-                    anim.runtimeAnimatorController = babyYippeeAnimatorController;
-                }
 
                 var btn = critterObj.GetComponent<Button>();
                 var capturedObj = critterObj;
