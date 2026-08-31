@@ -18,6 +18,7 @@ namespace BubbleTeaShop
         [SerializeField] private Button tabForagingButton;
         [SerializeField] private Button tabUpgradesButton;
         [SerializeField] private Button tabLedgerButton;
+        [SerializeField] private Button prepAreaButton;
         [SerializeField] private Button sleepButton;
 
         [Header("Ledger Info")]
@@ -59,6 +60,7 @@ namespace BubbleTeaShop
             if (tabForagingButton != null) tabForagingButton.onClick.AddListener(() => SwitchTab(1));
             if (tabUpgradesButton != null) tabUpgradesButton.onClick.AddListener(() => SwitchTab(2));
             if (tabLedgerButton != null) tabLedgerButton.onClick.AddListener(() => SwitchTab(3));
+            if (prepAreaButton != null) prepAreaButton.onClick.AddListener(OpenPrepArea);
             if (sleepButton != null) sleepButton.onClick.AddListener(OnSleepClicked);
 
             if (forageBambooBtn != null) forageBambooBtn.onClick.AddListener(() => ForagingManager.Instance?.GoForaging("BambooGrove"));
@@ -81,6 +83,16 @@ namespace BubbleTeaShop
                     int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                     UpdateTabsState(day);
                     UpdateForagingButtons(day);
+                };
+            }
+
+            if (PrepAreaViewController.Instance != null)
+            {
+                PrepAreaViewController.Instance.OnPrepAreaClosed += () =>
+                {
+                    int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                    UpdateTabsState(day);
+                    UpdateLedger();
                 };
             }
 
@@ -187,6 +199,15 @@ namespace BubbleTeaShop
                 tabUpgradesButton.interactable = upgradesUnlocked;
                 var t = tabUpgradesButton.GetComponentInChildren<TextMeshProUGUI>();
                 if (t != null) t.text = upgradesUnlocked ? "Shop Upgrades" : "Upgrades (Day 8)";
+            }
+
+            // 4. Kitchen Prep Area Button: Unlocks on Day 5+
+            if (prepAreaButton != null)
+            {
+                bool prepUnlocked = (day >= 5);
+                prepAreaButton.interactable = prepUnlocked;
+                var t = prepAreaButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (t != null) t.text = prepUnlocked ? "Kitchen Prep Area →" : "Prep Area (Day 5)";
             }
         }
 
@@ -343,6 +364,19 @@ namespace BubbleTeaShop
             if (foragingTabPanel != null) foragingTabPanel.SetActive(tabIndex == 1);
             if (upgradesTabPanel != null) upgradesTabPanel.SetActive(tabIndex == 2);
             if (ledgerTabPanel != null) ledgerTabPanel.SetActive(tabIndex == 3);
+        }
+
+        public void OpenPrepArea()
+        {
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            if (PrepAreaViewController.Instance != null)
+            {
+                PrepAreaViewController.Instance.OpenPrepAreaView(day);
+            }
+            else
+            {
+                HUDController.Instance?.ShowNotification("Kitchen Prep Area is not available.", 3f);
+            }
         }
 
         private void UpdateLedger()

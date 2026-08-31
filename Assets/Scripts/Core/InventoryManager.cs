@@ -64,6 +64,11 @@ namespace BubbleTeaShop
             stock[$"Topping_{ToppingType.CheeseFoam}"] = 0;
             stock[$"Topping_{ToppingType.GoldenHoneyPearls}"] = 0;
 
+            // Raw Foraged Ingredients
+            stock[$"Raw_{RawIngredientType.BabyYippees}"] = 0;
+            stock[$"Raw_{RawIngredientType.JellyBlocks}"] = 0;
+            stock[$"Raw_{RawIngredientType.GoldenDew}"] = 0;
+
             hasPremiumMilkDispenser = false;
             OnInventoryUpdated?.Invoke();
         }
@@ -122,5 +127,17 @@ namespace BubbleTeaShop
         public void AddMilkStock(MilkType milk, int qty) => AddStock($"Milk_{milk}", qty);
         public void AddToppingStock(ToppingType topping, int qty) => AddStock($"Topping_{topping}", qty);
         public void AddCups(int qty) => AddStock("Cup", qty);
+
+        // Raw Foraged Ingredients API
+        public int GetRawStock(RawIngredientType type) => GetStock($"Raw_{type}");
+        public void AddRawStock(RawIngredientType type, int qty) => AddStock($"Raw_{type}", qty);
+        public bool ConsumeRawStock(RawIngredientType type, int qty = 1) => ConsumeStock($"Raw_{type}", qty);
+    }
+
+    public enum RawIngredientType
+    {
+        BabyYippees,
+        JellyBlocks,
+        GoldenDew
     }
 }
