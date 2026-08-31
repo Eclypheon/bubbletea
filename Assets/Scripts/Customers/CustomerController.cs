@@ -63,6 +63,12 @@ namespace BubbleTeaShop
 
         private void Start()
         {
+            if (patienceFillImage != null && patienceFillImage.sprite == null)
+            {
+                Texture2D whiteTex = Texture2D.whiteTexture;
+                patienceFillImage.sprite = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+            }
+
             if (payRentButton != null)
             {
                 payRentButton.onClick.RemoveAllListeners();
@@ -87,13 +93,29 @@ namespace BubbleTeaShop
 
             if (!isWaiting) return;
 
-            currentPatience -= Time.deltaTime;
+            // Continually refresh hierarchy positioning and visibility of patience bar during day phase
             if (patienceFillImage != null)
             {
+                if (patienceFillImage.transform.parent != null)
+                {
+                    if (!patienceFillImage.transform.parent.gameObject.activeSelf)
+                    {
+                        patienceFillImage.transform.parent.gameObject.SetActive(true);
+                    }
+                    patienceFillImage.transform.parent.SetAsLastSibling();
+                }
+
+                if (!patienceFillImage.gameObject.activeSelf)
+                {
+                    patienceFillImage.gameObject.SetActive(true);
+                }
+
                 patienceFillImage.fillAmount = PatiencePercent;
                 // Tint patience bar from Green -> Yellow -> Red
                 patienceFillImage.color = Color.Lerp(Color.red, Color.green, PatiencePercent);
             }
+
+            currentPatience -= Time.deltaTime;
 
             if (currentPatience <= 0f)
             {
@@ -122,12 +144,36 @@ namespace BubbleTeaShop
             currentPatience = maxPatience;
             isWaiting = true;
 
+            transform.SetAsLastSibling();
+
+            if (patienceFillImage != null)
+            {
+                if (patienceFillImage.sprite == null)
+                {
+                    Texture2D whiteTex = Texture2D.whiteTexture;
+                    patienceFillImage.sprite = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+                }
+                if (patienceFillImage.transform.parent != null)
+                {
+                    patienceFillImage.transform.parent.gameObject.SetActive(true);
+                    patienceFillImage.transform.parent.SetAsLastSibling();
+                }
+                patienceFillImage.gameObject.SetActive(true);
+                patienceFillImage.fillAmount = 1f;
+                patienceFillImage.color = Color.green;
+            }
+
             UpdateCustomerSprite(order.archetype);
             gameObject.SetActive(true);
 
             if (speechBubble != null)
             {
                 speechBubble.ShowOrder(order);
+            }
+
+            if (patienceFillImage != null && patienceFillImage.transform.parent != null)
+            {
+                patienceFillImage.transform.parent.SetAsLastSibling();
             }
 
             OrderTicketUI.Instance?.ShowTicket(order);
