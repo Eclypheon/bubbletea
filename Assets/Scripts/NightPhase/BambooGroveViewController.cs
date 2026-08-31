@@ -19,15 +19,24 @@ namespace BubbleTeaShop
 
         [Header("UI Header & Basket")]
         [SerializeField] private TextMeshProUGUI harvestCounterText;
-        [SerializeField] private Image signboardImage;
-        [SerializeField] private Sprite signBoardSprite;
 
-        [Header("Interactive Grass Patches")]
+        [Header("Signpost & Lore")]
+        [SerializeField] private Signpost signpost;
+
+        [Header("Grass Spawning Tuning (Editable)")]
+        [Range(1, 6)]
+        [SerializeField] private int minGrassPatches = 2;
+        [Range(1, 6)]
+        [SerializeField] private int maxGrassPatches = 4;
+        [SerializeField] private Sprite grassPileSprite;
         [SerializeField] private Transform grassPatchesContainer;
-        [SerializeField] private Sprite[] grassPileSprites;
         [SerializeField] private List<Button> grassPatchButtons = new List<Button>();
 
-        [Header("Critter Spawning")]
+        [Header("Critter Spawning Tuning (Editable)")]
+        [Range(1, 10)]
+        [SerializeField] private int minYippeesPerPatch = 1;
+        [Range(1, 10)]
+        [SerializeField] private int maxYippeesPerPatch = 3;
         [SerializeField] private Transform crittersContainer;
         [SerializeField] private Sprite[] babyYippeeRunSprites;
         [SerializeField] private Sprite babyYippeeStaticSprite;
@@ -93,11 +102,6 @@ namespace BubbleTeaShop
                 backgroundImage.sprite = bambooGroveBackgroundSprite;
             }
 
-            if (signboardImage != null && signBoardSprite != null)
-            {
-                signboardImage.sprite = signBoardSprite;
-            }
-
             HUDController.Instance?.SetSubscreenMode(true, "🎋 Bamboo Grove: Tap the rustling grass to flush out wild Baby Yippees, then catch them!");
 
             UpdateHarvestCounterDisplay();
@@ -107,6 +111,11 @@ namespace BubbleTeaShop
         public void CloseBambooGroveView()
         {
             isGroveOpen = false;
+            if (signpost != null)
+            {
+                signpost.CloseSignInspection();
+            }
+
             StopAllWobbles();
             ClearAllCritters();
 
@@ -165,7 +174,7 @@ namespace BubbleTeaShop
                 return;
             }
 
-            // Auto-generate 3 grass patches if none wired in Inspector
+            // Auto-generate random 2, 3, or 4 grass patches
             Transform container = grassPatchesContainer != null ? grassPatchesContainer : bambooGrovePanelRoot.transform;
             for (int i = container.childCount - 1; i >= 0; i--)
             {
@@ -176,14 +185,28 @@ namespace BubbleTeaShop
                 }
             }
 
-            Vector2[] defaultPositions = new Vector2[]
+            List<Vector2> candidatePositions = new List<Vector2>
             {
-                new Vector2(-280f, -160f),
-                new Vector2(0f, -220f),
-                new Vector2(280f, -150f)
+                new Vector2(-330f, -160f),
+                new Vector2(-120f, -220f),
+                new Vector2(110f, -190f),
+                new Vector2(320f, -150f),
+                new Vector2(-210f, -130f),
+                new Vector2(210f, -230f)
             };
 
-            for (int i = 0; i < defaultPositions.Length; i++)
+            // Shuffle positions
+            for (int i = 0; i < candidatePositions.Count; i++)
+            {
+                int rnd = UnityEngine.Random.Range(i, candidatePositions.Count);
+                var temp = candidatePositions[i];
+                candidatePositions[i] = candidatePositions[rnd];
+                candidatePositions[rnd] = temp;
+            }
+
+            int spawnCount = Mathf.Clamp(UnityEngine.Random.Range(minGrassPatches, maxGrassPatches + 1), 1, candidatePositions.Count);
+
+            for (int i = 0; i < spawnCount; i++)
             {
                 int index = i;
                 GameObject patchObj = new GameObject($"AutoGrass_{i + 1}", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -192,13 +215,13 @@ namespace BubbleTeaShop
                 rt.anchorMin = new Vector2(0.5f, 0.5f);
                 rt.anchorMax = new Vector2(0.5f, 0.5f);
                 rt.pivot = new Vector2(0.5f, 0.5f);
-                rt.sizeDelta = new Vector2(160f, 130f);
-                rt.anchoredPosition = defaultPositions[i];
+                rt.sizeDelta = new Vector2(170f, 140f);
+                rt.anchoredPosition = candidatePositions[i];
 
                 var img = patchObj.GetComponent<Image>();
-                if (grassPileSprites != null && grassPileSprites.Length > 0)
+                if (grassPileSprite != null)
                 {
-                    img.sprite = grassPileSprites[i % grassPileSprites.Length];
+                    img.sprite = grassPileSprite;
                 }
                 img.preserveAspect = true;
 
@@ -280,7 +303,7 @@ namespace BubbleTeaShop
         private void SpawnCrittersFromPatch(Vector3 spawnWorldPos)
         {
             Transform container = crittersContainer != null ? crittersContainer : bambooGrovePanelRoot.transform;
-            int countToSpawn = UnityEngine.Random.Range(3, 6); // 3-5 critters per patch
+            int countToSpawn = UnityEngine.Random.Range(minYippeesPerPatch, maxYippeesPerPatch + 1); // 1-3 critters per patch
 
             HUDController.Instance?.ShowNotification($"💨 Wild Baby Yippees scattered into the bamboo! Tap them quickly!", 2.5f);
 
