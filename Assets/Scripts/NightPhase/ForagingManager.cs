@@ -28,6 +28,11 @@ namespace BubbleTeaShop
             hasForagedTonight = false;
         }
 
+        public void SetForagedTonight()
+        {
+            hasForagedTonight = true;
+        }
+
         public bool IsZoneUnlocked(string zone, int day)
         {
             return zone switch

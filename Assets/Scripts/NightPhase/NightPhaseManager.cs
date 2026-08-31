@@ -63,7 +63,7 @@ namespace BubbleTeaShop
             if (prepAreaButton != null) prepAreaButton.onClick.AddListener(OpenPrepArea);
             if (sleepButton != null) sleepButton.onClick.AddListener(OnSleepClicked);
 
-            if (forageBambooBtn != null) forageBambooBtn.onClick.AddListener(() => ForagingManager.Instance?.GoForaging("BambooGrove"));
+            if (forageBambooBtn != null) forageBambooBtn.onClick.AddListener(OnForageBambooClicked);
             if (forageHoneyBtn != null) forageHoneyBtn.onClick.AddListener(() => ForagingManager.Instance?.GoForaging("HoneyMeadow"));
             if (forageMountainBtn != null) forageMountainBtn.onClick.AddListener(() => ForagingManager.Instance?.GoForaging("MistMountain"));
             if (buyoutShopButton != null) buyoutShopButton.onClick.AddListener(OnBuyoutClicked);
@@ -92,6 +92,17 @@ namespace BubbleTeaShop
                 {
                     int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                     UpdateTabsState(day);
+                    UpdateLedger();
+                };
+            }
+
+            if (BambooGroveViewController.Instance != null)
+            {
+                BambooGroveViewController.Instance.OnBambooGroveClosed += () =>
+                {
+                    int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                    UpdateTabsState(day);
+                    UpdateForagingButtons(day);
                     UpdateLedger();
                 };
             }
@@ -376,6 +387,33 @@ namespace BubbleTeaShop
             else
             {
                 HUDController.Instance?.ShowNotification("Kitchen Prep Area is not available.", 3f);
+            }
+        }
+
+        private void OnForageBambooClicked()
+        {
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            if (performedActivityTonight == NightActivityType.Market)
+            {
+                HUDController.Instance?.ShowNotification("You are exhausted from visiting the Supermarket! Only 1 night activity allowed per night.", 4.5f);
+                return;
+            }
+            if (ForagingManager.Instance != null && ForagingManager.Instance.HasForagedTonight)
+            {
+                HUDController.Instance?.ShowNotification("You are exhausted from tonight's foraging expedition! Rest up for tomorrow.", 4.5f);
+                return;
+            }
+
+            RecordActivity(NightActivityType.Foraging);
+            ForagingManager.Instance?.SetForagedTonight();
+
+            if (BambooGroveViewController.Instance != null)
+            {
+                BambooGroveViewController.Instance.OpenBambooGroveView(day);
+            }
+            else
+            {
+                ForagingManager.Instance?.GoForaging("BambooGrove");
             }
         }
 
