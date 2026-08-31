@@ -128,7 +128,7 @@ namespace BubbleTeaShop
             }
         }
 
-        public void SetStorefrontHUDVisible(bool visible)
+        public void SetHUDDetailsVisible(bool visible)
         {
             if (dayText != null) dayText.gameObject.SetActive(visible);
             if (cashText != null) cashText.gameObject.SetActive(visible);
@@ -136,13 +136,12 @@ namespace BubbleTeaShop
             if (customerCountText != null) customerCountText.gameObject.SetActive(visible);
         }
 
+        public void SetStorefrontHUDVisible(bool visible) => SetHUDDetailsVisible(visible);
+
         public void UpdateStateHint(GameState state)
         {
-            bool isStorefront = (state == GameState.MorningPrep || 
-                                 state == GameState.ShopOpen || 
-                                 state == GameState.CustomerWaiting || 
-                                 state == GameState.ShopClosing);
-            SetStorefrontHUDVisible(isStorefront);
+            // HUD details are visible in storefront gameplay and night bedroom hub
+            SetHUDDetailsVisible(state != GameState.GameOver && state != GameState.GameWon);
 
             if (statusHintText == null) return;
 

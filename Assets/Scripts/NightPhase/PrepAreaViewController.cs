@@ -132,6 +132,8 @@ namespace BubbleTeaShop
                 prepAreaPanelRoot.SetActive(true);
             }
 
+            HUDController.Instance?.SetHUDDetailsVisible(false);
+
             if (returnToNightHubButton != null)
             {
                 returnToNightHubButton.gameObject.SetActive(true);
@@ -158,6 +160,7 @@ namespace BubbleTeaShop
                 returnToNightHubButton.gameObject.SetActive(false);
             }
 
+            HUDController.Instance?.SetHUDDetailsVisible(true);
             OnPrepAreaClosed?.Invoke();
         }
 

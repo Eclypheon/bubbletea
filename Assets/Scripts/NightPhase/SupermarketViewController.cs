@@ -116,6 +116,8 @@ namespace BubbleTeaShop
                 supermarketPanelRoot.SetActive(true);
             }
 
+            HUDController.Instance?.SetHUDDetailsVisible(false);
+
             if (supermarketBackgroundImage != null && supermarketInteriorSprite != null)
             {
                 supermarketBackgroundImage.sprite = supermarketInteriorSprite;
@@ -135,6 +137,7 @@ namespace BubbleTeaShop
             {
                 supermarketPanelRoot.SetActive(false);
             }
+            HUDController.Instance?.SetHUDDetailsVisible(true);
             OnSupermarketClosed?.Invoke();
         }
 

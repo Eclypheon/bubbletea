@@ -456,7 +456,7 @@ namespace BubbleTeaShop
                     rt.anchorMin = new Vector2(0.5f, 0.5f);
                     rt.anchorMax = new Vector2(0.5f, 0.5f);
                     rt.pivot = new Vector2(0.5f, 0.5f);
-                    rt.anchoredPosition = new Vector2(-280f, -175f);
+                    rt.anchoredPosition = new Vector2(0f, 260f);
                     rt.sizeDelta = new Vector2(340f, 48f);
                 }
                 buyoutShopButton.interactable = EconomyManager.Instance.CanAfford(EconomyManager.Instance.BuyoutGoal);
