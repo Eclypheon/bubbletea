@@ -66,7 +66,7 @@ namespace BubbleTeaShop
 
             if (forageBambooBtn != null) forageBambooBtn.onClick.AddListener(OnForageBambooClicked);
             if (forageHoneyBtn != null) forageHoneyBtn.onClick.AddListener(OnForageHoneyClicked);
-            if (forageMountainBtn != null) forageMountainBtn.onClick.AddListener(() => ForagingManager.Instance?.GoForaging("MistMountain"));
+            if (forageMountainBtn != null) forageMountainBtn.onClick.AddListener(OnForageMountainClicked);
             if (buyoutShopButton != null) buyoutShopButton.onClick.AddListener(OnBuyoutClicked);
 
             if (ForagingManager.Instance != null)
@@ -112,6 +112,18 @@ namespace BubbleTeaShop
             if (HoneyMeadowViewController.Instance != null)
             {
                 HoneyMeadowViewController.Instance.OnHoneyMeadowClosed += () =>
+                {
+                    int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                    UpdateTabsState(day);
+                    UpdateForagingButtons(day);
+                    UpdateLedger();
+                    StartPrepAreaButtonPulse();
+                };
+            }
+
+            if (MistMountainViewController.Instance != null)
+            {
+                MistMountainViewController.Instance.OnMistMountainClosed += () =>
                 {
                     int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                     UpdateTabsState(day);
@@ -537,6 +549,33 @@ namespace BubbleTeaShop
             else
             {
                 ForagingManager.Instance?.GoForaging("HoneyMeadow");
+            }
+        }
+
+        private void OnForageMountainClicked()
+        {
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            if (performedActivityTonight == NightActivityType.Market)
+            {
+                HUDController.Instance?.ShowNotification("You are exhausted from visiting the Supermarket! Only 1 night activity allowed per night.", 4.5f);
+                return;
+            }
+            if (ForagingManager.Instance != null && ForagingManager.Instance.HasForagedTonight)
+            {
+                HUDController.Instance?.ShowNotification("You are exhausted from tonight's foraging expedition! Rest up for tomorrow.", 4.5f);
+                return;
+            }
+
+            RecordActivity(NightActivityType.Foraging, "MistMountain");
+            ForagingManager.Instance?.SetForagedTonight();
+
+            if (MistMountainViewController.Instance != null)
+            {
+                MistMountainViewController.Instance.OpenMistMountainView(day);
+            }
+            else
+            {
+                ForagingManager.Instance?.GoForaging("MistMountain");
             }
         }
 

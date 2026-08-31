@@ -385,6 +385,12 @@ namespace BubbleTeaShop.Editor
             var meadowCtrl = meadowObj.AddComponent<HoneyMeadowViewController>();
             meadowObj.SetActive(false);
 
+            // 10. Mist Mountain View Controller
+            GameObject mountainObj = CreateUIElement("MistMountainViewController", canvasObj.transform);
+            SetFullStretch(mountainObj.GetComponent<RectTransform>());
+            var mountainCtrl = mountainObj.AddComponent<MistMountainViewController>();
+            mountainObj.SetActive(false);
+
             EditorUtility.SetDirty(canvasObj);
             Debug.Log("[ShopSceneSetup] Complete Bubble Tea Game Scene setup successfully!");
         }
