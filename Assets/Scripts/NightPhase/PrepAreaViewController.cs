@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,26 +25,11 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite prepAreaInteriorSprite;
         [SerializeField] private Button returnToNightHubButton;
 
-        [Header("Top Raw Cards Panel")]
-        [SerializeField] private GameObject topRawPanelRoot;
-        
-        [Header("Raw Card 1 - Baby Yippees (Day 5+)")]
-        [SerializeField] private GameObject rawCardBabyYippees;
-        [SerializeField] private Button rawCardBabyYippeesBtn;
-        [SerializeField] private TextMeshProUGUI rawCountBabyYippeesText;
-        [SerializeField] private Image rawIconBabyYippees;
-
-        [Header("Raw Card 2 - Jelly Blocks (Day 11+)")]
-        [SerializeField] private GameObject rawCardJellyBlocks;
-        [SerializeField] private Button rawCardJellyBlocksBtn;
-        [SerializeField] private TextMeshProUGUI rawCountJellyBlocksText;
-        [SerializeField] private Image rawIconJellyBlocks;
-
-        [Header("Raw Card 3 - Golden Dew (Day 18+)")]
-        [SerializeField] private GameObject rawCardGoldenDew;
-        [SerializeField] private Button rawCardGoldenDewBtn;
-        [SerializeField] private TextMeshProUGUI rawCountGoldenDewText;
-        [SerializeField] private Image rawIconGoldenDew;
+        [Header("Top Raw Cards Container (Runtime Generated)")]
+        [SerializeField] private Transform topRawCardsContainer;
+        [SerializeField] private Sprite rawBabyYippeesIcon;
+        [SerializeField] private Sprite rawJellyBlocksIcon;
+        [SerializeField] private Sprite rawGoldenDewIcon;
 
         [Header("Station 1: Blender & Sieve (Day 5+)")]
         [SerializeField] private GameObject stationBlenderRoot;
@@ -118,11 +104,6 @@ namespace BubbleTeaShop
                 prepAreaBackgroundImage.sprite = prepAreaInteriorSprite;
             }
 
-            // Raw Card Clicks (Deposit raw ingredient into matching station)
-            if (rawCardBabyYippeesBtn != null) rawCardBabyYippeesBtn.onClick.AddListener(() => DepositRawIngredient(RawIngredientType.BabyYippees));
-            if (rawCardJellyBlocksBtn != null) rawCardJellyBlocksBtn.onClick.AddListener(() => DepositRawIngredient(RawIngredientType.JellyBlocks));
-            if (rawCardGoldenDewBtn != null) rawCardGoldenDewBtn.onClick.AddListener(() => DepositRawIngredient(RawIngredientType.GoldenDew));
-
             // Station Clicks (Start processing or Collect rewards)
             if (stationBlenderButton != null) stationBlenderButton.onClick.AddListener(OnBlenderClicked);
             if (stationChoppingButton != null) stationChoppingButton.onClick.AddListener(OnChoppingClicked);
@@ -165,36 +146,14 @@ namespace BubbleTeaShop
         {
             int day = currentDayNumber;
 
-            // 1. Unlocks for Top Raw Cards
+            // 1. Populate Dynamic Raw Item Cards at Top
+            PopulateTopRawCards(day);
+
+            // 2. Unlocks for Stations on the Desk
             bool yippeesUnlocked = (day >= 5);
             bool jelliesUnlocked = (day >= 11);
             bool goldenDewUnlocked = (day >= 18);
 
-            if (rawCardBabyYippees != null) rawCardBabyYippees.SetActive(yippeesUnlocked);
-            if (rawCardJellyBlocks != null) rawCardJellyBlocks.SetActive(jelliesUnlocked);
-            if (rawCardGoldenDew != null) rawCardGoldenDew.SetActive(goldenDewUnlocked);
-
-            // Update raw stock counts
-            if (InventoryManager.Instance != null)
-            {
-                if (rawCountBabyYippeesText != null)
-                {
-                    int c = InventoryManager.Instance.GetRawStock(RawIngredientType.BabyYippees);
-                    rawCountBabyYippeesText.text = FormatCount(c);
-                }
-                if (rawCountJellyBlocksText != null)
-                {
-                    int c = InventoryManager.Instance.GetRawStock(RawIngredientType.JellyBlocks);
-                    rawCountJellyBlocksText.text = FormatCount(c);
-                }
-                if (rawCountGoldenDewText != null)
-                {
-                    int c = InventoryManager.Instance.GetRawStock(RawIngredientType.GoldenDew);
-                    rawCountGoldenDewText.text = FormatCount(c);
-                }
-            }
-
-            // 2. Unlocks for Stations on the Desk
             if (stationBlenderRoot != null) stationBlenderRoot.SetActive(yippeesUnlocked);
             if (stationChoppingRoot != null) stationChoppingRoot.SetActive(jelliesUnlocked);
             if (stationCentrifugeRoot != null) stationCentrifugeRoot.SetActive(goldenDewUnlocked);
@@ -203,6 +162,137 @@ namespace BubbleTeaShop
             UpdateBlenderUI();
             UpdateChoppingUI();
             UpdateCentrifugeUI();
+        }
+
+        // =========================================================================
+        // RUNTIME TOP RAW CARDS GENERATOR
+        // =========================================================================
+        private void PopulateTopRawCards(int day)
+        {
+            if (topRawCardsContainer == null || InventoryManager.Instance == null) return;
+
+            // Clear existing cards
+            for (int i = topRawCardsContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(topRawCardsContainer.GetChild(i).gameObject);
+            }
+
+            var activeRawItems = new List<(RawIngredientType type, string name, Sprite icon, string actionLabel)>();
+
+            if (day >= 5)
+            {
+                activeRawItems.Add((RawIngredientType.BabyYippees, "Baby Yippees", rawBabyYippeesIcon, "Load Blender"));
+            }
+            if (day >= 11)
+            {
+                activeRawItems.Add((RawIngredientType.JellyBlocks, "Jelly Blocks", rawJellyBlocksIcon, "Load Board"));
+            }
+            if (day >= 18)
+            {
+                activeRawItems.Add((RawIngredientType.GoldenDew, "Golden Dew", rawGoldenDewIcon, "Pour Bucket"));
+            }
+
+            if (activeRawItems.Count == 0) return;
+
+            RectTransform containerRt = topRawCardsContainer as RectTransform;
+            float totalWidth = containerRt != null && containerRt.rect.width > 200 ? containerRt.rect.width : 1000f;
+            float totalHeight = containerRt != null && containerRt.rect.height > 40 ? containerRt.rect.height : 90f;
+
+            int count = activeRawItems.Count;
+            float spacingX = 24f;
+            float cardWidth = Mathf.Min(310f, (totalWidth - (spacingX * (count - 1))) / count);
+            float cardHeight = Mathf.Min(84f, totalHeight);
+
+            float totalBlockWidth = (cardWidth * count) + (spacingX * (count - 1));
+            float startX = -totalBlockWidth * 0.5f + (cardWidth * 0.5f);
+
+            for (int i = 0; i < count; i++)
+            {
+                var item = activeRawItems[i];
+                int stockCount = InventoryManager.Instance.GetRawStock(item.type);
+                Vector2 pos = new Vector2(startX + i * (cardWidth + spacingX), 0);
+
+                // Card Root Object with Button for easy tapping
+                GameObject cardObj = new GameObject($"RawCard_{item.type}", typeof(RectTransform), typeof(Image), typeof(Button));
+                cardObj.transform.SetParent(topRawCardsContainer, false);
+                var rt = cardObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(cardWidth, cardHeight);
+                rt.anchoredPosition = pos;
+
+                var cardImg = cardObj.GetComponent<Image>();
+                cardImg.color = new Color(0.12f, 0.16f, 0.24f, 0.95f);
+
+                // Left: Raw Ingredient Icon
+                float leftOffset = 12f;
+                if (item.icon != null)
+                {
+                    GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                    iconObj.transform.SetParent(cardObj.transform, false);
+                    var iconRt = iconObj.GetComponent<RectTransform>();
+                    iconRt.anchorMin = new Vector2(0, 0.5f);
+                    iconRt.anchorMax = new Vector2(0, 0.5f);
+                    iconRt.pivot = new Vector2(0, 0.5f);
+                    float iconSize = Mathf.Min(cardHeight - 16f, 56f);
+                    iconRt.sizeDelta = new Vector2(iconSize, iconSize);
+                    iconRt.anchoredPosition = new Vector2(10, 0);
+
+                    var img = iconObj.GetComponent<Image>();
+                    img.sprite = item.icon;
+                    img.preserveAspect = true;
+                    leftOffset = iconSize + 20f;
+                }
+
+                // Right: Count Pill Badge
+                GameObject pillObj = new GameObject("CountPill", typeof(RectTransform), typeof(Image));
+                pillObj.transform.SetParent(cardObj.transform, false);
+                var pillRt = pillObj.GetComponent<RectTransform>();
+                pillRt.anchorMin = new Vector2(1, 0.5f);
+                pillRt.anchorMax = new Vector2(1, 0.5f);
+                pillRt.pivot = new Vector2(1, 0.5f);
+                pillRt.sizeDelta = new Vector2(80, 36);
+                pillRt.anchoredPosition = new Vector2(-10, 0);
+
+                var pillImg = pillObj.GetComponent<Image>();
+                pillImg.color = new Color(0.18f, 0.24f, 0.36f, 0.90f);
+
+                GameObject countTextObj = new GameObject("CountText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                countTextObj.transform.SetParent(pillObj.transform, false);
+                var countTextRt = countTextObj.GetComponent<RectTransform>();
+                countTextRt.anchorMin = Vector2.zero;
+                countTextRt.anchorMax = Vector2.one;
+                countTextRt.offsetMin = Vector2.zero;
+                countTextRt.offsetMax = Vector2.zero;
+
+                var countTmp = countTextObj.GetComponent<TextMeshProUGUI>();
+                countTmp.text = FormatCount(stockCount);
+                countTmp.fontSize = 18;
+                countTmp.alignment = TextAlignmentOptions.Center;
+                countTmp.enableWordWrapping = false;
+
+                // Middle: Item Name and Action Subtitle
+                GameObject textObj = new GameObject("TextInfo", typeof(RectTransform), typeof(TextMeshProUGUI));
+                textObj.transform.SetParent(cardObj.transform, false);
+                var textRt = textObj.GetComponent<RectTransform>();
+                textRt.anchorMin = new Vector2(0, 0);
+                textRt.anchorMax = new Vector2(1, 1);
+                textRt.offsetMin = new Vector2(leftOffset, 4);
+                textRt.offsetMax = new Vector2(-95, -4);
+
+                var tmp = textObj.GetComponent<TextMeshProUGUI>();
+                tmp.text = $"<b>{item.name}</b>\n<size=13><color=#88AACC>{item.actionLabel}</color></size>";
+                tmp.fontSize = 17;
+                tmp.alignment = TextAlignmentOptions.MidlineLeft;
+                tmp.color = Color.white;
+                tmp.enableWordWrapping = false;
+
+                // Button Click -> Deposit Raw Ingredient
+                var btn = cardObj.GetComponent<Button>();
+                var capturedType = item.type;
+                btn.onClick.AddListener(() => DepositRawIngredient(capturedType));
+            }
         }
 
         private string FormatCount(int count)
