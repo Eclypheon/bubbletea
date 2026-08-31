@@ -329,6 +329,7 @@ namespace BubbleTeaShop
 
             HUDController.Instance?.SetStatusHint(SCATTERED_HINT);
 
+            EnsureTimerBarUI(container);
             if (timerCoroutine != null) StopCoroutine(timerCoroutine);
             timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
 
@@ -359,28 +360,26 @@ namespace BubbleTeaShop
             }
         }
 
-        private void EnsureTimerBarUI()
+        private void EnsureTimerBarUI(Transform containerParent = null)
         {
             if (timerBarRoot != null) return;
-            if (bambooGrovePanelRoot == null) return;
 
-            // Create sleek timer bar near the top with highest sorting order
-            timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image), typeof(Canvas), typeof(GraphicRaycaster));
-            timerBarRoot.transform.SetParent(bambooGrovePanelRoot.transform, false);
+            Transform targetParent = (containerParent != null)
+                ? containerParent
+                : ((crittersContainer != null) ? crittersContainer : (bambooGrovePanelRoot != null ? bambooGrovePanelRoot.transform : transform));
 
-            var canvas = timerBarRoot.GetComponent<Canvas>();
-            if (canvas != null)
-            {
-                canvas.overrideSorting = true;
-                canvas.sortingOrder = 400;
-            }
+            if (targetParent == null) return;
+
+            // Spawn timer bar directly under the same container as Baby Yippees
+            timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image));
+            timerBarRoot.transform.SetParent(targetParent, false);
 
             var rootRt = timerBarRoot.GetComponent<RectTransform>();
-            rootRt.anchorMin = new Vector2(0.5f, 1f);
-            rootRt.anchorMax = new Vector2(0.5f, 1f);
-            rootRt.pivot = new Vector2(0.5f, 1f);
-            rootRt.anchoredPosition = new Vector2(0f, -80f);
-            rootRt.sizeDelta = new Vector2(360f, 26f);
+            rootRt.anchorMin = new Vector2(0.5f, 0.5f);
+            rootRt.anchorMax = new Vector2(0.5f, 0.5f);
+            rootRt.pivot = new Vector2(0.5f, 0.5f);
+            rootRt.anchoredPosition = new Vector2(0f, 220f); // Prominently displayed in upper-center above grass patches
+            rootRt.sizeDelta = new Vector2(360f, 28f);
 
             var bgImg = timerBarRoot.GetComponent<Image>();
             bgImg.color = new Color(0.10f, 0.08f, 0.06f, 0.95f);
@@ -395,7 +394,7 @@ namespace BubbleTeaShop
             borderRt.offsetMin = new Vector2(-2, -2);
             borderRt.offsetMax = new Vector2(2, 2);
             var borderImg = borderObj.GetComponent<Image>();
-            borderImg.color = new Color(0.85f, 0.70f, 0.25f, 0.95f);
+            borderImg.color = new Color(0.95f, 0.82f, 0.35f, 1f);
             borderImg.raycastTarget = false;
             borderObj.transform.SetAsFirstSibling();
 

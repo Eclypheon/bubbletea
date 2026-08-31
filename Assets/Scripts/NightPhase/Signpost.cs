@@ -36,7 +36,7 @@ namespace BubbleTeaShop
         [SerializeField] private Image glowAuraImage;
 
         private const string PREFS_KEY_SIGN_VIEWED = "BubbleTea_BambooSign_Viewed";
-        private bool hasBeenViewed = false;
+        private static bool hasBeenViewedInSession = false;
 
         private Coroutine zoomRoutine;
         private Coroutine pulseRoutine;
@@ -44,10 +44,10 @@ namespace BubbleTeaShop
 
         private void Awake()
         {
-            hasBeenViewed = (PlayerPrefs.GetInt(PREFS_KEY_SIGN_VIEWED, 0) == 1);
-            if (hasBeenViewed)
+            // Clear any lingering persistent keys from previous runs
+            if (PlayerPrefs.HasKey(PREFS_KEY_SIGN_VIEWED))
             {
-                enablePulsingGlow = false;
+                PlayerPrefs.DeleteKey(PREFS_KEY_SIGN_VIEWED);
             }
 
             if (signpostButton == null)
@@ -92,7 +92,7 @@ namespace BubbleTeaShop
 
             baseScale = transform.localScale;
 
-            if (!hasBeenViewed && enablePulsingGlow)
+            if (!hasBeenViewedInSession && enablePulsingGlow)
             {
                 CreateGlowAura();
             }
@@ -100,8 +100,7 @@ namespace BubbleTeaShop
 
         private void OnEnable()
         {
-            hasBeenViewed = (PlayerPrefs.GetInt(PREFS_KEY_SIGN_VIEWED, 0) == 1);
-            if (hasBeenViewed || !enablePulsingGlow)
+            if (hasBeenViewedInSession || !enablePulsingGlow)
             {
                 enablePulsingGlow = false;
                 if (pulseRoutine != null)
@@ -135,7 +134,7 @@ namespace BubbleTeaShop
 
         private void CreateGlowAura()
         {
-            if (hasBeenViewed) return;
+            if (hasBeenViewedInSession) return;
             if (glowAuraImage != null) return;
 
             GameObject auraObj = new GameObject("SignGlowAura", typeof(RectTransform), typeof(Image));
@@ -161,7 +160,7 @@ namespace BubbleTeaShop
             // Keep the signpost itself completely stationary and static
             transform.localScale = baseScale;
 
-            while (enabled && !hasBeenViewed && enablePulsingGlow)
+            while (enabled && !hasBeenViewedInSession && enablePulsingGlow)
             {
                 float t = Time.time * 2.2f;
                 float pulse = (Mathf.Sin(t) + 1f) * 0.2f; // 0 to 1
@@ -191,10 +190,8 @@ namespace BubbleTeaShop
 
         public void OpenSignInspection()
         {
-            // Permanently mark signpost as viewed so it never glows again
-            PlayerPrefs.SetInt(PREFS_KEY_SIGN_VIEWED, 1);
-            PlayerPrefs.Save();
-            hasBeenViewed = true;
+            // Mark signpost as viewed for this playthrough so it never glows again
+            hasBeenViewedInSession = true;
             enablePulsingGlow = false;
 
             if (pulseRoutine != null)
