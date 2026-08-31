@@ -90,11 +90,36 @@ namespace BubbleTeaShop
             statusHintText.text = text;
         }
 
+        private bool isSubscreenActive = false;
+        private string defaultSubscreenHint = "";
+
         public void BringToFront()
         {
             if (transform.parent != null)
             {
                 transform.SetAsLastSibling();
+            }
+        }
+
+        public void SetSubscreenMode(bool inSubscreen, string persistentHint = "")
+        {
+            isSubscreenActive = inSubscreen;
+            defaultSubscreenHint = persistentHint;
+
+            if (inSubscreen)
+            {
+                SetHUDDetailsVisible(false);
+                if (!string.IsNullOrEmpty(persistentHint) && notificationRoutine == null && statusHintText != null)
+                {
+                    statusHintText.text = persistentHint;
+                }
+            }
+            else
+            {
+                if (GameManager.Instance != null)
+                {
+                    UpdateStateHint(GameManager.Instance.CurrentState);
+                }
             }
         }
 
@@ -118,6 +143,18 @@ namespace BubbleTeaShop
             }
 
             yield return new WaitForSeconds(duration);
+            notificationRoutine = null;
+
+            if (isSubscreenActive)
+            {
+                SetHUDDetailsVisible(false);
+                if (statusHintText != null && !string.IsNullOrEmpty(defaultSubscreenHint))
+                {
+                    statusHintText.text = defaultSubscreenHint;
+                }
+                yield break;
+            }
+
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
                 statusHintText.text = "The Landlord has arrived to collect weekly rent!";
@@ -140,6 +177,16 @@ namespace BubbleTeaShop
 
         public void UpdateStateHint(GameState state)
         {
+            if (isSubscreenActive)
+            {
+                SetHUDDetailsVisible(false);
+                if (statusHintText != null && !string.IsNullOrEmpty(defaultSubscreenHint) && notificationRoutine == null)
+                {
+                    statusHintText.text = defaultSubscreenHint;
+                }
+                return;
+            }
+
             // HUD details are visible in storefront gameplay and night bedroom hub
             SetHUDDetailsVisible(state != GameState.GameOver && state != GameState.GameWon);
 

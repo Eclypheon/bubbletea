@@ -132,7 +132,7 @@ namespace BubbleTeaShop
                 prepAreaPanelRoot.SetActive(true);
             }
 
-            HUDController.Instance?.SetHUDDetailsVisible(false);
+            HUDController.Instance?.SetSubscreenMode(true, "Kitchen Prep Area: Click raw cards above to load stations, then tap to process!");
 
             if (returnToNightHubButton != null)
             {
@@ -145,7 +145,6 @@ namespace BubbleTeaShop
             }
 
             UpdateUnlocksAndDisplay();
-            HUDController.Instance?.ShowNotification("Kitchen Prep Area: Click raw cards above to load stations, then tap to process!", 3.5f);
         }
 
         public void ClosePrepAreaView()
@@ -160,7 +159,7 @@ namespace BubbleTeaShop
                 returnToNightHubButton.gameObject.SetActive(false);
             }
 
-            HUDController.Instance?.SetHUDDetailsVisible(true);
+            HUDController.Instance?.SetSubscreenMode(false);
             OnPrepAreaClosed?.Invoke();
         }
 

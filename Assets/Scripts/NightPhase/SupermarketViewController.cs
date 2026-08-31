@@ -116,7 +116,7 @@ namespace BubbleTeaShop
                 supermarketPanelRoot.SetActive(true);
             }
 
-            HUDController.Instance?.SetHUDDetailsVisible(false);
+            HUDController.Instance?.SetSubscreenMode(true, "Wholesale Supermarket: Tap items to purchase supplies for tomorrow.");
 
             if (supermarketBackgroundImage != null && supermarketInteriorSprite != null)
             {
@@ -137,7 +137,7 @@ namespace BubbleTeaShop
             {
                 supermarketPanelRoot.SetActive(false);
             }
-            HUDController.Instance?.SetHUDDetailsVisible(true);
+            HUDController.Instance?.SetSubscreenMode(false);
             OnSupermarketClosed?.Invoke();
         }
 
