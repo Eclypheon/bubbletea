@@ -418,6 +418,10 @@ namespace BubbleTeaShop
             fillRt.offsetMax = new Vector2(-3, -3);
 
             timerBarFill = fillObj.GetComponent<Image>();
+            // Assign solid white sprite so Image.Type.Filled shrinks properly from right to left in Unity UI
+            Texture2D whiteTex = Texture2D.whiteTexture;
+            Sprite whiteSprite = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+            timerBarFill.sprite = whiteSprite;
             timerBarFill.type = Image.Type.Filled;
             timerBarFill.fillMethod = Image.FillMethod.Horizontal;
             timerBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;

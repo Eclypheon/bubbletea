@@ -386,7 +386,6 @@ namespace BubbleTeaShop
 
         private Coroutine prepAreaPulseRoutine;
         private Vector3 prepAreaBaseScale = Vector3.one;
-        private Color prepAreaBaseColor = Color.white;
 
         public void StartPrepAreaButtonPulse()
         {
@@ -405,8 +404,6 @@ namespace BubbleTeaShop
             if (prepAreaButton != null)
             {
                 prepAreaButton.transform.localScale = prepAreaBaseScale;
-                var img = prepAreaButton.GetComponent<Image>();
-                if (img != null) img.color = prepAreaBaseColor;
             }
         }
 
@@ -415,8 +412,6 @@ namespace BubbleTeaShop
             if (prepAreaButton == null) yield break;
 
             prepAreaBaseScale = prepAreaButton.transform.localScale;
-            var img = prepAreaButton.GetComponent<Image>();
-            if (img != null) prepAreaBaseColor = img.color;
 
             while (prepAreaButton != null && prepAreaButton.gameObject.activeInHierarchy)
             {
@@ -425,18 +420,12 @@ namespace BubbleTeaShop
 
                 prepAreaButton.transform.localScale = prepAreaBaseScale * (1f + (pulse * 0.08f));
 
-                if (img != null)
-                {
-                    img.color = Color.Lerp(prepAreaBaseColor, new Color(1f, 0.92f, 0.55f, 1f), pulse);
-                }
-
                 yield return null;
             }
 
             if (prepAreaButton != null)
             {
                 prepAreaButton.transform.localScale = prepAreaBaseScale;
-                if (img != null) img.color = prepAreaBaseColor;
             }
             prepAreaPulseRoutine = null;
         }
