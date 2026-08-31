@@ -56,8 +56,8 @@ namespace BubbleTeaShop
 
             string[] briefingLines = new string[]
             {
-                "Glad to see you starting up your own bubble tea store here!",
-                "Your ultimate goal is to buy out this store location for $5,000 to win the game.",
+                "Thanks for bringing <i>Yippee Tea</i> to <i>L-PAX</i>",
+                "Rent here is pretty steep but you can buy out this entire store location for $5,000!",
                 "Be careful with expenses! If you miss two weekly rent payments to the landlord, you will lose the shop.",
                 "Here are some basic ingredients to get you started: 15 servings of Tapioca Pearls and Fresh Milk.",
                 "Your daily supply of sugar, ice, cups, straws, and tea blends costs $10 to automatically restock each day.",
@@ -296,7 +296,7 @@ namespace BubbleTeaShop
             {
                 $"Good morning! There's breaking market news today: {marketEvent.title}!",
                 marketEvent.description,
-                "This market condition will last for the next 3 days, so plan your stock and preparations accordingly!",
+                "This market condition will probably last for the next 3 days, so plan your stock and preparations accordingly!",
                 "Ring the desk bell whenever you're ready to serve your first customer!"
             };
 
