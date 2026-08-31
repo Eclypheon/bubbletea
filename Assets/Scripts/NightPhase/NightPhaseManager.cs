@@ -81,6 +81,7 @@ namespace BubbleTeaShop
             {
                 SupermarketViewController.Instance.OnSupermarketClosed += () =>
                 {
+                    StopPrepAreaButtonPulse();
                     int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                     UpdateTabsState(day);
                     UpdateForagingButtons(day);
@@ -91,6 +92,7 @@ namespace BubbleTeaShop
             {
                 PrepAreaViewController.Instance.OnPrepAreaClosed += () =>
                 {
+                    StopPrepAreaButtonPulse();
                     int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                     UpdateTabsState(day);
                     UpdateLedger();
@@ -440,10 +442,23 @@ namespace BubbleTeaShop
 
         private Coroutine prepAreaPulseRoutine;
         private Vector3 prepAreaBaseScale = Vector3.one;
+        private Color prepAreaBaseColor = Color.white;
+        private bool hasCapturedPrepAreaBaseProps = false;
 
         public void StartPrepAreaButtonPulse()
         {
             if (prepAreaButton == null || !prepAreaButton.interactable) return;
+
+            if (!hasCapturedPrepAreaBaseProps)
+            {
+                prepAreaBaseScale = prepAreaButton.transform.localScale;
+                if (prepAreaButton.image != null)
+                {
+                    prepAreaBaseColor = prepAreaButton.image.color;
+                }
+                hasCapturedPrepAreaBaseProps = true;
+            }
+
             if (prepAreaPulseRoutine != null) StopCoroutine(prepAreaPulseRoutine);
             prepAreaPulseRoutine = StartCoroutine(PrepAreaButtonPulseRoutine());
         }
@@ -455,9 +470,13 @@ namespace BubbleTeaShop
                 StopCoroutine(prepAreaPulseRoutine);
                 prepAreaPulseRoutine = null;
             }
-            if (prepAreaButton != null)
+            if (prepAreaButton != null && hasCapturedPrepAreaBaseProps)
             {
                 prepAreaButton.transform.localScale = prepAreaBaseScale;
+                if (prepAreaButton.image != null)
+                {
+                    prepAreaButton.image.color = prepAreaBaseColor;
+                }
             }
         }
 
@@ -465,14 +484,21 @@ namespace BubbleTeaShop
         {
             if (prepAreaButton == null) yield break;
 
-            prepAreaBaseScale = prepAreaButton.transform.localScale;
+            Image btnImage = prepAreaButton.image;
+            // Vibrant glowing gold / amber highlight to draw player attention
+            Color brightPulseColor = new Color(1f, 0.88f, 0.30f, 1f);
 
             while (prepAreaButton != null && prepAreaButton.gameObject.activeInHierarchy)
             {
-                float t = Time.time * 3.5f;
+                float t = Time.time * 4.0f;
                 float pulse = (Mathf.Sin(t) + 1f) * 0.5f; // 0 to 1
 
-                prepAreaButton.transform.localScale = prepAreaBaseScale * (1f + (pulse * 0.08f));
+                prepAreaButton.transform.localScale = prepAreaBaseScale * (1f + (pulse * 0.09f));
+
+                if (btnImage != null)
+                {
+                    btnImage.color = Color.Lerp(prepAreaBaseColor, brightPulseColor, pulse * 0.9f);
+                }
 
                 yield return null;
             }
@@ -480,6 +506,10 @@ namespace BubbleTeaShop
             if (prepAreaButton != null)
             {
                 prepAreaButton.transform.localScale = prepAreaBaseScale;
+                if (btnImage != null)
+                {
+                    btnImage.color = prepAreaBaseColor;
+                }
             }
             prepAreaPulseRoutine = null;
         }
