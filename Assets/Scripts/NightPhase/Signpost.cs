@@ -116,7 +116,7 @@ namespace BubbleTeaShop
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(180f, 220f);
+            rt.sizeDelta = new Vector2(400f, 700f);
             rt.anchoredPosition = Vector2.zero;
 
             glowAuraImage = auraObj.GetComponent<Image>();
@@ -134,7 +134,7 @@ namespace BubbleTeaShop
             while (enabled)
             {
                 float t = Time.time * 2.2f;
-                float pulse = (Mathf.Sin(t) + 1f) * 0.5f; // 0 to 1
+                float pulse = (Mathf.Sin(t) + 1f) * 0.2f; // 0 to 1
 
                 // Only pulse the surrounding outer glow aura
                 if (glowAuraImage != null)
