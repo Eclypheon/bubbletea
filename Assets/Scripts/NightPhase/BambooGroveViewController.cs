@@ -330,8 +330,6 @@ namespace BubbleTeaShop
             HUDController.Instance?.SetStatusHint(SCATTERED_HINT);
 
             EnsureTimerBarUI(container);
-            if (timerCoroutine != null) StopCoroutine(timerCoroutine);
-            timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
 
             for (int i = 0; i < countToSpawn; i++)
             {
@@ -358,17 +356,27 @@ namespace BubbleTeaShop
 
                 StartCoroutine(CritterScurryRoutine(rt, img));
             }
+
+            if (timerCoroutine != null) StopCoroutine(timerCoroutine);
+            timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
         }
 
         private void EnsureTimerBarUI(Transform containerParent = null)
         {
-            if (timerBarRoot != null) return;
-
             Transform targetParent = (containerParent != null)
                 ? containerParent
                 : ((crittersContainer != null) ? crittersContainer : (bambooGrovePanelRoot != null ? bambooGrovePanelRoot.transform : transform));
 
             if (targetParent == null) return;
+
+            if (timerBarRoot != null)
+            {
+                if (timerBarRoot.transform.parent != targetParent)
+                {
+                    timerBarRoot.transform.SetParent(targetParent, false);
+                }
+                return;
+            }
 
             // Spawn timer bar directly under the same container as Baby Yippees
             timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image));
