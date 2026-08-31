@@ -77,8 +77,12 @@ namespace BubbleTeaShop
         [SerializeField] private PrepStationState centrifugeState = PrepStationState.Empty;
         [SerializeField] private int centrifugeLoadedCount = 0;
 
+        [SerializeField] private int rolledGrassJellyYield = 0;
+        [SerializeField] private int rolledCoconutJellyYield = 0;
+
         private const int MAX_BLENDER_CAPACITY = 9;
         private const int MAX_CHOPPING_CAPACITY = 3;
+        private const int MAX_CENTRIFUGE_CAPACITY = 9;
         private int currentDayNumber = 1;
         public event Action OnPrepAreaClosed;
 
@@ -404,13 +408,18 @@ namespace BubbleTeaShop
                         HUDController.Instance?.ShowNotification("Please collect your refined gourmet toppings before spinning a new batch!", 3f);
                         return;
                     }
+                    if (centrifugeLoadedCount >= MAX_CENTRIFUGE_CAPACITY)
+                    {
+                        HUDController.Instance?.ShowNotification($"The centrifuge bucket is full! (Max {MAX_CENTRIFUGE_CAPACITY} Golden Dew). Click station to process.", 3f);
+                        return;
+                    }
                     if (InventoryManager.Instance.ConsumeRawStock(RawIngredientType.GoldenDew, 1))
                     {
                         centrifugeLoadedCount++;
                         centrifugeState = PrepStationState.Loaded;
                         PlaySound(loadIngredientSound);
                         UpdateUnlocksAndDisplay();
-                        HUDController.Instance?.ShowNotification($"Poured Golden Dew into the Bucket! (Loaded: {centrifugeLoadedCount})", 2.5f);
+                        HUDController.Instance?.ShowNotification($"Poured Golden Dew into the Bucket! ({centrifugeLoadedCount}/{MAX_CENTRIFUGE_CAPACITY})", 2f);
                     }
                     break;
             }
@@ -510,14 +519,33 @@ namespace BubbleTeaShop
         {
             if (blenderLoadedCount <= 0) return;
 
-            int tapiocaYield = blenderLoadedCount * 1;
-            int poppingBobaYield = blenderLoadedCount * 1;
+            int totalItems = blenderLoadedCount * 2;
+            int poppingBobaYield = 0;
+            int tapiocaYield = 0;
 
-            InventoryManager.Instance?.AddToppingStock(ToppingType.TapiocaPearls, tapiocaYield);
-            InventoryManager.Instance?.AddToppingStock(ToppingType.PoppingBoba, poppingBobaYield);
+            for (int i = 0; i < totalItems; i++)
+            {
+                if (UnityEngine.Random.value < 0.40f)
+                {
+                    poppingBobaYield++;
+                }
+                else
+                {
+                    tapiocaYield++;
+                }
+            }
+
+            if (tapiocaYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.TapiocaPearls, tapiocaYield);
+            if (poppingBobaYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.PoppingBoba, poppingBobaYield);
 
             PlaySound(collectRewardSound);
-            HUDController.Instance?.ShowNotification($"🎉 Collected <color=#2ECC71>+{tapiocaYield} Tapioca Pearls</color> and <color=#2ECC71>+{poppingBobaYield} Popping Boba</color>!", 4f);
+
+            List<string> parts = new List<string>();
+            if (tapiocaYield > 0) parts.Add($"<color=#2ECC71>+{tapiocaYield} Tapioca Pearls</color>");
+            if (poppingBobaYield > 0) parts.Add($"<color=#2ECC71>+{poppingBobaYield} Popping Boba</color>");
+            string summary = string.Join(" and ", parts);
+
+            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4f);
 
             ClearBlenderContents();
             blenderLoadedCount = 0;
@@ -656,16 +684,15 @@ namespace BubbleTeaShop
             Sprite grassSp = GetGrassJellySprite();
             Sprite cocoSp = GetCoconutJellySprite();
 
-            int grassCount = choppingLoadedCount * 1;
-            int cocoCount = choppingLoadedCount * 1;
-
             RectTransform boardRt = (stationChoppingImage != null ? stationChoppingImage.rectTransform : parent as RectTransform);
             float boardW = boardRt != null && boardRt.rect.width > 20 ? boardRt.rect.width : 220f;
             float boardH = boardRt != null && boardRt.rect.height > 20 ? boardRt.rect.height : 140f;
 
-            float cubeSize = 50f;
+            float cubeSize = 44f;
 
-            for (int i = 0; i < grassCount; i++)
+            // Spawn Grass Jelly cubes on the left half of the board
+            int grassToSpawn = Mathf.Min(rolledGrassJellyYield, 12);
+            for (int i = 0; i < grassToSpawn; i++)
             {
                 if (grassSp == null) break;
                 GameObject cubeObj = new GameObject($"GrassJelly_{i + 1}", typeof(RectTransform), typeof(Image));
@@ -676,9 +703,10 @@ namespace BubbleTeaShop
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.sizeDelta = new Vector2(cubeSize, cubeSize);
 
-                float stepX = (i - (grassCount - 1) * 0.5f) * 40f;
-                float posX = -boardW * 0.22f + stepX;
-                float posY = boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
+                int col = i % 4;
+                int row = i / 4;
+                float posX = -boardW * 0.35f + (col * 22f) + UnityEngine.Random.Range(-3f, 3f);
+                float posY = (boardH * 0.15f) - (row * 20f) + UnityEngine.Random.Range(-3f, 3f);
                 rt.anchoredPosition = new Vector2(posX, posY);
                 rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-15f, 15f));
 
@@ -688,7 +716,9 @@ namespace BubbleTeaShop
                 img.raycastTarget = false;
             }
 
-            for (int i = 0; i < cocoCount; i++)
+            // Spawn Coconut Jelly cubes on the right half of the board
+            int cocoToSpawn = Mathf.Min(rolledCoconutJellyYield, 12);
+            for (int i = 0; i < cocoToSpawn; i++)
             {
                 if (cocoSp == null) break;
                 GameObject cubeObj = new GameObject($"CoconutJelly_{i + 1}", typeof(RectTransform), typeof(Image));
@@ -699,9 +729,10 @@ namespace BubbleTeaShop
                 rt.pivot = new Vector2(0.5f, 0.5f);
                 rt.sizeDelta = new Vector2(cubeSize, cubeSize);
 
-                float stepX = (i - (cocoCount - 1) * 0.5f) * 40f;
-                float posX = boardW * 0.22f + stepX;
-                float posY = -boardH * 0.08f + UnityEngine.Random.Range(-5f, 5f);
+                int col = i % 4;
+                int row = i / 4;
+                float posX = boardW * 0.05f + (col * 22f) + UnityEngine.Random.Range(-3f, 3f);
+                float posY = (boardH * 0.15f) - (row * 20f) + UnityEngine.Random.Range(-3f, 3f);
                 rt.anchoredPosition = new Vector2(posX, posY);
                 rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-15f, 15f));
 
@@ -778,6 +809,22 @@ namespace BubbleTeaShop
                 yield return new WaitForSeconds(1.8f);
             }
 
+            // Roll yields for the batch: 6 items per block (60% Grass, 40% Coconut)
+            int totalItems = choppingLoadedCount * 6;
+            rolledGrassJellyYield = 0;
+            rolledCoconutJellyYield = 0;
+            for (int i = 0; i < totalItems; i++)
+            {
+                if (UnityEngine.Random.value < 0.60f)
+                {
+                    rolledGrassJellyYield++;
+                }
+                else
+                {
+                    rolledCoconutJellyYield++;
+                }
+            }
+
             SpawnChoppedJelliesOnBoard();
             choppingState = PrepStationState.ReadyToCollect;
             UpdateChoppingUI();
@@ -788,17 +835,25 @@ namespace BubbleTeaShop
         {
             if (choppingLoadedCount <= 0) return;
 
-            int grassJellyYield = choppingLoadedCount * 1;
-            int coconutJellyYield = choppingLoadedCount * 1;
+            int grassJellyYield = rolledGrassJellyYield;
+            int coconutJellyYield = rolledCoconutJellyYield;
 
-            InventoryManager.Instance?.AddToppingStock(ToppingType.GrassJelly, grassJellyYield);
-            InventoryManager.Instance?.AddToppingStock(ToppingType.CoconutJelly, coconutJellyYield);
+            if (grassJellyYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.GrassJelly, grassJellyYield);
+            if (coconutJellyYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.CoconutJelly, coconutJellyYield);
 
             PlaySound(collectRewardSound);
-            HUDController.Instance?.ShowNotification($"🎉 Collected <color=#2ECC71>+{grassJellyYield} Grass Jelly</color> and <color=#2ECC71>+{coconutJellyYield} Coconut Jelly</color>!", 4f);
+
+            List<string> parts = new List<string>();
+            if (grassJellyYield > 0) parts.Add($"<color=#2ECC71>+{grassJellyYield} Grass Jelly</color>");
+            if (coconutJellyYield > 0) parts.Add($"<color=#2ECC71>+{coconutJellyYield} Coconut Jelly</color>");
+            string summary = string.Join(" and ", parts);
+
+            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4f);
 
             ClearChoppingContents();
             choppingLoadedCount = 0;
+            rolledGrassJellyYield = 0;
+            rolledCoconutJellyYield = 0;
             choppingState = PrepStationState.Empty;
             UpdateUnlocksAndDisplay();
         }
@@ -863,16 +918,41 @@ namespace BubbleTeaShop
         {
             if (centrifugeLoadedCount <= 0) return;
 
-            int puddingYield = centrifugeLoadedCount * 1;
-            int foamYield = centrifugeLoadedCount * 1;
-            int honeyPearlsYield = centrifugeLoadedCount * 1;
+            int totalItems = centrifugeLoadedCount * 2;
+            int puddingYield = 0;
+            int foamYield = 0;
+            int honeyPearlsYield = 0;
 
-            InventoryManager.Instance?.AddToppingStock(ToppingType.EggPudding, puddingYield);
-            InventoryManager.Instance?.AddToppingStock(ToppingType.CheeseFoam, foamYield);
-            InventoryManager.Instance?.AddToppingStock(ToppingType.GoldenHoneyPearls, honeyPearlsYield);
+            for (int i = 0; i < totalItems; i++)
+            {
+                float roll = UnityEngine.Random.value;
+                if (roll < 0.50f)
+                {
+                    puddingYield++;
+                }
+                else if (roll < 0.90f)
+                {
+                    foamYield++;
+                }
+                else
+                {
+                    honeyPearlsYield++;
+                }
+            }
+
+            if (puddingYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.EggPudding, puddingYield);
+            if (foamYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.CheeseFoam, foamYield);
+            if (honeyPearlsYield > 0) InventoryManager.Instance?.AddToppingStock(ToppingType.GoldenHoneyPearls, honeyPearlsYield);
 
             PlaySound(collectRewardSound);
-            HUDController.Instance?.ShowNotification($"🎉 Collected <color=#2ECC71>+{puddingYield} Egg Custard</color>, <color=#2ECC71>+{foamYield} Cheese Foam</color>, and <color=#2ECC71>+{honeyPearlsYield} Honey Pearls</color>!", 4.5f);
+
+            List<string> parts = new List<string>();
+            if (puddingYield > 0) parts.Add($"<color=#2ECC71>+{puddingYield} Egg Custard</color>");
+            if (foamYield > 0) parts.Add($"<color=#2ECC71>+{foamYield} Cheese Foam</color>");
+            if (honeyPearlsYield > 0) parts.Add($"<color=#2ECC71>+{honeyPearlsYield} Honey Pearls</color>");
+            string summary = string.Join(", ", parts);
+
+            HUDController.Instance?.ShowNotification($"🎉 Collected {summary}!", 4.5f);
 
             centrifugeLoadedCount = 0;
             centrifugeState = PrepStationState.Empty;
