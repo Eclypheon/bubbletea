@@ -387,9 +387,26 @@ namespace BubbleTeaShop
 
                 // Randomly construct the drink from available ingredients
                 order.targetTea = availableTeas[UnityEngine.Random.Range(0, availableTeas.Count)];
-                order.targetMilk = (UnityEngine.Random.value > 0.35f)
-                    ? availableMilks[UnityEngine.Random.Range(1, availableMilks.Count)]
-                    : MilkType.None;
+
+                // Milk Selection (Artisanal Menu gives higher weighting to premium milks)
+                float milkChance = hasArtisanalMenu ? 0.85f : 0.65f;
+                if (UnityEngine.Random.value < milkChance)
+                {
+                    List<MilkType> milkPool = new List<MilkType>(availableMilks);
+                    milkPool.Remove(MilkType.None);
+                    if (hasArtisanalMenu)
+                    {
+                        // Add extra weight for premium milks
+                        if (milkPool.Contains(MilkType.CoconutMilk)) milkPool.Add(MilkType.CoconutMilk);
+                        if (milkPool.Contains(MilkType.CondensedMilk)) { milkPool.Add(MilkType.CondensedMilk); milkPool.Add(MilkType.CondensedMilk); }
+                        if (milkPool.Contains(MilkType.OatMilk)) milkPool.Add(MilkType.OatMilk);
+                    }
+                    order.targetMilk = milkPool[UnityEngine.Random.Range(0, milkPool.Count)];
+                }
+                else
+                {
+                    order.targetMilk = MilkType.None;
+                }
 
                 order.targetSweetnessPercent = availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
                 order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
@@ -401,11 +418,22 @@ namespace BubbleTeaShop
                     int toppingsCount = UnityEngine.Random.Range(1, maxToppings + 1);
                     List<ToppingType> toppingPool = new List<ToppingType>(availableToppings);
 
+                    if (hasArtisanalMenu)
+                    {
+                        // Weight rare / expensive gourmet toppings heavily
+                        if (toppingPool.Contains(ToppingType.GoldenHoneyPearls)) { toppingPool.Add(ToppingType.GoldenHoneyPearls); toppingPool.Add(ToppingType.GoldenHoneyPearls); }
+                        if (toppingPool.Contains(ToppingType.CheeseFoam)) { toppingPool.Add(ToppingType.CheeseFoam); toppingPool.Add(ToppingType.CheeseFoam); }
+                        if (toppingPool.Contains(ToppingType.PoppingBoba)) toppingPool.Add(ToppingType.PoppingBoba);
+                        if (toppingPool.Contains(ToppingType.EggPudding)) toppingPool.Add(ToppingType.EggPudding);
+                    }
+
                     for (int i = 0; i < toppingsCount && toppingPool.Count > 0; i++)
                     {
                         int randIdx = UnityEngine.Random.Range(0, toppingPool.Count);
-                        order.targetToppings.Add(toppingPool[randIdx]);
-                        toppingPool.RemoveAt(randIdx);
+                        ToppingType selected = toppingPool[randIdx];
+                        order.targetToppings.Add(selected);
+                        // Remove all instances of selected topping so customer doesn't get duplicate of same topping
+                        toppingPool.RemoveAll(x => x == selected);
                     }
                 }
             }
