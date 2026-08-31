@@ -20,9 +20,6 @@ namespace BubbleTeaShop
         [Header("UI Header & Basket")]
         [SerializeField] private TextMeshProUGUI harvestCounterText;
 
-        [Header("Signpost & Lore")]
-        [SerializeField] private Signpost signpost;
-
         [Header("Jelly Tree & Branches (Editable)")]
         [SerializeField] private Transform jellyTreeContainer;
         [SerializeField] private Image jellyTreeImage;
@@ -286,11 +283,6 @@ namespace BubbleTeaShop
         public void CloseHoneyMeadowView()
         {
             isMeadowOpen = false;
-
-            if (signpost != null)
-            {
-                signpost.CloseSignInspection();
-            }
 
             StopTreeIdleSway();
             StopAllPendulumRoutines();
