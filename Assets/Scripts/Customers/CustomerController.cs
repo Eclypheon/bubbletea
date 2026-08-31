@@ -80,6 +80,11 @@ namespace BubbleTeaShop
 
         private void Update()
         {
+            if (isMentorTalking)
+            {
+                UpdateMentorNavPosition();
+            }
+
             if (!isWaiting) return;
 
             currentPatience -= Time.deltaTime;
@@ -328,112 +333,125 @@ namespace BubbleTeaShop
 
         private void EnsureMentorNavUI()
         {
-            if (mentorNavPanel != null)
+            Canvas rootCanvas = GetComponentInParent<Canvas>();
+            Transform targetParent = (rootCanvas != null) ? rootCanvas.transform : transform.root;
+
+            if (mentorNavPanel == null)
             {
-                mentorNavPanel.transform.SetAsLastSibling();
-                return;
+                mentorNavPanel = new GameObject("MentorNavPanel", typeof(RectTransform));
+                mentorNavPanel.transform.SetParent(targetParent, false);
+
+                var navRt = mentorNavPanel.GetComponent<RectTransform>();
+                navRt.anchorMin = new Vector2(0.5f, 0.5f);
+                navRt.anchorMax = new Vector2(0.5f, 0.5f);
+                navRt.pivot = new Vector2(0.5f, 0.5f);
+                navRt.sizeDelta = new Vector2(400f, 48f);
+
+                Texture2D whiteTex = Texture2D.whiteTexture;
+                Sprite whiteSp = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+
+                // 1. Skip Button (Left)
+                GameObject skipObj = new GameObject("SkipButton", typeof(RectTransform), typeof(Image), typeof(Button));
+                skipObj.transform.SetParent(mentorNavPanel.transform, false);
+                var skipRt = skipObj.GetComponent<RectTransform>();
+                skipRt.anchorMin = new Vector2(0f, 0.5f);
+                skipRt.anchorMax = new Vector2(0f, 0.5f);
+                skipRt.pivot = new Vector2(0f, 0.5f);
+                skipRt.anchoredPosition = new Vector2(10f, 0f);
+                skipRt.sizeDelta = new Vector2(140f, 44f);
+
+                var skipImg = skipObj.GetComponent<Image>();
+                skipImg.sprite = whiteSp;
+                skipImg.color = new Color(0.32f, 0.35f, 0.40f, 1f);
+
+                GameObject skipTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+                skipTextObj.transform.SetParent(skipObj.transform, false);
+                var stRt = skipTextObj.GetComponent<RectTransform>();
+                stRt.anchorMin = Vector2.zero;
+                stRt.anchorMax = Vector2.one;
+                stRt.offsetMin = Vector2.zero;
+                stRt.offsetMax = Vector2.zero;
+
+                mentorSkipButtonText = skipTextObj.GetComponent<TMPro.TextMeshProUGUI>();
+                mentorSkipButtonText.text = "Skip >>";
+                mentorSkipButtonText.fontSize = 18;
+                mentorSkipButtonText.fontStyle = TMPro.FontStyles.Bold;
+                mentorSkipButtonText.alignment = TMPro.TextAlignmentOptions.Center;
+                mentorSkipButtonText.color = Color.white;
+                mentorSkipButtonText.raycastTarget = false;
+
+                mentorSkipButton = skipObj.GetComponent<Button>();
+                mentorSkipButton.onClick.AddListener(OnMentorSkipClicked);
+
+                // 2. Next Button (Right)
+                GameObject nextObj = new GameObject("NextButton", typeof(RectTransform), typeof(Image), typeof(Button));
+                nextObj.transform.SetParent(mentorNavPanel.transform, false);
+                var nextRt = nextObj.GetComponent<RectTransform>();
+                nextRt.anchorMin = new Vector2(1f, 0.5f);
+                nextRt.anchorMax = new Vector2(1f, 0.5f);
+                nextRt.pivot = new Vector2(1f, 0.5f);
+                nextRt.anchoredPosition = new Vector2(-10f, 0f);
+                nextRt.sizeDelta = new Vector2(180f, 44f);
+
+                var nextImg = nextObj.GetComponent<Image>();
+                nextImg.sprite = whiteSp;
+                nextImg.color = new Color(0.16f, 0.68f, 0.32f, 1f);
+
+                GameObject nextTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
+                nextTextObj.transform.SetParent(nextObj.transform, false);
+                var ntRt = nextTextObj.GetComponent<RectTransform>();
+                ntRt.anchorMin = Vector2.zero;
+                ntRt.anchorMax = Vector2.one;
+                ntRt.offsetMin = Vector2.zero;
+                ntRt.offsetMax = Vector2.zero;
+
+                mentorNextButtonText = nextTextObj.GetComponent<TMPro.TextMeshProUGUI>();
+                mentorNextButtonText.text = "Next >";
+                mentorNextButtonText.fontSize = 18;
+                mentorNextButtonText.fontStyle = TMPro.FontStyles.Bold;
+                mentorNextButtonText.alignment = TMPro.TextAlignmentOptions.Center;
+                mentorNextButtonText.color = Color.white;
+                mentorNextButtonText.raycastTarget = false;
+
+                mentorNextButton = nextObj.GetComponent<Button>();
+                mentorNextButton.onClick.AddListener(OnMentorNextClicked);
+            }
+            else
+            {
+                if (mentorNavPanel.transform.parent != targetParent)
+                {
+                    mentorNavPanel.transform.SetParent(targetParent, false);
+                }
             }
 
-            Transform targetParent = (customerRoot != null) ? customerRoot.transform : transform;
+            mentorNavPanel.transform.SetAsLastSibling();
+            UpdateMentorNavPosition();
+        }
 
-            mentorNavPanel = new GameObject("MentorNavPanel", typeof(RectTransform));
-            mentorNavPanel.transform.SetParent(targetParent, false);
-
+        private void UpdateMentorNavPosition()
+        {
+            if (mentorNavPanel == null) return;
             var navRt = mentorNavPanel.GetComponent<RectTransform>();
-            navRt.anchorMin = new Vector2(0.5f, 0.5f);
-            navRt.anchorMax = new Vector2(0.5f, 0.5f);
-            navRt.pivot = new Vector2(0.5f, 0.5f);
-            navRt.sizeDelta = new Vector2(400f, 48f);
+            if (navRt == null) return;
 
-            // Compute exact position right below speech bubble
             if (speechBubble != null)
             {
                 var sbRt = speechBubble.GetComponent<RectTransform>();
                 if (sbRt != null)
                 {
-                    float bottomY = sbRt.anchoredPosition.y - (sbRt.sizeDelta.y * sbRt.pivot.y);
-                    navRt.anchoredPosition = new Vector2(sbRt.anchoredPosition.x, bottomY - 30f);
-                }
-                else
-                {
-                    navRt.anchoredPosition = new Vector2(260f, 95f);
+                    Vector3[] corners = new Vector3[4];
+                    sbRt.GetWorldCorners(corners);
+                    // corners[0] is bottom-left, corners[3] is bottom-right
+                    Vector3 bottomCenterWorld = (corners[0] + corners[3]) * 0.5f;
+
+                    Canvas rootCanvas = GetComponentInParent<Canvas>();
+                    float scaleFactor = (rootCanvas != null) ? rootCanvas.scaleFactor : 1f;
+                    navRt.position = bottomCenterWorld + new Vector3(0f, -28f * scaleFactor, 0f);
+                    return;
                 }
             }
-            else
-            {
-                navRt.anchoredPosition = new Vector2(260f, 95f);
-            }
 
-            Texture2D whiteTex = Texture2D.whiteTexture;
-            Sprite whiteSp = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
-
-            // 1. Skip Button (Left)
-            GameObject skipObj = new GameObject("SkipButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            skipObj.transform.SetParent(mentorNavPanel.transform, false);
-            var skipRt = skipObj.GetComponent<RectTransform>();
-            skipRt.anchorMin = new Vector2(0f, 0.5f);
-            skipRt.anchorMax = new Vector2(0f, 0.5f);
-            skipRt.pivot = new Vector2(0f, 0.5f);
-            skipRt.anchoredPosition = new Vector2(10f, 0f);
-            skipRt.sizeDelta = new Vector2(140f, 44f);
-
-            var skipImg = skipObj.GetComponent<Image>();
-            skipImg.sprite = whiteSp;
-            skipImg.color = new Color(0.32f, 0.35f, 0.40f, 1f);
-
-            GameObject skipTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
-            skipTextObj.transform.SetParent(skipObj.transform, false);
-            var stRt = skipTextObj.GetComponent<RectTransform>();
-            stRt.anchorMin = Vector2.zero;
-            stRt.anchorMax = Vector2.one;
-            stRt.offsetMin = Vector2.zero;
-            stRt.offsetMax = Vector2.zero;
-
-            mentorSkipButtonText = skipTextObj.GetComponent<TMPro.TextMeshProUGUI>();
-            mentorSkipButtonText.text = "Skip >>";
-            mentorSkipButtonText.fontSize = 18;
-            mentorSkipButtonText.fontStyle = TMPro.FontStyles.Bold;
-            mentorSkipButtonText.alignment = TMPro.TextAlignmentOptions.Center;
-            mentorSkipButtonText.color = Color.white;
-            mentorSkipButtonText.raycastTarget = false;
-
-            mentorSkipButton = skipObj.GetComponent<Button>();
-            mentorSkipButton.onClick.AddListener(OnMentorSkipClicked);
-
-            // 2. Next Button (Right)
-            GameObject nextObj = new GameObject("NextButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            nextObj.transform.SetParent(mentorNavPanel.transform, false);
-            var nextRt = nextObj.GetComponent<RectTransform>();
-            nextRt.anchorMin = new Vector2(1f, 0.5f);
-            nextRt.anchorMax = new Vector2(1f, 0.5f);
-            nextRt.pivot = new Vector2(1f, 0.5f);
-            nextRt.anchoredPosition = new Vector2(-10f, 0f);
-            nextRt.sizeDelta = new Vector2(180f, 44f);
-
-            var nextImg = nextObj.GetComponent<Image>();
-            nextImg.sprite = whiteSp;
-            nextImg.color = new Color(0.16f, 0.68f, 0.32f, 1f);
-
-            GameObject nextTextObj = new GameObject("Text", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
-            nextTextObj.transform.SetParent(nextObj.transform, false);
-            var ntRt = nextTextObj.GetComponent<RectTransform>();
-            ntRt.anchorMin = Vector2.zero;
-            ntRt.anchorMax = Vector2.one;
-            ntRt.offsetMin = Vector2.zero;
-            ntRt.offsetMax = Vector2.zero;
-
-            mentorNextButtonText = nextTextObj.GetComponent<TMPro.TextMeshProUGUI>();
-            mentorNextButtonText.text = "Next >";
-            mentorNextButtonText.fontSize = 18;
-            mentorNextButtonText.fontStyle = TMPro.FontStyles.Bold;
-            mentorNextButtonText.alignment = TMPro.TextAlignmentOptions.Center;
-            mentorNextButtonText.color = Color.white;
-            mentorNextButtonText.raycastTarget = false;
-
-            mentorNextButton = nextObj.GetComponent<Button>();
-            mentorNextButton.onClick.AddListener(OnMentorNextClicked);
-
-            mentorNavPanel.SetActive(false);
+            navRt.anchoredPosition = new Vector2(260f, 95f);
         }
 
         public void SpawnMentorSequence(string[] lines, float delayPerLine, Sprite mentorSpriteParam, Action onCompletedSequence = null)
@@ -486,6 +504,7 @@ namespace BubbleTeaShop
             {
                 mentorNavPanel.SetActive(true);
                 mentorNavPanel.transform.SetAsLastSibling();
+                UpdateMentorNavPosition();
             }
 
             string line = activeMentorLines[currentMentorLineIndex];
