@@ -829,7 +829,8 @@ namespace BubbleTeaShop
             );
 
             float clampedX = Mathf.Clamp(localPoint.x, -360f, 360f);
-            bucketRectTransform.anchoredPosition = new Vector2(clampedX, -220f);
+            float clampedY = Mathf.Clamp(localPoint.y, -270f, -120f);
+            bucketRectTransform.anchoredPosition = new Vector2(clampedX, clampedY);
         }
 
         public void OnPointerClick(PointerEventData eventData)
