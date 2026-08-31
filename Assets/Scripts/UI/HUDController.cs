@@ -46,6 +46,11 @@ namespace BubbleTeaShop
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnStateChanged += UpdateStateHint;
+                UpdateStateHint(GameManager.Instance.CurrentState);
+            }
+            else
+            {
+                UpdateStateHint(GameState.MorningPrep);
             }
         }
 
@@ -123,8 +128,22 @@ namespace BubbleTeaShop
             }
         }
 
+        public void SetStorefrontHUDVisible(bool visible)
+        {
+            if (dayText != null) dayText.gameObject.SetActive(visible);
+            if (cashText != null) cashText.gameObject.SetActive(visible);
+            if (rentTimerText != null) rentTimerText.gameObject.SetActive(visible);
+            if (customerCountText != null) customerCountText.gameObject.SetActive(visible);
+        }
+
         public void UpdateStateHint(GameState state)
         {
+            bool isStorefront = (state == GameState.MorningPrep || 
+                                 state == GameState.ShopOpen || 
+                                 state == GameState.CustomerWaiting || 
+                                 state == GameState.ShopClosing);
+            SetStorefrontHUDVisible(isStorefront);
+
             if (statusHintText == null) return;
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)

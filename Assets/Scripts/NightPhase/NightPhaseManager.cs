@@ -429,17 +429,17 @@ namespace BubbleTeaShop
                     rt.anchorMax = new Vector2(0.5f, 0.5f);
                     rt.pivot = new Vector2(0.5f, 0.5f);
                     rt.anchoredPosition = new Vector2(-280f, -105f);
-                    rt.sizeDelta = new Vector2(460f, 55f);
+                    rt.sizeDelta = new Vector2(460f, 65f);
                 }
 
                 if (accumulated > 0)
                 {
-                    rentStatusText.text = $"Weekly Rent: ${baseRent:F2} + <color=#FF4444>Overdue: ${accumulated:F2}</color> (Total: ${totalRent:F2}) | <color=#FFAA00>Extensions: 1/1 used</color>";
+                    rentStatusText.text = $"Weekly Rent: ${baseRent:F2} + <color=#FF4444>Overdue: ${accumulated:F2}</color> (Total: ${totalRent:F2})\n<color=#FFAA00>Extensions: 1/1 used</color>";
                 }
                 else
                 {
                     string dueNotice = daysLeft == 0 ? "Due Today at Closing" : $"Due in {daysLeft} days";
-                    rentStatusText.text = $"Weekly Rent: ${totalRent:F2} ({dueNotice})";
+                    rentStatusText.text = $"Weekly Rent: ${totalRent:F2}\n({dueNotice})";
                 }
             }
 
