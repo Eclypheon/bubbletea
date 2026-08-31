@@ -84,6 +84,10 @@ namespace BubbleTeaShop
 
         public void SetStatusHint(string text)
         {
+            if (isSubscreenActive)
+            {
+                defaultSubscreenHint = text;
+            }
             if (statusHintText == null) return;
             if (notificationRoutine != null)
             {
