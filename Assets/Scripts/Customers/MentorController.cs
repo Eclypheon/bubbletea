@@ -259,7 +259,7 @@ namespace BubbleTeaShop
             string[] briefingLines = new string[]
             {
                 "Incredible work! You've really mastered the rhythm of running this bubble tea shop.",
-                "Tonight, I'm delivering our highest-grade preparation equipment: a collection Bucket and high-speed Centrifuge!",
+                "Tonight, I'm delivering our highest-grade preparation equipment: a high-speed Centrifuge!",
                 "They recently opened up the path to the Misty Mountains again for merchants, you really should head over to take a look, there might be some special ingredients you can use to really elevate your tea!",
                 "We're getting closer to buying out the shop for good! Close the shutter whenever you're ready to start the night!"
             };
