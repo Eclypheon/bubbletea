@@ -41,6 +41,14 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite[] babyYippeeRunSprites;
         [SerializeField] private Sprite babyYippeeStaticSprite;
 
+        [Header("Critter Scurry Duration & Timer HUD (Editable)")]
+        [Tooltip("Seconds the Baby Yippees will scurry on screen before escaping.")]
+        [Range(3f, 30f)]
+        [SerializeField] private float scurryDurationSeconds = 12f;
+        [SerializeField] private GameObject timerBarRoot;
+        [SerializeField] private Image timerBarFill;
+        [SerializeField] private TextMeshProUGUI timerText;
+
         [Header("Audio SFX")]
         [SerializeField] private AudioClip grassRustleSound;
         [SerializeField] private AudioClip catchCritterSound;
@@ -52,6 +60,7 @@ namespace BubbleTeaShop
         private int remainingActiveCritters = 0;
         private bool isGroveOpen = false;
         private List<Coroutine> activeWobbleRoutines = new List<Coroutine>();
+        private Coroutine timerCoroutine;
 
         private void Awake()
         {
@@ -120,6 +129,16 @@ namespace BubbleTeaShop
 
             StopAllWobbles();
             ClearAllCritters();
+
+            if (timerCoroutine != null)
+            {
+                StopCoroutine(timerCoroutine);
+                timerCoroutine = null;
+            }
+            if (timerBarRoot != null)
+            {
+                timerBarRoot.SetActive(false);
+            }
 
             if (sessionCaughtCount > 0)
             {
@@ -309,6 +328,9 @@ namespace BubbleTeaShop
 
             HUDController.Instance?.SetStatusHint(SCATTERED_HINT);
 
+            if (timerCoroutine != null) StopCoroutine(timerCoroutine);
+            timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
+
             for (int i = 0; i < countToSpawn; i++)
             {
                 remainingActiveCritters++;
@@ -336,13 +358,119 @@ namespace BubbleTeaShop
             }
         }
 
+        private void EnsureTimerBarUI()
+        {
+            if (timerBarRoot != null) return;
+            if (bambooGrovePanelRoot == null) return;
+
+            // Create sleek timer bar near the top
+            timerBarRoot = new GameObject("ScurryTimerBar", typeof(RectTransform), typeof(Image));
+            timerBarRoot.transform.SetParent(bambooGrovePanelRoot.transform, false);
+
+            var rootRt = timerBarRoot.GetComponent<RectTransform>();
+            rootRt.anchorMin = new Vector2(0.5f, 1f);
+            rootRt.anchorMax = new Vector2(0.5f, 1f);
+            rootRt.pivot = new Vector2(0.5f, 1f);
+            rootRt.anchoredPosition = new Vector2(0f, -50f);
+            rootRt.sizeDelta = new Vector2(340f, 22f);
+
+            var bgImg = timerBarRoot.GetComponent<Image>();
+            bgImg.color = new Color(0.10f, 0.08f, 0.06f, 0.90f);
+            bgImg.raycastTarget = false;
+
+            // Border
+            GameObject borderObj = new GameObject("Border", typeof(RectTransform), typeof(Image));
+            borderObj.transform.SetParent(timerBarRoot.transform, false);
+            var borderRt = borderObj.GetComponent<RectTransform>();
+            borderRt.anchorMin = Vector2.zero;
+            borderRt.anchorMax = Vector2.one;
+            borderRt.offsetMin = new Vector2(-2, -2);
+            borderRt.offsetMax = new Vector2(2, 2);
+            var borderImg = borderObj.GetComponent<Image>();
+            borderImg.color = new Color(0.35f, 0.28f, 0.18f, 0.85f);
+            borderImg.raycastTarget = false;
+            borderObj.transform.SetAsFirstSibling();
+
+            // Fill Bar
+            GameObject fillObj = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+            fillObj.transform.SetParent(timerBarRoot.transform, false);
+            var fillRt = fillObj.GetComponent<RectTransform>();
+            fillRt.anchorMin = Vector2.zero;
+            fillRt.anchorMax = Vector2.one;
+            fillRt.offsetMin = new Vector2(3, 3);
+            fillRt.offsetMax = new Vector2(-3, -3);
+
+            timerBarFill = fillObj.GetComponent<Image>();
+            timerBarFill.type = Image.Type.Filled;
+            timerBarFill.fillMethod = Image.FillMethod.Horizontal;
+            timerBarFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            timerBarFill.color = new Color(0.18f, 0.80f, 0.44f, 1f);
+            timerBarFill.raycastTarget = false;
+
+            // Label Text
+            GameObject labelObj = new GameObject("TimerLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelObj.transform.SetParent(timerBarRoot.transform, false);
+            var labelRt = labelObj.GetComponent<RectTransform>();
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+
+            timerText = labelObj.GetComponent<TextMeshProUGUI>();
+            timerText.text = $"Escape in: {scurryDurationSeconds:F1}s";
+            timerText.fontSize = 13;
+            timerText.fontStyle = FontStyles.Bold;
+            timerText.alignment = TextAlignmentOptions.Center;
+            timerText.color = Color.white;
+            timerText.raycastTarget = false;
+
+            timerBarRoot.SetActive(false);
+        }
+
+        private IEnumerator ScurryTimerBarRoutine(float duration)
+        {
+            EnsureTimerBarUI();
+            if (timerBarRoot != null)
+            {
+                timerBarRoot.SetActive(true);
+                timerBarRoot.transform.SetAsLastSibling();
+            }
+
+            float elapsed = 0f;
+            while (elapsed < duration && remainingActiveCritters > 0)
+            {
+                elapsed += Time.deltaTime;
+                float pct = Mathf.Clamp01(1f - (elapsed / duration));
+                float remaining = Mathf.Max(0f, duration - elapsed);
+
+                if (timerBarFill != null)
+                {
+                    timerBarFill.fillAmount = pct;
+                    timerBarFill.color = Color.Lerp(new Color(0.95f, 0.25f, 0.25f), new Color(0.18f, 0.80f, 0.44f), pct);
+                }
+
+                if (timerText != null)
+                {
+                    timerText.text = $"Escape in: {remaining:F1}s";
+                }
+
+                yield return null;
+            }
+
+            if (timerBarRoot != null)
+            {
+                timerBarRoot.SetActive(false);
+            }
+            timerCoroutine = null;
+        }
+
         private IEnumerator CritterScurryRoutine(RectTransform rt, Image img)
         {
             if (rt == null) yield break;
 
             Vector2 moveDir = new Vector2(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-0.8f, 0.8f)).normalized;
             float speed = UnityEngine.Random.Range(150f, 240f);
-            float lifetime = 14f; // Stay active for 14 seconds before burrowing away
+            float lifetime = scurryDurationSeconds;
             float elapsed = 0f;
             float animFps = 10f; // 10 frames per second run animation
 
@@ -414,6 +542,15 @@ namespace BubbleTeaShop
 
             if (remainingActiveCritters == 0)
             {
+                if (timerCoroutine != null)
+                {
+                    StopCoroutine(timerCoroutine);
+                    timerCoroutine = null;
+                }
+                if (timerBarRoot != null)
+                {
+                    timerBarRoot.SetActive(false);
+                }
                 HUDController.Instance?.ShowNotification($"All critters caught from this patch! Total: <color=#2ECC71>{sessionCaughtCount} Baby Yippees</color>.", 3f);
             }
         }
