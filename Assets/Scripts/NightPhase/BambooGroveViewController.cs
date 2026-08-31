@@ -365,8 +365,8 @@ namespace BubbleTeaShop
                 float tiltAngle = Mathf.Sin(elapsed * 18f) * 7f;
                 rt.localRotation = Quaternion.Euler(0, 0, tiltAngle);
 
-                // Flip sprite depending on horizontal movement
-                float dirScaleX = (moveDir.x > 0.05f) ? -1f : 1f;
+                // Flip sprite depending on horizontal movement (facing forward in direction of motion)
+                float dirScaleX = (moveDir.x > 0f) ? 1f : -1f;
                 rt.localScale = new Vector3(dirScaleX, 1f, 1f);
 
                 // Screen boundaries bounce check

@@ -116,37 +116,32 @@ namespace BubbleTeaShop
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(160f, 200f);
+            rt.sizeDelta = new Vector2(180f, 220f);
             rt.anchoredPosition = Vector2.zero;
 
             glowAuraImage = auraObj.GetComponent<Image>();
-            glowAuraImage.color = new Color(1f, 0.95f, 0.5f, 0.35f);
+            glowAuraImage.color = new Color(1f, 0.92f, 0.5f, 0.25f);
+            glowAuraImage.preserveAspect = true;
             glowAuraImage.raycastTarget = false;
             if (signboardSprite != null) glowAuraImage.sprite = signboardSprite;
         }
 
         private IEnumerator SignPulseGlowRoutine()
         {
+            // Keep the signpost itself completely stationary and static
+            transform.localScale = baseScale;
+
             while (enabled)
             {
-                float t = Time.time * 2.8f;
+                float t = Time.time * 2.2f;
                 float pulse = (Mathf.Sin(t) + 1f) * 0.5f; // 0 to 1
 
-                // Subtle scale breathe
-                float scaleFactor = 1f + (pulse * 0.05f);
-                transform.localScale = baseScale * scaleFactor;
-
-                // Faint warm golden color tint pulse
-                if (sceneSignImage != null)
-                {
-                    sceneSignImage.color = Color.Lerp(Color.white, new Color(1f, 0.98f, 0.82f, 1f), pulse);
-                }
-
-                // Aura pulse
+                // Only pulse the surrounding outer glow aura
                 if (glowAuraImage != null)
                 {
-                    glowAuraImage.color = new Color(1f, 0.92f, 0.45f, 0.20f + (pulse * 0.30f));
-                    glowAuraImage.transform.localScale = Vector3.one * (1.08f + (pulse * 0.14f));
+                    float alpha = Mathf.Lerp(0.12f, 0.42f, pulse);
+                    glowAuraImage.color = new Color(1f, 0.90f, 0.45f, alpha);
+                    glowAuraImage.transform.localScale = Vector3.one * Mathf.Lerp(1.04f, 1.16f, pulse);
                 }
 
                 yield return null;
@@ -249,7 +244,7 @@ namespace BubbleTeaShop
             var backdropBtn = zoomModalRoot.AddComponent<Button>();
             backdropBtn.onClick.AddListener(CloseSignInspection);
 
-            // 2x Larger Modal Card Content (1020 x 680)
+            // 2x Larger Modal Card Content (1020 x 680) with clean wooden notice board background
             GameObject cardObj = new GameObject("SignContentCard", typeof(RectTransform), typeof(Image));
             cardObj.transform.SetParent(zoomModalRoot.transform, false);
             modalContentTransform = cardObj.GetComponent<RectTransform>();
@@ -259,8 +254,48 @@ namespace BubbleTeaShop
             modalContentTransform.sizeDelta = new Vector2(1020f, 680f);
 
             var cardImg = cardObj.GetComponent<Image>();
-            cardImg.color = new Color(0.16f, 0.13f, 0.09f, 0.98f);
-            if (signboardSprite != null) cardImg.sprite = signboardSprite;
+            cardImg.color = new Color(0.14f, 0.11f, 0.08f, 0.97f); // Clean wooden parchment backing (no squished stretching)
+
+            // Inner Decorative Border
+            GameObject borderObj = new GameObject("InnerBorder", typeof(RectTransform), typeof(Image));
+            borderObj.transform.SetParent(cardObj.transform, false);
+            var borderRt = borderObj.GetComponent<RectTransform>();
+            borderRt.anchorMin = Vector2.zero;
+            borderRt.anchorMax = Vector2.one;
+            borderRt.offsetMin = new Vector2(14, 14);
+            borderRt.offsetMax = new Vector2(-14, -14);
+            var borderImg = borderObj.GetComponent<Image>();
+            borderImg.color = new Color(0.32f, 0.24f, 0.15f, 0.85f);
+            borderImg.raycastTarget = false;
+
+            // Inner Content Panel
+            GameObject innerObj = new GameObject("InnerPanel", typeof(RectTransform), typeof(Image));
+            innerObj.transform.SetParent(borderObj.transform, false);
+            var innerRt = innerObj.GetComponent<RectTransform>();
+            innerRt.anchorMin = Vector2.zero;
+            innerRt.anchorMax = Vector2.one;
+            innerRt.offsetMin = new Vector2(6, 6);
+            innerRt.offsetMax = new Vector2(-6, -6);
+            var innerImg = innerObj.GetComponent<Image>();
+            innerImg.color = new Color(0.18f, 0.14f, 0.10f, 0.98f);
+            innerImg.raycastTarget = false;
+
+            // Optional Signboard Graphic with preserved aspect ratio
+            if (signboardSprite != null)
+            {
+                GameObject signGraphic = new GameObject("SignboardIcon", typeof(RectTransform), typeof(Image));
+                signGraphic.transform.SetParent(innerObj.transform, false);
+                var sgRt = signGraphic.GetComponent<RectTransform>();
+                sgRt.anchorMin = new Vector2(0, 1);
+                sgRt.anchorMax = new Vector2(0, 1);
+                sgRt.pivot = new Vector2(0, 1);
+                sgRt.anchoredPosition = new Vector2(25, -20);
+                sgRt.sizeDelta = new Vector2(90, 110);
+                var sgImg = signGraphic.GetComponent<Image>();
+                sgImg.sprite = signboardSprite;
+                sgImg.preserveAspect = true;
+                sgImg.raycastTarget = false;
+            }
 
             // 2x Larger Title
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
