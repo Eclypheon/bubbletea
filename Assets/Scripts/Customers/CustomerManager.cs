@@ -31,6 +31,23 @@ namespace BubbleTeaShop
         [Tooltip("Patience duration in seconds for Dyslexia customer")]
         [SerializeField] private float dyslexiaPatience = 50f;
 
+        [Header("Customer Dismissal Safety Settings")]
+        [Tooltip("When enabled, ringing the bell while a drink is prepared in the cup requires a second confirmation ring before dismissing the customer.")]
+        [SerializeField] private bool confirmDismissIfCupNotEmpty = true;
+
+        public bool ConfirmDismissIfCupNotEmpty
+        {
+            get => confirmDismissIfCupNotEmpty;
+            set => confirmDismissIfCupNotEmpty = value;
+        }
+
+        private bool awaitingDismissalConfirmation = false;
+
+        public void ResetDismissalConfirmation()
+        {
+            awaitingDismissalConfirmation = false;
+        }
+
         private Queue<DrinkOrder> dailyCustomerQueue = new Queue<DrinkOrder>();
         private bool rentEncounterTriggeredToday = false;
         public bool RentEncounterTriggeredToday => rentEncounterTriggeredToday;
@@ -100,6 +117,7 @@ namespace BubbleTeaShop
         public void GenerateDailyQueue(int dayNumber)
         {
             dailyCustomerQueue.Clear();
+            awaitingDismissalConfirmation = false;
             rentEncounterTriggeredToday = false;
             hasTriggeredDay4EventBriefing = false;
             int count = DayManager.Instance.TotalCustomersToday;
@@ -127,6 +145,7 @@ namespace BubbleTeaShop
 
             if (customerController != null && customerController.IsMentorActive)
             {
+                awaitingDismissalConfirmation = false;
                 customerController.DismissMentor();
                 return SpawnNextInQueue();
             }
@@ -135,22 +154,40 @@ namespace BubbleTeaShop
             {
                 if (customerController.IsWaitingDrink)
                 {
+                    // Check if current cup has contents (not empty)
+                    bool hasPreparedDrink = CupStation.Instance != null &&
+                                            CupStation.Instance.CurrentCup != null &&
+                                            !CupStation.Instance.CurrentCup.IsEmpty;
+
+                    // Safety check: require a second ring if the player has a drink in progress
+                    if (confirmDismissIfCupNotEmpty && hasPreparedDrink && !awaitingDismissalConfirmation)
+                    {
+                        awaitingDismissalConfirmation = true;
+                        HUDController.Instance?.SetStatusHint("Are you sure you want to dismiss this customer? Ring again to dismiss them.");
+                        HUDController.Instance?.ShowNotification("Drink prepared in cup! Ring again to confirm skipping customer.", 3.5f);
+                        return false;
+                    }
+
+                    awaitingDismissalConfirmation = false;
                     // Customer was waiting and unserved -> trigger angry skip reaction, then spawn next
                     customerController.ForceSkipCustomer(() => SpawnNextInQueue());
                     return true;
                 }
                 else
                 {
+                    awaitingDismissalConfirmation = false;
                     // Customer was already in departure animation -> dismiss immediately and bring next
                     customerController.DismissCustomer();
                 }
             }
 
+            awaitingDismissalConfirmation = false;
             return SpawnNextInQueue();
         }
 
         private bool SpawnNextInQueue()
         {
+            awaitingDismissalConfirmation = false;
             if (dailyCustomerQueue.Count == 0)
             {
                 Debug.Log("No more customers in line today!");
@@ -171,6 +208,7 @@ namespace BubbleTeaShop
 
         public void ServeCurrentCustomer(BubbleTeaCup cup)
         {
+            awaitingDismissalConfirmation = false;
             if (HasCustomerAtWindow)
             {
                 customerController.ReceiveDrink(cup);

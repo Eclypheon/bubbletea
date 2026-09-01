@@ -83,6 +83,7 @@ namespace BubbleTeaShop
         public void SpawnNewCup()
         {
             currentCup.Reset();
+            CustomerManager.Instance?.ResetDismissalConfirmation();
             UpdateVisuals();
         }
 
@@ -95,6 +96,7 @@ namespace BubbleTeaShop
 
             currentCup.hasCup = false;
             currentCup.Reset();
+            CustomerManager.Instance?.ResetDismissalConfirmation();
             UpdateVisuals();
             SpawnNewCup();
         }
