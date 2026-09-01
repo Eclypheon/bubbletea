@@ -360,19 +360,15 @@ namespace BubbleTeaShop
                 return;
             }
 
-            bool isMorningPrep = GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.MorningPrep;
-
-            // Shift DayText 60 pixels to the left when a market event is active and shop is open (after shutters opened)
+            // Shift DayText 60 pixels to the left when a market event is active
             if (dayText != null)
             {
-                dayText.rectTransform.anchoredPosition = isMorningPrep
-                    ? dayTextOriginalAnchoredPos
-                    : new Vector2(dayTextOriginalAnchoredPos.x - 60f, dayTextOriginalAnchoredPos.y);
+                dayText.rectTransform.anchoredPosition = new Vector2(dayTextOriginalAnchoredPos.x - 60f, dayTextOriginalAnchoredPos.y);
             }
 
             if (marketEventBadgeObj != null)
             {
-                bool shouldShowBadge = !isSubscreenActive && !isMorningPrep && GameManager.Instance != null &&
+                bool shouldShowBadge = !isSubscreenActive && GameManager.Instance != null &&
                                        GameManager.Instance.CurrentState != GameState.GameOver &&
                                        GameManager.Instance.CurrentState != GameState.GameWon;
                 marketEventBadgeObj.SetActive(shouldShowBadge);
@@ -689,8 +685,7 @@ namespace BubbleTeaShop
             if (marketEventBadgeObj != null)
             {
                 bool hasActiveEvent = MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null;
-                bool isMorningPrep = GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.MorningPrep;
-                marketEventBadgeObj.SetActive(visible && hasActiveEvent && !isMorningPrep);
+                marketEventBadgeObj.SetActive(visible && hasActiveEvent);
             }
         }
 
