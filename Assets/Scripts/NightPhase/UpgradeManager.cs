@@ -38,19 +38,11 @@ namespace BubbleTeaShop
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.BambooGroveTrailMap,
-                "Bamboo Grove Trail Map",
-                "An annotated map marking swift shortcuts through the Bamboo Grove.",
-                "Removes -1 customer late opening penalty when foraging in Bamboo Grove.",
-                55f
-            ));
-
-            availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.LuckyPoppingBobaBracelet,
-                "Lucky Popping Boba Bracelet",
-                "A hand-woven bead charm said to bless your kitchen blending.",
-                "Increases chances of obtaining Popping Boba when blending.",
-                60f
+                UpgradeType.ImproveStoreAmbience,
+                "Improve Store Ambience",
+                "Aromatherapy diffusers, plush barstools, and soothing lofi beats.",
+                "REMOVES customer patience timer completely! Customers wait indefinitely.",
+                30f
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
@@ -58,15 +50,7 @@ namespace BubbleTeaShop
                 "Advertisements",
                 "Launch targeted flyers and local social media buzz across the district.",
                 "Increases maximum daily customers by +1.",
-                65f
-            ));
-
-            availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.HoneyMeadowsTrailMap,
-                "Honey Meadows Trail Map",
-                "A surveyor's chart revealing rapid routes across the Honey Meadows.",
-                "Removes -1 customer late opening penalty when foraging in Honey Meadows.",
-                70f
+                40f
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
@@ -74,15 +58,15 @@ namespace BubbleTeaShop
                 "Storefront Beautification",
                 "Install lush flower planters, polished glass, and warm lantern lighting.",
                 "Increases minimum daily customers by +1.",
-                75f
+                50f
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.ChefsHoningSteel,
-                "Chef's Honing Steel",
-                "A ceramic sharpening rod keeping your kitchen knives razor sharp.",
-                "25% chance to yield DOUBLE toppings when chopping Jelly Blocks.",
-                75f
+                UpgradeType.LuckyPoppingBobaBracelet,
+                "Lucky Popping Boba Bracelet",
+                "A hand-woven bead charm said to bless your kitchen blending.",
+                "Increases chances of obtaining Popping Boba when blending.",
+                55f
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
@@ -90,6 +74,46 @@ namespace BubbleTeaShop
                 "Yippee Pheromones",
                 "Brew an irresistible botanical scent that lures critters out of the brush.",
                 "Increases min and max Baby Yippees spawned when foraging by +1.",
+                60f
+            ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.ChefsHoningSteel,
+                "Chef's Honing Steel",
+                "A ceramic sharpening rod keeping your kitchen knives razor sharp.",
+                "25% chance to yield DOUBLE toppings when chopping Jelly Blocks.",
+                60f
+            ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.BambooGroveTrailMap,
+                "Bamboo Grove Trail Map",
+                "An annotated map marking swift shortcuts through the Bamboo Grove.",
+                "Removes -1 customer late opening penalty when foraging in Bamboo Grove.",
+                70f
+            ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.DowsingRods,
+                "Dowsing Rods",
+                "Attuned copper rods that resonate with dense Golden Dew currents.",
+                "Increases chances of refining Golden Honey Pearls from the centrifuge.",
+                70f
+            ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.HoneyMeadowsTrailMap,
+                "Honey Meadows Trail Map",
+                "A surveyor's chart revealing rapid routes across the Honey Meadows.",
+                "Removes -1 customer late opening penalty when foraging in Honey Meadows.",
+                75f
+            ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.MistyMountainsTrailMap,
+                "Misty Mountains Trail Map",
+                "A mountaineer's trail guide traversing the misty mountain peaks.",
+                "Removes -1 customer late opening penalty when foraging in Misty Mountains.",
                 80f
             ));
 
@@ -110,14 +134,6 @@ namespace BubbleTeaShop
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.MistyMountainsTrailMap,
-                "Misty Mountains Trail Map",
-                "A mountaineer's trail guide traversing the misty mountain peaks.",
-                "Removes -1 customer late opening penalty when foraging in Misty Mountains.",
-                85f
-            ));
-
-            availableUpgrades.Add(new ShopUpgrade(
                 UpgradeType.MarketingIntern,
                 "Marketing Intern",
                 "Studied market trends and realized some drinks were under-priced!",
@@ -134,27 +150,11 @@ namespace BubbleTeaShop
             ));
 
             availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.DowsingRods,
-                "Dowsing Rods",
-                "Attuned copper rods that resonate with dense Golden Dew currents.",
-                "Increases chances of refining Golden Honey Pearls from the centrifuge.",
-                90f
-            ));
-
-            availableUpgrades.Add(new ShopUpgrade(
                 UpgradeType.ArtisanalTeaMenu,
                 "Artisanal Tea Menu",
                 "A chic chalkboard menu tempting patrons with gourmet creations.",
                 "Significantly increases chances customer orders involve rare ingredients.",
-                95f
-            ));
-
-            availableUpgrades.Add(new ShopUpgrade(
-                UpgradeType.ImproveStoreAmbience,
-                "Improve Store Ambience",
-                "Aromatherapy diffusers, plush barstools, and soothing lofi beats.",
-                "REMOVES customer patience timer completely! Customers wait indefinitely.",
-                140f
+                100f
             ));
 
             availableUpgrades.Sort((a, b) => a.cost.CompareTo(b.cost));
