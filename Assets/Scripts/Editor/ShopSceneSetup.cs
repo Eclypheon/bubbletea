@@ -341,7 +341,7 @@ namespace BubbleTeaShop.Editor
             // Ledger content
             var ledSummary = CreateText("LedgerSummary", ledPanel.transform, "Day Summary...", new Vector2(0, 80), 22);
             var rentStatus = CreateText("RentStatus", ledPanel.transform, "Rent: $150 (Due in 7 days)", new Vector2(0, -40), 24, Color.yellow);
-            GameObject buyoutBtn = CreateButton("BuyoutButton", ledPanel.transform, "Buy Out Location ($5,000)", new Vector2(0, -140), new Vector2(320, 60));
+            GameObject buyoutBtn = CreateButton("BuyoutButton", ledPanel.transform, "Buy Out Location ($1,500)", new Vector2(0, -140), new Vector2(320, 60));
 
             var nightMgr = nightRoot.AddComponent<NightPhaseManager>();
             SetSerializedProperty(nightMgr, "nightPanelRoot", nightRoot);

@@ -27,7 +27,6 @@ namespace BubbleTeaShop
                 TeaBase.OolongTea => "Oolong Tea",
                 TeaBase.ThaiTea => "Thai Tea",
                 TeaBase.TaroTea => "Taro Tea",
-                TeaBase.WildMountainTea => "Wild Mountain Tea",
                 _ => "Tea"
             };
         }

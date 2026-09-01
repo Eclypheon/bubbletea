@@ -330,29 +330,15 @@ namespace BubbleTeaShop
                 RectTransform rt = layerObj.GetComponent<RectTransform>();
                 Image img = layerObj.GetComponent<Image>();
 
-                // Calculate stacked layer bounds inside the cup
-                float yMin, yMax;
-                if (bottomCount == 1)
-                {
-                    yMin = 0f;
-                    yMax = 0.38f;
-                }
-                else if (bottomCount == 2)
-                {
-                    if (b == 0) { yMin = 0f; yMax = 0.22f; }
-                    else { yMin = 0.18f; yMax = 0.40f; }
-                }
-                else
-                {
-                    if (b == 0) { yMin = 0f; yMax = 0.16f; }
-                    else if (b == 1) { yMin = 0.14f; yMax = 0.30f; }
-                    else { yMin = 0.28f; yMax = 0.44f; }
-                }
-
-                rt.anchorMin = new Vector2(0f, yMin);
-                rt.anchorMax = new Vector2(1f, yMax);
+                // Maintain full stretch with cup aspect ratio so toppings remain circular and unsquished
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
+
+                // Stack additional topping layers slightly higher in the cup
+                float yOffset = b * 26f;
+                rt.anchoredPosition = new Vector2(0f, yOffset);
 
                 Sprite customSp = GetToppingSprite(top);
                 if (customSp != null)
@@ -365,7 +351,7 @@ namespace BubbleTeaShop
                     img.sprite = defaultBobaSprite != null ? defaultBobaSprite : (primaryToppingImage != null ? primaryToppingImage.sprite : null);
                     img.color = GetToppingColor(top);
                 }
-                img.preserveAspect = false;
+                img.preserveAspect = true;
                 img.raycastTarget = false;
 
                 layerIndex++;
@@ -380,16 +366,17 @@ namespace BubbleTeaShop
                 RectTransform rt = foamObj.GetComponent<RectTransform>();
                 Image img = foamObj.GetComponent<Image>();
 
-                // Cheese foam floats on the top rim (72% to 100% height)
-                rt.anchorMin = new Vector2(0f, 0.72f);
+                // Foam layer sits at the top rim of the cup
+                rt.anchorMin = new Vector2(0f, 0.70f);
                 rt.anchorMax = new Vector2(1f, 1f);
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
+                rt.anchoredPosition = Vector2.zero;
 
                 Sprite foamSp = cheeseFoamSprite != null ? cheeseFoamSprite : defaultLiquidMaskSprite;
                 img.sprite = foamSp;
                 img.color = GetToppingColor(ToppingType.CheeseFoam);
-                img.preserveAspect = false;
+                img.preserveAspect = true;
                 img.raycastTarget = false;
 
                 layerIndex++;
@@ -451,7 +438,6 @@ namespace BubbleTeaShop
                 TeaBase.OolongTea => new Color(0.75f, 0.45f, 0.18f, 0.9f),
                 TeaBase.ThaiTea => new Color(0.95f, 0.45f, 0.1f, 0.95f),
                 TeaBase.TaroTea => new Color(0.7f, 0.5f, 0.85f, 0.95f),
-                TeaBase.WildMountainTea => new Color(0.85f, 0.65f, 0.25f, 0.95f),
                 _ => Color.white
             };
         }

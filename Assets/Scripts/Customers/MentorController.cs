@@ -57,7 +57,7 @@ namespace BubbleTeaShop
             string[] briefingLines = new string[]
             {
                 "Thanks for bringing <i>Yippee Tea</i> to <i>L-PAX</i>",
-                "Rent here is pretty steep but you can buy out this entire store location for $5,000!",
+                "Rent here is pretty steep but you can buy out this entire store location for $1,500!",
                 "Be careful with expenses! If you miss two weekly rent payments to the landlord, you will lose the shop.",
                 "Here are some basic ingredients to get you started: 15 servings of Tapioca Pearls and Fresh Milk.",
                 "Your daily supply of sugar, ice, cups, straws, and tea blends costs $10 to automatically restock each day.",

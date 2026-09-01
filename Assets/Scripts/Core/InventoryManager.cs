@@ -49,7 +49,6 @@ namespace BubbleTeaShop
         [SerializeField] private int teaOolong = 0;
         [SerializeField] private int teaThai = 0;
         [SerializeField] private int teaTaro = 0;
-        [SerializeField] private int teaWildMountain = 0;
 
         private Dictionary<string, int> stock = new Dictionary<string, int>();
 
@@ -107,7 +106,6 @@ namespace BubbleTeaShop
             teaOolong = GetStock($"Tea_{TeaBase.OolongTea}");
             teaThai = GetStock($"Tea_{TeaBase.ThaiTea}");
             teaTaro = GetStock($"Tea_{TeaBase.TaroTea}");
-            teaWildMountain = GetStock($"Tea_{TeaBase.WildMountainTea}");
         }
 
         private void CheckInspectorModifications()
@@ -142,7 +140,6 @@ namespace BubbleTeaShop
             changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.OolongTea}", teaOolong);
             changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.ThaiTea}", teaThai);
             changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.TaroTea}", teaTaro);
-            changed |= UpdateKeyIfDifferent($"Tea_{TeaBase.WildMountainTea}", teaWildMountain);
 
             if (changed)
             {
@@ -176,7 +173,6 @@ namespace BubbleTeaShop
             stock[$"Tea_{TeaBase.OolongTea}"] = 10;
             stock[$"Tea_{TeaBase.ThaiTea}"] = 10;
             stock[$"Tea_{TeaBase.TaroTea}"] = 10;
-            stock[$"Tea_{TeaBase.WildMountainTea}"] = 0;
 
             // Day 1 Milk: 15 Fresh Milk
             stock[$"Milk_{MilkType.FreshMilk}"] = 15;

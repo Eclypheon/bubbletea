@@ -22,8 +22,7 @@ namespace BubbleTeaShop
         GreenTea,
         OolongTea,
         ThaiTea,
-        TaroTea,
-        WildMountainTea
+        TaroTea
     }
 
     public enum MilkType

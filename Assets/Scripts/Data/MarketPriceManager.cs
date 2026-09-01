@@ -22,7 +22,6 @@ namespace BubbleTeaShop
         [SerializeField] private float oolongTeaCost = 0.80f;
         [SerializeField] private float thaiTeaCost = 0.80f;
         [SerializeField] private float taroTeaCost = 0.80f;
-        [SerializeField] private float wildMountainTeaCost = 1.50f;
 
         [Header("Milk Type Costs per Serving ($)")]
         [SerializeField] private float freshMilkCost = 0.50f;
@@ -66,7 +65,6 @@ namespace BubbleTeaShop
                 TeaBase.OolongTea => oolongTeaCost,
                 TeaBase.ThaiTea => thaiTeaCost,
                 TeaBase.TaroTea => taroTeaCost,
-                TeaBase.WildMountainTea => wildMountainTeaCost,
                 _ => 0f
             };
 

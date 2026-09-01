@@ -11,7 +11,7 @@ namespace BubbleTeaShop
         [SerializeField] private float startingCash = 50.00f;
         [SerializeField] private float baseRentAmount = 150.00f;
         [SerializeField] private float rentIncreasePerWeek = 50.00f;
-        [SerializeField] private float buyoutGoal = 5000.00f;
+        [SerializeField] private float buyoutGoal = 1500.00f;
 
         public const float DailySuppliesExpense = 10.00f;
 

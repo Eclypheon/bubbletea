@@ -77,9 +77,8 @@ namespace BubbleTeaShop
             }
             else if (zone == "MistMountain")
             {
-                InventoryManager.Instance.AddTeaStock(TeaBase.WildMountainTea, 6);
-                InventoryManager.Instance.AddToppingStock(ToppingType.TapiocaPearls, 6);
-                resultMessage = "Mist Mountain: Scaled the peak and harvested 6x Legendary Wild Mountain Tea Leaves!";
+                InventoryManager.Instance.AddRawStock(RawIngredientType.GoldenDew, 5);
+                resultMessage = "Mist Mountain: Scaled the peak and collected 5x Raw Golden Dew!";
             }
 
             OnForagingResult?.Invoke(resultMessage);
