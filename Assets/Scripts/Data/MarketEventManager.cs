@@ -25,8 +25,8 @@ namespace BubbleTeaShop
         [SerializeField] private bool hasNewEventToday = false;
         [SerializeField] private int lastEventEndDay = 0;
 
-        public MarketEvent ActiveEvent => activeEvent;
-        public bool HasNewEventToday => hasNewEventToday;
+        public MarketEvent ActiveEvent => (activeEvent != null && !string.IsNullOrEmpty(activeEvent.eventId) && !string.IsNullOrEmpty(activeEvent.title)) ? activeEvent : null;
+        public bool HasNewEventToday => hasNewEventToday && ActiveEvent != null;
 
         public event Action<MarketEvent> OnMarketEventTriggered;
 
@@ -38,22 +38,32 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
-
-            if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.title) || string.IsNullOrEmpty(activeEvent.eventId)))
+            if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.eventId) || string.IsNullOrEmpty(activeEvent.title)))
             {
                 activeEvent = null;
             }
+            hasNewEventToday = false;
         }
 
         private void Start()
         {
+            if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.eventId) || string.IsNullOrEmpty(activeEvent.title)))
+            {
+                activeEvent = null;
+            }
+
             if (DayManager.Instance != null)
             {
+                DayManager.Instance.OnDayStarted -= EvaluateDailyEvent;
                 DayManager.Instance.OnDayStarted += EvaluateDailyEvent;
-                if (DayManager.Instance.CurrentDay >= 4 && activeEvent == null)
-                {
-                    EvaluateDailyEvent(DayManager.Instance.CurrentDay);
-                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (DayManager.Instance != null)
+            {
+                DayManager.Instance.OnDayStarted -= EvaluateDailyEvent;
             }
         }
 
@@ -65,6 +75,11 @@ namespace BubbleTeaShop
         public void EvaluateDailyEvent(int dayNumber)
         {
             hasNewEventToday = false;
+
+            if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.eventId) || string.IsNullOrEmpty(activeEvent.title)))
+            {
+                activeEvent = null;
+            }
 
             // Days 1, 2, and 3: 0% probability of market events
             if (dayNumber <= 3)
@@ -86,6 +101,7 @@ namespace BubbleTeaShop
                 else
                 {
                     Debug.Log($"[MarketEventManager] Event '{activeEvent.title}' continuing ({activeEvent.daysRemaining} days remaining).");
+                    OnMarketEventTriggered?.Invoke(activeEvent);
                     return;
                 }
             }

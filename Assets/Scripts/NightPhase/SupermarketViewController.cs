@@ -58,6 +58,7 @@ namespace BubbleTeaShop
         {
             if (returnToNightHubButton != null)
             {
+                returnToNightHubButton.onClick.RemoveListener(CloseSupermarketView);
                 returnToNightHubButton.onClick.AddListener(CloseSupermarketView);
             }
 
@@ -98,110 +99,80 @@ namespace BubbleTeaShop
 
         private void EnsureSupermarketPanelHierarchy()
         {
-            if (supermarketPanelRoot != null && supermarketBackgroundImage != null && marketCatalogContainer != null) return;
-
-            Transform parentCanvas = null;
-            if (NightPhaseManager.Instance != null && NightPhaseManager.Instance.transform.parent != null)
+            // 1. Resolve Root Panel
+            if (supermarketPanelRoot == null)
             {
-                parentCanvas = NightPhaseManager.Instance.transform.parent;
-            }
-            else
-            {
-                var canvas = FindObjectOfType<Canvas>();
-                if (canvas != null) parentCanvas = canvas.transform;
+                supermarketPanelRoot = gameObject;
             }
 
-            if (parentCanvas == null) parentCanvas = transform;
-
-            // Fullscreen panel root
-            GameObject rootObj = new GameObject("SupermarketViewPanel", typeof(RectTransform), typeof(Image));
-            rootObj.transform.SetParent(parentCanvas, false);
-            var rootRt = rootObj.GetComponent<RectTransform>();
-            rootRt.anchorMin = Vector2.zero;
-            rootRt.anchorMax = Vector2.one;
-            rootRt.offsetMin = Vector2.zero;
-            rootRt.offsetMax = Vector2.zero;
-
-            supermarketBackgroundImage = rootObj.GetComponent<Image>();
-            if (supermarketInteriorSprite != null)
+            // 2. Resolve Background Image
+            if (supermarketBackgroundImage == null)
             {
-                supermarketBackgroundImage.sprite = supermarketInteriorSprite;
+                supermarketBackgroundImage = GetComponent<Image>();
+                if (supermarketBackgroundImage == null)
+                {
+                    var bgChild = transform.Find("SupermarketBg");
+                    if (bgChild != null) supermarketBackgroundImage = bgChild.GetComponent<Image>();
+                }
             }
-            supermarketBackgroundImage.color = Color.white;
-            supermarketBackgroundImage.raycastTarget = true;
 
-            supermarketPanelRoot = rootObj;
+            // 3. Resolve Header Title
+            if (marketAisleTitleText == null)
+            {
+                var titleChild = transform.Find("MarketAisleTitleText") ?? transform.Find("TitleText");
+                if (titleChild != null) marketAisleTitleText = titleChild.GetComponent<TextMeshProUGUI>();
+            }
 
-            // Header Title
-            GameObject titleObj = new GameObject("MarketAisleTitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            titleObj.transform.SetParent(rootObj.transform, false);
-            var titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0.5f, 1f);
-            titleRt.anchorMax = new Vector2(0.5f, 1f);
-            titleRt.pivot = new Vector2(0.5f, 1f);
-            titleRt.anchoredPosition = new Vector2(0f, -20f);
-            titleRt.sizeDelta = new Vector2(500f, 40f);
-            marketAisleTitleText = titleObj.GetComponent<TextMeshProUGUI>();
-            marketAisleTitleText.text = "Wholesale Supermarket";
-            marketAisleTitleText.fontSize = 24;
-            marketAisleTitleText.fontStyle = FontStyles.Bold;
-            marketAisleTitleText.alignment = TextAlignmentOptions.Center;
-            marketAisleTitleText.color = Color.white;
+            // 4. Resolve Cash Balance Text
+            if (cashBalanceText == null)
+            {
+                var cashChild = transform.Find("CashBalanceText") ?? transform.Find("CashBalanceText (1)") ?? transform.Find("CashText");
+                if (cashChild != null) cashBalanceText = cashChild.GetComponent<TextMeshProUGUI>();
+            }
 
-            // Wallet Balance
-            GameObject cashObj = new GameObject("CashBalanceText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            cashObj.transform.SetParent(rootObj.transform, false);
-            var cashRt = cashObj.GetComponent<RectTransform>();
-            cashRt.anchorMin = new Vector2(0f, 1f);
-            cashRt.anchorMax = new Vector2(0f, 1f);
-            cashRt.pivot = new Vector2(0f, 1f);
-            cashRt.anchoredPosition = new Vector2(30f, -20f);
-            cashRt.sizeDelta = new Vector2(250f, 40f);
-            cashBalanceText = cashObj.GetComponent<TextMeshProUGUI>();
-            cashBalanceText.fontSize = 20;
-            cashBalanceText.alignment = TextAlignmentOptions.Left;
-            cashBalanceText.color = Color.yellow;
+            if (cashBalanceText != null)
+            {
+                cashBalanceText.raycastTarget = false;
+            }
 
-            // Return / Exit Button
-            GameObject exitObj = new GameObject("ReturnToNightHubButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            exitObj.transform.SetParent(rootObj.transform, false);
-            var exitRt = exitObj.GetComponent<RectTransform>();
-            exitRt.anchorMin = new Vector2(1f, 1f);
-            exitRt.anchorMax = new Vector2(1f, 1f);
-            exitRt.pivot = new Vector2(1f, 1f);
-            exitRt.anchoredPosition = new Vector2(-30f, -20f);
-            exitRt.sizeDelta = new Vector2(150f, 45f);
-            var exitImg = exitObj.GetComponent<Image>();
-            exitImg.color = new Color(0.2f, 0.2f, 0.28f, 0.95f);
-            returnToNightHubButton = exitObj.GetComponent<Button>();
-            returnToNightHubButton.onClick.AddListener(CloseSupermarketView);
+            // 5. Resolve Return / Exit Button
+            if (returnToNightHubButton == null)
+            {
+                var retChild = transform.Find("ReturnToNightHubButton") ?? transform.Find("ReturnShopButton") ?? transform.Find("ExitButton") ?? transform.Find("BackButton");
+                if (retChild != null) returnToNightHubButton = retChild.GetComponent<Button>();
+            }
 
-            GameObject exitTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            exitTxtObj.transform.SetParent(exitObj.transform, false);
-            var exitTxtRt = exitTxtObj.GetComponent<RectTransform>();
-            exitTxtRt.anchorMin = Vector2.zero;
-            exitTxtRt.anchorMax = Vector2.one;
-            exitTxtRt.offsetMin = Vector2.zero;
-            exitTxtRt.offsetMax = Vector2.zero;
-            var exitTmp = exitTxtObj.GetComponent<TextMeshProUGUI>();
-            exitTmp.text = "Exit Market";
-            exitTmp.fontSize = 16;
-            exitTmp.fontStyle = FontStyles.Bold;
-            exitTmp.alignment = TextAlignmentOptions.Center;
-            exitTmp.color = Color.white;
+            if (returnToNightHubButton != null)
+            {
+                returnToNightHubButton.onClick.RemoveListener(CloseSupermarketView);
+                returnToNightHubButton.onClick.AddListener(CloseSupermarketView);
+                returnToNightHubButton.transform.SetAsLastSibling();
 
-            // Catalog Container
-            GameObject catalogObj = new GameObject("MarketCatalogContainer", typeof(RectTransform));
-            catalogObj.transform.SetParent(rootObj.transform, false);
-            var catalogRt = catalogObj.GetComponent<RectTransform>();
-            catalogRt.anchorMin = new Vector2(0.5f, 0.5f);
-            catalogRt.anchorMax = new Vector2(0.5f, 0.5f);
-            catalogRt.pivot = new Vector2(0.5f, 0.5f);
-            catalogRt.anchoredPosition = new Vector2(0f, -30f);
-            catalogRt.sizeDelta = new Vector2(980f, 460f);
-            marketCatalogContainer = catalogObj.transform;
+                var btnText = returnToNightHubButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (btnText != null) btnText.raycastTarget = false;
+            }
 
-            rootObj.SetActive(false);
+            // 6. Resolve Catalog Container
+            if (marketCatalogContainer == null)
+            {
+                var catChild = transform.Find("MarketCatalogContainer");
+                if (catChild != null)
+                {
+                    marketCatalogContainer = catChild;
+                }
+                else
+                {
+                    GameObject catalogObj = new GameObject("MarketCatalogContainer", typeof(RectTransform));
+                    catalogObj.transform.SetParent(transform, false);
+                    var catalogRt = catalogObj.GetComponent<RectTransform>();
+                    catalogRt.anchorMin = new Vector2(0.5f, 0.5f);
+                    catalogRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    catalogRt.pivot = new Vector2(0.5f, 0.5f);
+                    catalogRt.anchoredPosition = new Vector2(0f, -30f);
+                    catalogRt.sizeDelta = new Vector2(980f, 460f);
+                    marketCatalogContainer = catalogObj.transform;
+                }
+            }
         }
 
         public Sprite GetIngredientIcon(string key)
@@ -226,7 +197,8 @@ namespace BubbleTeaShop
             {
                 icon = CashRegisterInventoryUI.Instance.GetIngredientIcon(key);
             }
-            else if (icon == null && CupStation.Instance != null)
+            
+            if (icon == null && CupStation.Instance != null)
             {
                 icon = key switch
                 {
@@ -309,16 +281,17 @@ namespace BubbleTeaShop
             float totalWidth = containerRt != null && containerRt.rect.width > 200 ? containerRt.rect.width : 960f;
             float totalHeight = containerRt != null && containerRt.rect.height > 100 ? containerRt.rect.height : 450f;
 
-            int cols = totalWidth > 800 ? 3 : 2;
+            // Use 2 columns for a spacious, clean layout with ample room for titles and stats
+            int cols = totalWidth >= 1250f ? 3 : 2;
             int totalRows = Mathf.CeilToInt((float)catalog.Count / cols);
 
             float paddingX = 16f;
-            float paddingY = 16f;
+            float paddingY = 12f;
             float spacingX = 20f;
-            float spacingY = 16f;
+            float spacingY = 12f;
 
             float cardWidth = (totalWidth - (paddingX * 2) - (spacingX * (cols - 1))) / cols;
-            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 90f, 120f);
+            float cardHeight = Mathf.Clamp((totalHeight - (paddingY * 2) - (spacingY * (totalRows - 1))) / Mathf.Max(1, totalRows), 76f, 88f);
 
             float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
             float startY = totalHeight * 0.5f - paddingY - (cardHeight * 0.5f);
@@ -354,26 +327,26 @@ namespace BubbleTeaShop
                     iconRt.anchorMin = new Vector2(0, 0.5f);
                     iconRt.anchorMax = new Vector2(0, 0.5f);
                     iconRt.pivot = new Vector2(0, 0.5f);
-                    float iconSize = Mathf.Min(cardHeight - 16f, 68f);
+                    float iconSize = Mathf.Min(cardHeight - 16f, 54f);
                     iconRt.sizeDelta = new Vector2(iconSize, iconSize);
-                    iconRt.anchoredPosition = new Vector2(12, 0);
+                    iconRt.anchoredPosition = new Vector2(10, 0);
 
                     var iconImg = iconObj.GetComponent<Image>();
                     iconImg.sprite = itemIcon;
                     iconImg.preserveAspect = true;
-                    leftOffset = iconSize + 24f;
+                    leftOffset = iconSize + 20f;
                 }
 
-                // Right: Dedicated Buy Button (Generous width to fit large text without wrapping)
-                float buyButtonWidth = 120f;
+                // Right: Dedicated Buy Button
+                float buyButtonWidth = 96f;
                 GameObject buyBtnObj = new GameObject("BuyButton", typeof(RectTransform), typeof(Image), typeof(Button));
                 buyBtnObj.transform.SetParent(cardObj.transform, false);
                 var buyRt = buyBtnObj.GetComponent<RectTransform>();
                 buyRt.anchorMin = new Vector2(1, 0.5f);
                 buyRt.anchorMax = new Vector2(1, 0.5f);
                 buyRt.pivot = new Vector2(1, 0.5f);
-                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 18f);
-                buyRt.anchoredPosition = new Vector2(-12, 0);
+                buyRt.sizeDelta = new Vector2(buyButtonWidth, cardHeight - 16f);
+                buyRt.anchoredPosition = new Vector2(-10, 0);
 
                 var buyImg = buyBtnObj.GetComponent<Image>();
                 buyImg.color = canAfford ? new Color(0.18f, 0.55f, 0.34f, 1f) : new Color(0.35f, 0.35f, 0.35f, 0.65f);
@@ -386,15 +359,15 @@ namespace BubbleTeaShop
                 var buyTextRt = buyTextObj.GetComponent<RectTransform>();
                 buyTextRt.anchorMin = Vector2.zero;
                 buyTextRt.anchorMax = Vector2.one;
-                buyTextRt.offsetMin = new Vector2(4, 2);
-                buyTextRt.offsetMax = new Vector2(-4, -2);
+                buyTextRt.offsetMin = new Vector2(2, 2);
+                buyTextRt.offsetMax = new Vector2(-2, -2);
 
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
-                buyTmp.fontSize = 20f;
+                buyTmp.fontSize = 17f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
                 buyTmp.enableWordWrapping = false;
-                buyTmp.lineSpacing = -10f;
-                buyTmp.text = $"<b>BUY</b>\n<size=17>${item.price:F2}</size>";
+                buyTmp.lineSpacing = -4f;
+                buyTmp.text = $"<b>BUY</b>\n<size=14>${item.price:F2}</size>";
 
                 // Middle: Info Text (Item Name + Pack Quantity + In Store count)
                 GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -402,15 +375,16 @@ namespace BubbleTeaShop
                 var infoRt = infoTextObj.GetComponent<RectTransform>();
                 infoRt.anchorMin = new Vector2(0, 0);
                 infoRt.anchorMax = new Vector2(1, 1);
-                infoRt.offsetMin = new Vector2(leftOffset, 4);
-                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 20f), -4);
+                infoRt.offsetMin = new Vector2(leftOffset, 0);
+                infoRt.offsetMax = new Vector2(-(buyButtonWidth + 18f), 0);
 
                 var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
-                infoTmp.fontSize = 22f;
+                infoTmp.fontSize = 18f;
+                infoTmp.lineSpacing = 2f;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 infoTmp.enableWordWrapping = true;
                 infoTmp.text = $"<b>{item.displayName}</b>\n" +
-                               $"<size=17><color=#BDC3C7>Pack of {item.bundleQuantity}</color>  |  In Store: {FormatStockCount(currentStock)}</size>";
+                               $"<size=14><color=#BDC3C7>Pack of {item.bundleQuantity}</color>   In Store: {FormatStockCount(currentStock)}</size>";
 
                 buyBtn.onClick.AddListener(() =>
                 {

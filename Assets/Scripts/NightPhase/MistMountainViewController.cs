@@ -97,11 +97,17 @@ namespace BubbleTeaShop
                 if (rt != null) rootPanelBaseAnchoredPos = rt.anchoredPosition;
                 mistMountainPanelRoot.SetActive(false);
             }
+            gameObject.SetActive(false);
         }
 
         private void Start()
         {
             WireButtonsAndListeners();
+            if (mistMountainPanelRoot != null)
+            {
+                mistMountainPanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()

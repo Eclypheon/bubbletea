@@ -5526,8 +5526,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 27.679382, y: 58.2724}
-  m_SizeDelta: {x: 1000, y: 600}
+  m_AnchoredPosition: {x: 0.000030517578, y: 115.94348}
+  m_SizeDelta: {x: 1192.237, y: 715.3423}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &421
 RectTransform:
@@ -6930,8 +6930,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -329, y: -305}
-  m_SizeDelta: {x: 900, y: 50}
+  m_AnchoredPosition: {x: -480.72058, y: -305}
+  m_SizeDelta: {x: 596.5588, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &502
 RectTransform:
@@ -17143,7 +17143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   supermarketPanelRoot: {fileID: 166}
   supermarketBackgroundImage: {fileID: 616}
-  supermarketInteriorSprite: {fileID: 0}
+  supermarketInteriorSprite: {fileID: 2609851761605400732, guid: fbb9c97f32e0a4b638f25ae03d4c722d, type: 3}
   cashBalanceText: {fileID: 581}
   marketAisleTitleText: {fileID: 0}
   returnToNightHubButton: {fileID: 1795197340}

@@ -95,20 +95,29 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
+            ResolveComponentReferences();
             EnsureFallbackAssets();
             EnsurePrepAreaPanelHierarchy();
 
             if (returnToNightHubButton != null)
             {
+                returnToNightHubButton.onClick.RemoveListener(ClosePrepAreaView);
                 returnToNightHubButton.onClick.AddListener(ClosePrepAreaView);
                 returnToNightHubButton.gameObject.SetActive(false);
             }
+
+            if (prepAreaPanelRoot != null)
+            {
+                prepAreaPanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
         }
 
         private void Start()
         {
             if (returnToNightHubButton != null)
             {
+                returnToNightHubButton.onClick.RemoveListener(ClosePrepAreaView);
                 returnToNightHubButton.onClick.AddListener(ClosePrepAreaView);
                 returnToNightHubButton.gameObject.SetActive(false);
             }
@@ -119,13 +128,57 @@ namespace BubbleTeaShop
             }
 
             // Station Clicks (Start processing or Collect rewards)
-            if (stationBlenderButton != null) stationBlenderButton.onClick.AddListener(OnBlenderClicked);
-            if (stationChoppingButton != null) stationChoppingButton.onClick.AddListener(OnChoppingClicked);
-            if (stationCentrifugeButton != null) stationCentrifugeButton.onClick.AddListener(OnCentrifugeClicked);
+            if (stationBlenderButton != null)
+            {
+                stationBlenderButton.onClick.RemoveListener(OnBlenderClicked);
+                stationBlenderButton.onClick.AddListener(OnBlenderClicked);
+            }
+            if (stationChoppingButton != null)
+            {
+                stationChoppingButton.onClick.RemoveListener(OnChoppingClicked);
+                stationChoppingButton.onClick.AddListener(OnChoppingClicked);
+            }
+            if (stationCentrifugeButton != null)
+            {
+                stationCentrifugeButton.onClick.RemoveListener(OnCentrifugeClicked);
+                stationCentrifugeButton.onClick.AddListener(OnCentrifugeClicked);
+            }
 
             if (prepAreaPanelRoot != null)
             {
                 prepAreaPanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
+        }
+
+        private void ResolveComponentReferences()
+        {
+            if (prepAreaPanelRoot == null) prepAreaPanelRoot = gameObject;
+            if (prepAreaBackgroundImage == null && prepAreaPanelRoot != null)
+            {
+                prepAreaBackgroundImage = prepAreaPanelRoot.GetComponent<Image>();
+                if (prepAreaBackgroundImage == null)
+                {
+                    var bgChild = prepAreaPanelRoot.transform.Find("PrepAreaBG") ?? prepAreaPanelRoot.transform.Find("Background");
+                    if (bgChild != null) prepAreaBackgroundImage = bgChild.GetComponent<Image>();
+                }
+            }
+            if (topRawCardsContainer == null && prepAreaPanelRoot != null)
+            {
+                var t = prepAreaPanelRoot.transform.Find("TopRawPanel") ?? prepAreaPanelRoot.transform.Find("TopRawCardsContainer");
+                if (t != null) topRawCardsContainer = t;
+            }
+            if (returnToNightHubButton == null && prepAreaPanelRoot != null)
+            {
+                var btns = prepAreaPanelRoot.GetComponentsInChildren<Button>(true);
+                foreach (var b in btns)
+                {
+                    if (b.gameObject.name.ToLower().Contains("return") || b.gameObject.name.ToLower().Contains("hub") || b.gameObject.name.ToLower().Contains("shop") || b.gameObject.name.ToLower().Contains("exit"))
+                    {
+                        returnToNightHubButton = b;
+                        break;
+                    }
+                }
             }
         }
 
@@ -158,144 +211,23 @@ namespace BubbleTeaShop
 
         private void EnsurePrepAreaPanelHierarchy()
         {
-            if (prepAreaPanelRoot != null && prepAreaBackgroundImage != null && topRawCardsContainer != null) return;
+            ResolveComponentReferences();
 
-            Transform parentCanvas = null;
-            if (NightPhaseManager.Instance != null && NightPhaseManager.Instance.transform.parent != null)
+            if (prepAreaPanelRoot == null)
             {
-                parentCanvas = NightPhaseManager.Instance.transform.parent;
-            }
-            else
-            {
-                var canvas = FindObjectOfType<Canvas>();
-                if (canvas != null) parentCanvas = canvas.transform;
+                prepAreaPanelRoot = gameObject;
             }
 
-            if (parentCanvas == null) parentCanvas = transform;
-
-            // Fullscreen panel root
-            GameObject rootObj = new GameObject("PrepAreaViewPanel", typeof(RectTransform), typeof(Image));
-            rootObj.transform.SetParent(parentCanvas, false);
-            var rootRt = rootObj.GetComponent<RectTransform>();
-            rootRt.anchorMin = Vector2.zero;
-            rootRt.anchorMax = Vector2.one;
-            rootRt.offsetMin = Vector2.zero;
-            rootRt.offsetMax = Vector2.zero;
-
-            prepAreaBackgroundImage = rootObj.GetComponent<Image>();
-            if (prepAreaInteriorSprite != null)
+            if (topRawCardsContainer == null)
             {
-                prepAreaBackgroundImage.sprite = prepAreaInteriorSprite;
+                var topPanel = new GameObject("TopRawPanel", typeof(RectTransform));
+                topPanel.transform.SetParent(prepAreaPanelRoot.transform, false);
+                var topRt = topPanel.GetComponent<RectTransform>();
+                topRt.anchorMin = new Vector2(0.5f, 1f);
+                topRt.anchorMax = new Vector2(0.5f, 1f);
+                topRt.pivot = new Vector2(0.5f, 1f);
+                topRt.anchoredPosition = new Vector2(0f, -65f);
             }
-            prepAreaBackgroundImage.color = Color.white;
-            prepAreaBackgroundImage.raycastTarget = true;
-
-            prepAreaPanelRoot = rootObj;
-
-            // Header Title
-            GameObject titleObj = new GameObject("TitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            titleObj.transform.SetParent(rootObj.transform, false);
-            var titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0.5f, 1f);
-            titleRt.anchorMax = new Vector2(0.5f, 1f);
-            titleRt.pivot = new Vector2(0.5f, 1f);
-            titleRt.anchoredPosition = new Vector2(0f, -20f);
-            titleRt.sizeDelta = new Vector2(500f, 40f);
-            var titleTmp = titleObj.GetComponent<TextMeshProUGUI>();
-            titleTmp.text = "KITCHEN PREPARATION AREA";
-            titleTmp.fontSize = 24;
-            titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.alignment = TextAlignmentOptions.Center;
-            titleTmp.color = Color.white;
-
-            // Top Raw Cards Container
-            GameObject topCardsObj = new GameObject("TopRawCardsContainer", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-            topCardsObj.transform.SetParent(rootObj.transform, false);
-            var topCardsRt = topCardsObj.GetComponent<RectTransform>();
-            topCardsRt.anchorMin = new Vector2(0.5f, 1f);
-            topCardsRt.anchorMax = new Vector2(0.5f, 1f);
-            topCardsRt.pivot = new Vector2(0.5f, 1f);
-            topCardsRt.anchoredPosition = new Vector2(0f, -70f);
-            topCardsRt.sizeDelta = new Vector2(800f, 100f);
-
-            var hlg = topCardsObj.GetComponent<HorizontalLayoutGroup>();
-            hlg.spacing = 30f;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = false;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = false;
-
-            topRawCardsContainer = topCardsObj.transform;
-
-            // Return / Exit Button
-            GameObject exitObj = new GameObject("ReturnToNightHubButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            exitObj.transform.SetParent(rootObj.transform, false);
-            var exitRt = exitObj.GetComponent<RectTransform>();
-            exitRt.anchorMin = new Vector2(1f, 1f);
-            exitRt.anchorMax = new Vector2(1f, 1f);
-            exitRt.pivot = new Vector2(1f, 1f);
-            exitRt.anchoredPosition = new Vector2(-30f, -20f);
-            exitRt.sizeDelta = new Vector2(150f, 45f);
-            var exitImg = exitObj.GetComponent<Image>();
-            exitImg.color = new Color(0.2f, 0.2f, 0.28f, 0.95f);
-            returnToNightHubButton = exitObj.GetComponent<Button>();
-            returnToNightHubButton.onClick.AddListener(ClosePrepAreaView);
-
-            GameObject exitTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            exitTxtObj.transform.SetParent(exitObj.transform, false);
-            var exitTxtRt = exitTxtObj.GetComponent<RectTransform>();
-            exitTxtRt.anchorMin = Vector2.zero;
-            exitTxtRt.anchorMax = Vector2.one;
-            exitTxtRt.offsetMin = Vector2.zero;
-            exitTxtRt.offsetMax = Vector2.zero;
-            var exitTmp = exitTxtObj.GetComponent<TextMeshProUGUI>();
-            exitTmp.text = "Exit Prep Area";
-            exitTmp.fontSize = 16;
-            exitTmp.fontStyle = FontStyles.Bold;
-            exitTmp.alignment = TextAlignmentOptions.Center;
-            exitTmp.color = Color.white;
-
-            // Station 1: Blender & Sieve
-            GameObject st1 = new GameObject("Station1_Blender", typeof(RectTransform), typeof(Button));
-            st1.transform.SetParent(rootObj.transform, false);
-            var st1Rt = st1.GetComponent<RectTransform>();
-            st1Rt.anchorMin = new Vector2(0.5f, 0.5f);
-            st1Rt.anchorMax = new Vector2(0.5f, 0.5f);
-            st1Rt.pivot = new Vector2(0.5f, 0.5f);
-            st1Rt.anchoredPosition = new Vector2(-380f, -120f);
-            st1Rt.sizeDelta = new Vector2(240f, 280f);
-            stationBlenderRoot = st1;
-            stationBlenderButton = st1.GetComponent<Button>();
-            stationBlenderButton.onClick.AddListener(OnBlenderClicked);
-
-            // Station 2: Chopping Board & Knife
-            GameObject st2 = new GameObject("Station2_Chopping", typeof(RectTransform), typeof(Button));
-            st2.transform.SetParent(rootObj.transform, false);
-            var st2Rt = st2.GetComponent<RectTransform>();
-            st2Rt.anchorMin = new Vector2(0.5f, 0.5f);
-            st2Rt.anchorMax = new Vector2(0.5f, 0.5f);
-            st2Rt.pivot = new Vector2(0.5f, 0.5f);
-            st2Rt.anchoredPosition = new Vector2(0f, -120f);
-            st2Rt.sizeDelta = new Vector2(280f, 280f);
-            stationChoppingRoot = st2;
-            stationChoppingButton = st2.GetComponent<Button>();
-            stationChoppingButton.onClick.AddListener(OnChoppingClicked);
-
-            // Station 3: Bucket & Centrifuge
-            GameObject st3 = new GameObject("Station3_Centrifuge", typeof(RectTransform), typeof(Button));
-            st3.transform.SetParent(rootObj.transform, false);
-            var st3Rt = st3.GetComponent<RectTransform>();
-            st3Rt.anchorMin = new Vector2(0.5f, 0.5f);
-            st3Rt.anchorMax = new Vector2(0.5f, 0.5f);
-            st3Rt.pivot = new Vector2(0.5f, 0.5f);
-            st3Rt.anchoredPosition = new Vector2(380f, -120f);
-            st3Rt.sizeDelta = new Vector2(240f, 280f);
-            stationCentrifugeRoot = st3;
-            stationCentrifugeButton = st3.GetComponent<Button>();
-            stationCentrifugeButton.onClick.AddListener(OnCentrifugeClicked);
-
-            rootObj.SetActive(false);
         }
 
         public void OpenPrepAreaView(int dayNumber)

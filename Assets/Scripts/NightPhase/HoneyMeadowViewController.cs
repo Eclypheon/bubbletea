@@ -82,11 +82,17 @@ namespace BubbleTeaShop
                 if (rt != null) rootPanelBaseAnchoredPos = rt.anchoredPosition;
                 honeyMeadowPanelRoot.SetActive(false);
             }
+            gameObject.SetActive(false);
         }
 
         private void Start()
         {
             WireTreeAndButtonListeners();
+            if (honeyMeadowPanelRoot != null)
+            {
+                honeyMeadowPanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()

@@ -63,37 +63,57 @@ namespace BubbleTeaShop
 
             if (BambooGroveViewController.Instance == null)
             {
-                var go = new GameObject("BambooGroveViewController", typeof(RectTransform));
-                go.transform.SetParent(parentCanvas, false);
-                go.AddComponent<BambooGroveViewController>();
+                var existing = FindFirstObjectByType<BambooGroveViewController>(FindObjectsInactive.Include);
+                if (existing == null)
+                {
+                    var go = new GameObject("BambooGroveViewController", typeof(RectTransform));
+                    go.transform.SetParent(parentCanvas, false);
+                    go.AddComponent<BambooGroveViewController>();
+                }
             }
 
             if (HoneyMeadowViewController.Instance == null)
             {
-                var go = new GameObject("HoneyMeadowViewController", typeof(RectTransform));
-                go.transform.SetParent(parentCanvas, false);
-                go.AddComponent<HoneyMeadowViewController>();
+                var existing = FindFirstObjectByType<HoneyMeadowViewController>(FindObjectsInactive.Include);
+                if (existing == null)
+                {
+                    var go = new GameObject("HoneyMeadowViewController", typeof(RectTransform));
+                    go.transform.SetParent(parentCanvas, false);
+                    go.AddComponent<HoneyMeadowViewController>();
+                }
             }
 
             if (MistMountainViewController.Instance == null)
             {
-                var go = new GameObject("MistMountainViewController", typeof(RectTransform));
-                go.transform.SetParent(parentCanvas, false);
-                go.AddComponent<MistMountainViewController>();
+                var existing = FindFirstObjectByType<MistMountainViewController>(FindObjectsInactive.Include);
+                if (existing == null)
+                {
+                    var go = new GameObject("MistMountainViewController", typeof(RectTransform));
+                    go.transform.SetParent(parentCanvas, false);
+                    go.AddComponent<MistMountainViewController>();
+                }
             }
 
             if (PrepAreaViewController.Instance == null)
             {
-                var go = new GameObject("PrepAreaViewController", typeof(RectTransform));
-                go.transform.SetParent(parentCanvas, false);
-                go.AddComponent<PrepAreaViewController>();
+                var existing = FindFirstObjectByType<PrepAreaViewController>(FindObjectsInactive.Include);
+                if (existing == null)
+                {
+                    var go = new GameObject("PrepAreaViewController", typeof(RectTransform));
+                    go.transform.SetParent(parentCanvas, false);
+                    go.AddComponent<PrepAreaViewController>();
+                }
             }
 
             if (SupermarketViewController.Instance == null)
             {
-                var go = new GameObject("SupermarketViewController", typeof(RectTransform));
-                go.transform.SetParent(parentCanvas, false);
-                go.AddComponent<SupermarketViewController>();
+                var existing = FindFirstObjectByType<SupermarketViewController>(FindObjectsInactive.Include);
+                if (existing == null)
+                {
+                    var go = new GameObject("SupermarketViewController", typeof(RectTransform));
+                    go.transform.SetParent(parentCanvas, false);
+                    go.AddComponent<SupermarketViewController>();
+                }
             }
         }
 

@@ -35,11 +35,6 @@ namespace BubbleTeaShop
         [SerializeField] private Button modalCloseButton;
 
         private Coroutine notificationRoutine;
-        private Sprite bobaSprite;
-        private Sprite iceSprite;
-        private Sprite milkSprite;
-        private Sprite jellySprite;
-
         private Vector2 dayTextOriginalAnchoredPos = new Vector2(-700f, 0f);
         private bool hasCapturedDayTextPos = false;
 
@@ -71,7 +66,6 @@ namespace BubbleTeaShop
                 hasCapturedDayTextPos = true;
             }
 
-            LoadFallbackSprites();
             EnsureMarketEventUI();
             EnsureMarketEventModal();
 
@@ -114,35 +108,15 @@ namespace BubbleTeaShop
             UpdateMarketEventDisplay();
         }
 
-        private void LoadFallbackSprites()
-        {
-#if UNITY_EDITOR
-            bobaSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Topping_Boba.png");
-            iceSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Ice_Cubes.png");
-#endif
-            if (bobaSprite == null || iceSprite == null)
-            {
-                var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
-                foreach (var s in allSprites)
-                {
-                    if (s == null) continue;
-                    if (bobaSprite == null && (s.name.Contains("Boba") || s.name.Contains("boba"))) bobaSprite = s;
-                    if (iceSprite == null && (s.name.Contains("Ice") || s.name.Contains("ice"))) iceSprite = s;
-                    if (milkSprite == null && (s.name.Contains("milk") || s.name.Contains("Milk"))) milkSprite = s;
-                    if (jellySprite == null && (s.name.Contains("jelly") || s.name.Contains("Jelly"))) jellySprite = s;
-                }
-            }
-        }
-
         private void EnsureMarketEventUI()
         {
             if (marketEventBadgeObj != null)
             {
-                // Ensure correct updated positioning (-685f), transparent background, and 200% scale
+                // Ensure correct updated positioning (-705f), transparent background, and 200% scale
                 RectTransform existingRt = marketEventBadgeObj.GetComponent<RectTransform>();
                 if (existingRt != null)
                 {
-                    existingRt.anchoredPosition = new Vector2(-685f, 0f);
+                    existingRt.anchoredPosition = new Vector2(-705f, 0f);
                     existingRt.localScale = new Vector3(2f, 2f, 1f);
                 }
                 var existingBg = marketEventBadgeObj.GetComponent<Image>();
@@ -159,8 +133,8 @@ namespace BubbleTeaShop
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(65f, 32f);
-            // Shifted left to -685f and scaled by 200% (2x)
-            rt.anchoredPosition = new Vector2(-685f, 0f);
+            // Positioned at -705f and scaled by 200% (2x)
+            rt.anchoredPosition = new Vector2(-705f, 0f);
             rt.localScale = new Vector3(2f, 2f, 1f);
 
             var bgImg = marketEventBadgeObj.GetComponent<Image>();
@@ -346,7 +320,12 @@ namespace BubbleTeaShop
                 hasCapturedDayTextPos = true;
             }
 
-            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null)
+            int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            bool isNight = GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.NightPhase;
+
+            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null ||
+                string.IsNullOrEmpty(MarketEventManager.Instance.ActiveEvent.title) ||
+                currentDay <= 3 || isNight)
             {
                 if (marketEventBadgeObj != null) marketEventBadgeObj.SetActive(false);
                 if (marketEventModal != null) marketEventModal.SetActive(false);
@@ -355,12 +334,6 @@ namespace BubbleTeaShop
             }
 
             var ev = MarketEventManager.Instance.ActiveEvent;
-            if (string.IsNullOrEmpty(ev.title))
-            {
-                if (marketEventBadgeObj != null) marketEventBadgeObj.SetActive(false);
-                if (dayText != null) dayText.rectTransform.anchoredPosition = dayTextOriginalAnchoredPos;
-                return;
-            }
 
             // Shift DayText 60 pixels to the left when a market event is active
             if (dayText != null)
@@ -372,7 +345,8 @@ namespace BubbleTeaShop
             {
                 bool shouldShowBadge = !isSubscreenActive && GameManager.Instance != null &&
                                        GameManager.Instance.CurrentState != GameState.GameOver &&
-                                       GameManager.Instance.CurrentState != GameState.GameWon;
+                                       GameManager.Instance.CurrentState != GameState.GameWon &&
+                                       GameManager.Instance.CurrentState != GameState.NightPhase;
                 marketEventBadgeObj.SetActive(shouldShowBadge);
             }
 
@@ -382,6 +356,8 @@ namespace BubbleTeaShop
 
         private Sprite GetMarketEventSprite(MarketEvent ev)
         {
+            if (ev == null) return null;
+
             Sprite sp = null;
             switch (ev.eventId)
             {
@@ -426,14 +402,15 @@ namespace BubbleTeaShop
                     break;
 
                 case "summer_heatwave":
-                    sp = iceSprite;
+                    if (CupStation.Instance != null && CupStation.Instance.PoppingBobaSprite != null)
+                        sp = CupStation.Instance.PoppingBobaSprite;
+                    else if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_PoppingBoba");
                     break;
 
                 case "chilly_rain":
                     if (SupermarketViewController.Instance != null)
                         sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_CondensedMilk");
-                    if (sp == null)
-                        sp = iceSprite;
                     break;
 
                 case "golden_harvest":
@@ -444,14 +421,25 @@ namespace BubbleTeaShop
                     break;
             }
 
-            if (sp == null && !string.IsNullOrEmpty(ev.affectedKey) && SupermarketViewController.Instance != null)
+            if (sp == null && !string.IsNullOrEmpty(ev.affectedKey))
             {
-                sp = SupermarketViewController.Instance.GetIngredientIcon(ev.affectedKey);
-            }
+                if (SupermarketViewController.Instance != null)
+                    sp = SupermarketViewController.Instance.GetIngredientIcon(ev.affectedKey);
 
-            if (sp == null)
-            {
-                sp = bobaSprite;
+                if (sp == null && CupStation.Instance != null)
+                {
+                    sp = ev.affectedKey switch
+                    {
+                        "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
+                        "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
+                        "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
+                        "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
+                        "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
+                        "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
+                        "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
+                        _ => null
+                    };
+                }
             }
 
             return sp;
@@ -462,7 +450,9 @@ namespace BubbleTeaShop
             if (marketEventIcon == null || marketEventTrendText == null || marketEventDaysText == null) return;
 
             marketEventDaysText.text = $"{ev.daysRemaining}d";
-            marketEventIcon.sprite = GetMarketEventSprite(ev);
+            Sprite eventSprite = GetMarketEventSprite(ev);
+            marketEventIcon.sprite = eventSprite;
+            marketEventIcon.enabled = (eventSprite != null);
             marketEventIcon.color = Color.white;
 
             switch (ev.eventId)

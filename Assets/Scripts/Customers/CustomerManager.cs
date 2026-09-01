@@ -106,16 +106,12 @@ namespace BubbleTeaShop
                 }
                 else if (MarketEventManager.Instance != null && MentorController.Instance != null && customerController != null)
                 {
-                    if (day == 4 && MarketEventManager.Instance.ActiveEvent == null)
-                    {
-                        MarketEventManager.Instance.EvaluateDailyEvent(day);
-                    }
-
-                    if (MarketEventManager.Instance.HasNewEventToday || (day == 4 && MarketEventManager.Instance.ActiveEvent != null && !hasTriggeredDay4EventBriefing))
+                    var ev = MarketEventManager.Instance.ActiveEvent;
+                    if (ev != null && !string.IsNullOrEmpty(ev.title) && (MarketEventManager.Instance.HasNewEventToday || (day == 4 && !hasTriggeredDay4EventBriefing)))
                     {
                         hasTriggeredDay4EventBriefing = true;
                         MarketEventManager.Instance.ConsumeNewEventFlag();
-                        MentorController.Instance.TriggerMarketEventBriefing(customerController, MarketEventManager.Instance.ActiveEvent);
+                        MentorController.Instance.TriggerMarketEventBriefing(customerController, ev);
                     }
                 }
             }

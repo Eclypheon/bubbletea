@@ -72,11 +72,13 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
+            ResolveComponentReferences();
             EnsureFallbackAssets();
             EnsureGrovePanelHierarchy();
 
             if (returnToNightHubButton != null)
             {
+                returnToNightHubButton.onClick.RemoveListener(CloseBambooGroveView);
                 returnToNightHubButton.onClick.AddListener(CloseBambooGroveView);
                 returnToNightHubButton.gameObject.SetActive(false);
             }
@@ -84,6 +86,62 @@ namespace BubbleTeaShop
             if (bambooGrovePanelRoot != null)
             {
                 bambooGrovePanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
+        }
+
+        private void Start()
+        {
+            if (bambooGrovePanelRoot != null)
+            {
+                bambooGrovePanelRoot.SetActive(false);
+            }
+            gameObject.SetActive(false);
+        }
+
+        private void ResolveComponentReferences()
+        {
+            if (bambooGrovePanelRoot == null) bambooGrovePanelRoot = gameObject;
+            if (backgroundImage == null && bambooGrovePanelRoot != null)
+            {
+                backgroundImage = bambooGrovePanelRoot.GetComponent<Image>();
+                if (backgroundImage == null)
+                {
+                    var bgChild = bambooGrovePanelRoot.transform.Find("BambooGroveBG") ?? bambooGrovePanelRoot.transform.Find("Background");
+                    if (bgChild != null) backgroundImage = bgChild.GetComponent<Image>();
+                }
+            }
+            if (grassPatchesContainer == null && bambooGrovePanelRoot != null)
+            {
+                var t = bambooGrovePanelRoot.transform.Find("GrassPatchesContainer") ?? bambooGrovePanelRoot.transform.Find("GrassPatches");
+                if (t != null) grassPatchesContainer = t;
+            }
+            if (crittersContainer == null && bambooGrovePanelRoot != null)
+            {
+                var t = bambooGrovePanelRoot.transform.Find("CrittersContainer") ?? bambooGrovePanelRoot.transform.Find("Critters");
+                if (t != null) crittersContainer = t;
+            }
+            if (harvestCounterText == null && bambooGrovePanelRoot != null)
+            {
+                var countChild = bambooGrovePanelRoot.transform.Find("HarvestCounter") ?? bambooGrovePanelRoot.transform.Find("HarvestCounterText");
+                if (countChild != null) harvestCounterText = countChild.GetComponent<TextMeshProUGUI>();
+                else harvestCounterText = bambooGrovePanelRoot.GetComponentInChildren<TextMeshProUGUI>();
+            }
+            if (signpost == null && bambooGrovePanelRoot != null)
+            {
+                signpost = bambooGrovePanelRoot.GetComponentInChildren<Signpost>(true);
+            }
+            if (returnToNightHubButton == null && bambooGrovePanelRoot != null)
+            {
+                var btns = bambooGrovePanelRoot.GetComponentsInChildren<Button>(true);
+                foreach (var b in btns)
+                {
+                    if (b.gameObject.name.ToLower().Contains("return") || b.gameObject.name.ToLower().Contains("hub") || b.gameObject.name.ToLower().Contains("shop") || b.gameObject.name.ToLower().Contains("exit"))
+                    {
+                        returnToNightHubButton = b;
+                        break;
+                    }
+                }
             }
         }
 
@@ -139,103 +197,36 @@ namespace BubbleTeaShop
 
         private void EnsureGrovePanelHierarchy()
         {
-            if (bambooGrovePanelRoot != null && backgroundImage != null && grassPatchesContainer != null && crittersContainer != null) return;
+            ResolveComponentReferences();
 
-            Transform parentCanvas = null;
-            if (NightPhaseManager.Instance != null && NightPhaseManager.Instance.transform.parent != null)
+            if (bambooGrovePanelRoot == null)
             {
-                parentCanvas = NightPhaseManager.Instance.transform.parent;
-            }
-            else
-            {
-                var canvas = FindObjectOfType<Canvas>();
-                if (canvas != null) parentCanvas = canvas.transform;
+                bambooGrovePanelRoot = gameObject;
             }
 
-            if (parentCanvas == null) parentCanvas = transform;
-
-            // Fullscreen panel root
-            GameObject rootObj = new GameObject("BambooGroveViewPanel", typeof(RectTransform), typeof(Image));
-            rootObj.transform.SetParent(parentCanvas, false);
-            var rootRt = rootObj.GetComponent<RectTransform>();
-            rootRt.anchorMin = Vector2.zero;
-            rootRt.anchorMax = Vector2.one;
-            rootRt.offsetMin = Vector2.zero;
-            rootRt.offsetMax = Vector2.zero;
-
-            backgroundImage = rootObj.GetComponent<Image>();
-            if (bambooGroveBackgroundSprite != null)
+            if (grassPatchesContainer == null)
             {
-                backgroundImage.sprite = bambooGroveBackgroundSprite;
+                var grassCont = new GameObject("GrassPatchesContainer", typeof(RectTransform));
+                grassCont.transform.SetParent(bambooGrovePanelRoot.transform, false);
+                var grassRt = grassCont.GetComponent<RectTransform>();
+                grassRt.anchorMin = Vector2.zero;
+                grassRt.anchorMax = Vector2.one;
+                grassRt.offsetMin = Vector2.zero;
+                grassRt.offsetMax = Vector2.zero;
+                grassPatchesContainer = grassCont.transform;
             }
-            backgroundImage.color = Color.white;
-            backgroundImage.raycastTarget = true;
 
-            bambooGrovePanelRoot = rootObj;
-
-            // Grass Patches Container
-            GameObject grassCont = new GameObject("GrassPatchesContainer", typeof(RectTransform));
-            grassCont.transform.SetParent(rootObj.transform, false);
-            var grassRt = grassCont.GetComponent<RectTransform>();
-            grassRt.anchorMin = Vector2.zero;
-            grassRt.anchorMax = Vector2.one;
-            grassRt.offsetMin = Vector2.zero;
-            grassRt.offsetMax = Vector2.zero;
-            grassPatchesContainer = grassCont.transform;
-
-            // Critters Container
-            GameObject critCont = new GameObject("CrittersContainer", typeof(RectTransform));
-            critCont.transform.SetParent(rootObj.transform, false);
-            var critRt = critCont.GetComponent<RectTransform>();
-            critRt.anchorMin = Vector2.zero;
-            critRt.anchorMax = Vector2.one;
-            critRt.offsetMin = Vector2.zero;
-            critRt.offsetMax = Vector2.zero;
-            crittersContainer = critCont.transform;
-
-            // Header Harvest Counter
-            GameObject counterObj = new GameObject("HarvestCounterText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            counterObj.transform.SetParent(rootObj.transform, false);
-            var countRt = counterObj.GetComponent<RectTransform>();
-            countRt.anchorMin = new Vector2(0.5f, 1f);
-            countRt.anchorMax = new Vector2(0.5f, 1f);
-            countRt.pivot = new Vector2(0.5f, 1f);
-            countRt.anchoredPosition = new Vector2(0f, -22f);
-            countRt.sizeDelta = new Vector2(500f, 40f);
-            harvestCounterText = counterObj.GetComponent<TextMeshProUGUI>();
-            harvestCounterText.fontSize = 22;
-            harvestCounterText.alignment = TextAlignmentOptions.Center;
-            harvestCounterText.color = Color.white;
-
-            // Return / Exit Button
-            GameObject exitObj = new GameObject("ReturnToNightHubButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            exitObj.transform.SetParent(rootObj.transform, false);
-            var exitRt = exitObj.GetComponent<RectTransform>();
-            exitRt.anchorMin = new Vector2(1f, 1f);
-            exitRt.anchorMax = new Vector2(1f, 1f);
-            exitRt.pivot = new Vector2(1f, 1f);
-            exitRt.anchoredPosition = new Vector2(-30f, -20f);
-            exitRt.sizeDelta = new Vector2(150f, 45f);
-            var exitImg = exitObj.GetComponent<Image>();
-            exitImg.color = new Color(0.2f, 0.2f, 0.28f, 0.95f);
-            returnToNightHubButton = exitObj.GetComponent<Button>();
-            returnToNightHubButton.onClick.AddListener(CloseBambooGroveView);
-
-            GameObject exitTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
-            exitTxtObj.transform.SetParent(exitObj.transform, false);
-            var exitTxtRt = exitTxtObj.GetComponent<RectTransform>();
-            exitTxtRt.anchorMin = Vector2.zero;
-            exitTxtRt.anchorMax = Vector2.one;
-            exitTxtRt.offsetMin = Vector2.zero;
-            exitTxtRt.offsetMax = Vector2.zero;
-            var exitTmp = exitTxtObj.GetComponent<TextMeshProUGUI>();
-            exitTmp.text = "Exit Grove";
-            exitTmp.fontSize = 17;
-            exitTmp.fontStyle = FontStyles.Bold;
-            exitTmp.alignment = TextAlignmentOptions.Center;
-            exitTmp.color = Color.white;
-
-            rootObj.SetActive(false);
+            if (crittersContainer == null)
+            {
+                var critCont = new GameObject("CrittersContainer", typeof(RectTransform));
+                critCont.transform.SetParent(bambooGrovePanelRoot.transform, false);
+                var critRt = critCont.GetComponent<RectTransform>();
+                critRt.anchorMin = Vector2.zero;
+                critRt.anchorMax = Vector2.one;
+                critRt.offsetMin = Vector2.zero;
+                critRt.offsetMax = Vector2.zero;
+                crittersContainer = critCont.transform;
+            }
         }
 
         private const string IDLE_HINT = "Bamboo Grove: Tap the rustling grass to flush out wild Baby Yippees, then catch them!";
