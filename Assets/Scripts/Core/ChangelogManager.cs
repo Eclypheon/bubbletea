@@ -42,10 +42,11 @@ namespace BubbleTeaShop
             {
                 version = "v1.3.0",
                 releaseDate = "2026-09-01",
-                summaryTitle = "Topping Visuals, Bell Dismissal Safety & Balanced Buyout",
+                summaryTitle = "Topping Visuals, Bell Dismissal Safety, Auto-Sealer & Balanced Buyout",
                 notes = "<b>• Multi-Topping Stacking:</b> Cups dynamically stack multiple topping layers without vertical compression.\n" +
                         "<b>• Calibrated Cheese Foam:</b> Tuned top-rim positioning, scale, and width.\n" +
                         "<b>• Bell Dismissal Safety:</b> Ringing the bell while an unserved customer is waiting prompts for a 2nd confirmation ring.\n" +
+                        "<b>• Auto-Sealer Upgrade:</b> Added Commercial Auto-Sealer to automatically seal drinks on serve.\n" +
                         "<b>• $1,500 Buyout Goal:</b> Calibrated default store buyout goal for a balanced 4-week story arc.\n" +
                         "<b>• Legacy Asset Cleanup:</b> Completely removed non-existent Wild Mountain Tea references."
             });

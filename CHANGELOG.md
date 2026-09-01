@@ -16,6 +16,9 @@ All notable changes to the Yippee Tea project are documented in this file.
 * Auto-Resetting Confirmation: Confirmation state automatically resets when a drink is served, trashed, or when a new cup is placed.
 * Toggleable Setting: Added toggleable setting flag ConfirmDismissIfCustomerWaiting in CustomerManager for integration with the settings menu.
 
+### Upgrades and Equipment
+* Commercial Auto-Sealer Upgrade: Added a permanent shop upgrade in the Upgrades tab that automatically seals drinks when pressing the Serve Drink button, while still allowing manual sealing.
+
 ### Economy and Progression Calibration
 * Lowered Buyout Target: Rebalanced the final shop buyout goal from $5,000 to $1,500 across the economy ledger, shop buyout button, and Mentor dialogue for a balanced 4-week story progression.
 * Removed Legacy Assets: Completely removed non-existent Wild Mountain Tea references from enums, market pricing, inventory stock, and drink evaluation.
@@ -39,13 +42,13 @@ All notable changes to the Yippee Tea project are documented in this file.
 ## [v1.1.0] - 2026-08-20
 
 ### Wholesale Market and Inventory
-* Wholesale Night Market: Introduced the Wholesale Market tab during the night phase to buy bulk cups, ingredients, milks, and toppings.
+* Wholesale Night Market: Introduced the Wholesale Market tab during the night phase to buy bulk cups, milks, and ingredients.
 * Inventory Management System: Implemented full stock tracking with interactive Cash Register UI inspection on the front counter.
 * Dynamic Market Events: Implemented daily market conditions and supply events affecting customer demand and pricing.
 
 ### Mentor and Order Tickets
-* Mentor System: Added Mentor morning briefings and dialogue tutorials introducing core mechanics across early days.
-* Order Ticket UI: Added dynamic physical order tickets clipped to the counter displaying customer preferences, sensory notes, and drink specs.
+* Mentor System: Added Mentor morning briefings and tutorial milestones.
+* Order Ticket UI: Added physical clipped order tickets for customer preferences.
 
 ---
 

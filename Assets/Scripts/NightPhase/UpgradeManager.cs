@@ -148,6 +148,14 @@ namespace BubbleTeaShop
                 "All drink prices involving Grass Jelly or Coconut Jelly increased by 10%.",
                 85f
             ));
+
+            availableUpgrades.Add(new ShopUpgrade(
+                UpgradeType.AutoSealer,
+                "Commercial Auto-Sealer",
+                "An automated sensor-activated cup sealing mechanism for busy shifts.",
+                "Automatically seals drinks upon pressing Serve Drink. Manual sealing still available.",
+                110f
+            ));
         }
 
         public bool HasUpgrade(UpgradeType type)

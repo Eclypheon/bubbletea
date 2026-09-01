@@ -170,10 +170,20 @@ namespace BubbleTeaShop
 
             if (!currentCup.isSealed)
             {
-                HUDController.Instance?.ShowNotification("You must click 'Seal Lid' before serving!");
-                CupSealer.Instance?.HighlightSealer();
-                Debug.LogWarning("You must seal the drink before serving!");
-                return;
+                bool hasAutoSealer = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.AutoSealer);
+                if (hasAutoSealer)
+                {
+                    // Auto-seal the drink upon pressing serve
+                    currentCup.isSealed = true;
+                    UpdateVisuals();
+                }
+                else
+                {
+                    HUDController.Instance?.ShowNotification("You must click 'Seal Lid' before serving!");
+                    CupSealer.Instance?.HighlightSealer();
+                    Debug.LogWarning("You must seal the drink before serving!");
+                    return;
+                }
             }
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
