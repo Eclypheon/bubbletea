@@ -10,7 +10,7 @@ namespace BubbleTeaShop
         public string version;
         public string releaseDate;
         public string summaryTitle;
-        [TextArea(5, 12)]
+        [TextArea(5, 15)]
         public string notes;
     }
 
@@ -18,7 +18,7 @@ namespace BubbleTeaShop
     {
         public static ChangelogManager Instance { get; private set; }
 
-        public const string CurrentVersion = "v1.2.0";
+        public const string CurrentVersion = "v1.3.0";
 
         [Header("Version History")]
         [SerializeField] private List<VersionEntry> history = new List<VersionEntry>();
@@ -40,14 +40,48 @@ namespace BubbleTeaShop
 
             history.Add(new VersionEntry
             {
-                version = "v1.2.0",
+                version = "v1.3.0",
                 releaseDate = "2026-09-01",
-                summaryTitle = "Topping Visuals & Dismissal Safety",
-                notes = "<b>• Multi-Topping Layering:</b> Multiple toppings now dynamically stack inside the cup without vertical squishing.\n" +
-                        "<b>• Calibrated Cheese Foam:</b> Placed across the top rim of the drink with tuned width & thickness.\n" +
+                summaryTitle = "Topping Visuals, Bell Dismissal Safety & Balanced Buyout",
+                notes = "<b>• Multi-Topping Stacking:</b> Cups dynamically stack multiple topping layers without vertical compression.\n" +
+                        "<b>• Calibrated Cheese Foam:</b> Tuned top-rim positioning, scale, and width.\n" +
                         "<b>• Bell Dismissal Safety:</b> Ringing the bell while an unserved customer is waiting prompts for a 2nd confirmation ring.\n" +
-                        "<b>• $1,500 Buyout Goal:</b> Recalibrated default store buyout goal for a balanced 4-week story arc.\n" +
-                        "<b>• Misty Mountains & Centrifuge:</b> Foraging minigame and kitchen centrifuge station."
+                        "<b>• $1,500 Buyout Goal:</b> Calibrated default store buyout goal for a balanced 4-week story arc.\n" +
+                        "<b>• Legacy Asset Cleanup:</b> Completely removed non-existent Wild Mountain Tea references."
+            });
+
+            history.Add(new VersionEntry
+            {
+                version = "v1.2.0",
+                releaseDate = "2026-08-28",
+                summaryTitle = "Foraging Expeditions, Kitchen Prep & Shop Upgrades",
+                notes = "<b>• Foraging Expeditions:</b> Playable expeditions across Bamboo Grove, Honey Meadows, and Misty Mountains.\n" +
+                        "<b>• Kitchen Prep Area:</b> Added Blender & Sieve, Chopping Board, and High-Speed Centrifuge stations.\n" +
+                        "<b>• Shop Upgrades:</b> Permanent upgrades including Storefront Sign, Ads, and Supply Contracts.\n" +
+                        "<b>• Mentor Dialogue Skip:</b> Added buttons to skip Mentor dialogues.\n" +
+                        "<b>• Ingredient Rebalance:</b> Rebalanced purchase costs and menu sell prices."
+            });
+
+            history.Add(new VersionEntry
+            {
+                version = "v1.1.0",
+                releaseDate = "2026-08-20",
+                summaryTitle = "Wholesale Market, Inventory & Mentor Guidance",
+                notes = "<b>• Wholesale Market:</b> Night phase market to buy bulk cups, milks, and ingredients.\n" +
+                        "<b>• Inventory Management:</b> Counter cash register inspection and full stock tracking.\n" +
+                        "<b>• Market Events:</b> Dynamic daily events and market price fluctuations.\n" +
+                        "<b>• Mentor Guidance:</b> Morning briefings and tutorial milestones.\n" +
+                        "<b>• Order Ticket UI:</b> Physical clipped order tickets for customer preferences."
+            });
+
+            history.Add(new VersionEntry
+            {
+                version = "v1.0.0",
+                releaseDate = "2026-08-10",
+                summaryTitle = "Initial Release",
+                notes = "<b>• Core Tea Brewing:</b> Tea base dispensers, sweetness/ice sliders, milk, toppings, and cup sealer.\n" +
+                        "<b>• Customer Archetypes:</b> Neurodivergent customer personalities and unique patience mechanics.\n" +
+                        "<b>• Cafe Loop:</b> Daily service shift, evaluation ratings, tips, and weekly rent cycles."
             });
         }
 
