@@ -23,6 +23,7 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject marketEventBadgeObj;
         [SerializeField] private Button marketEventButton;
         [SerializeField] private Image marketEventIcon;
+        [SerializeField] private Image marketEventIcon2;
         [SerializeField] private TextMeshProUGUI marketEventTrendText;
         [SerializeField] private TextMeshProUGUI marketEventDaysText;
 
@@ -133,8 +134,8 @@ namespace BubbleTeaShop
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(65f, 32f);
-            // Positioned at -705f and scaled by 200% (2x)
-            rt.anchoredPosition = new Vector2(-705f, 0f);
+            // Positioned at -715f and scaled by 200% (2x)
+            rt.anchoredPosition = new Vector2(-715f, 0f);
             rt.localScale = new Vector3(2f, 2f, 1f);
 
             var bgImg = marketEventBadgeObj.GetComponent<Image>();
@@ -144,7 +145,7 @@ namespace BubbleTeaShop
             marketEventButton = marketEventBadgeObj.GetComponent<Button>();
             marketEventButton.onClick.AddListener(OpenMarketEventModal);
 
-            // Icon Image
+            // Primary Icon Image
             GameObject iconObj = new GameObject("EventIcon", typeof(RectTransform), typeof(Image));
             iconObj.transform.SetParent(marketEventBadgeObj.transform, false);
             RectTransform iconRt = iconObj.GetComponent<RectTransform>();
@@ -156,6 +157,20 @@ namespace BubbleTeaShop
             marketEventIcon = iconObj.GetComponent<Image>();
             marketEventIcon.raycastTarget = false;
             marketEventIcon.preserveAspect = true;
+
+            // Secondary Icon Image (for dual-icon events like heatwave)
+            GameObject icon2Obj = new GameObject("EventIcon2", typeof(RectTransform), typeof(Image));
+            icon2Obj.transform.SetParent(marketEventBadgeObj.transform, false);
+            RectTransform icon2Rt = icon2Obj.GetComponent<RectTransform>();
+            icon2Rt.anchorMin = new Vector2(0f, 0.5f);
+            icon2Rt.anchorMax = new Vector2(0f, 0.5f);
+            icon2Rt.pivot = new Vector2(0f, 0.5f);
+            icon2Rt.sizeDelta = new Vector2(26f, 26f);
+            icon2Rt.anchoredPosition = new Vector2(27f, 0f);
+            marketEventIcon2 = icon2Obj.GetComponent<Image>();
+            marketEventIcon2.raycastTarget = false;
+            marketEventIcon2.preserveAspect = true;
+            marketEventIcon2.gameObject.SetActive(false);
 
             // Trend Indicator Text (Red/Green Triangle)
             GameObject trendObj = new GameObject("TrendText", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -217,7 +232,7 @@ namespace BubbleTeaShop
             GameObject cardObj = new GameObject("Card", typeof(RectTransform), typeof(Image));
             cardObj.transform.SetParent(marketEventModal.transform, false);
             RectTransform cardRt = cardObj.GetComponent<RectTransform>();
-            cardRt.sizeDelta = new Vector2(540f, 360f);
+            cardRt.sizeDelta = new Vector2(900f, 600f);
             cardRt.anchoredPosition = Vector2.zero;
 
             var cardImg = cardObj.GetComponent<Image>();
@@ -227,21 +242,21 @@ namespace BubbleTeaShop
             GameObject headerObj = new GameObject("Header", typeof(RectTransform), typeof(TextMeshProUGUI));
             headerObj.transform.SetParent(cardObj.transform, false);
             RectTransform headerRt = headerObj.GetComponent<RectTransform>();
-            headerRt.sizeDelta = new Vector2(500f, 40f);
-            headerRt.anchoredPosition = new Vector2(0f, 140f);
+            headerRt.sizeDelta = new Vector2(820f, 50f);
+            headerRt.anchoredPosition = new Vector2(0f, 235f);
             var headerTmp = headerObj.GetComponent<TextMeshProUGUI>();
             headerTmp.text = "<color=#F1C40F><b>MARKET EVENT ACTIVE</b></color>";
-            headerTmp.fontSize = 20;
+            headerTmp.fontSize = 36;
             headerTmp.alignment = TextAlignmentOptions.Center;
 
             // Title
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
             titleObj.transform.SetParent(cardObj.transform, false);
             RectTransform titleRt = titleObj.GetComponent<RectTransform>();
-            titleRt.sizeDelta = new Vector2(500f, 40f);
-            titleRt.anchoredPosition = new Vector2(0f, 100f);
+            titleRt.sizeDelta = new Vector2(840f, 65f);
+            titleRt.anchoredPosition = new Vector2(0f, 170f);
             modalTitleText = titleObj.GetComponent<TextMeshProUGUI>();
-            modalTitleText.fontSize = 24;
+            modalTitleText.fontSize = 44;
             modalTitleText.fontStyle = FontStyles.Bold;
             modalTitleText.alignment = TextAlignmentOptions.Center;
             modalTitleText.color = Color.white;
@@ -250,10 +265,10 @@ namespace BubbleTeaShop
             GameObject daysObj = new GameObject("Days", typeof(RectTransform), typeof(TextMeshProUGUI));
             daysObj.transform.SetParent(cardObj.transform, false);
             RectTransform daysRt = daysObj.GetComponent<RectTransform>();
-            daysRt.sizeDelta = new Vector2(500f, 30f);
-            daysRt.anchoredPosition = new Vector2(0f, 65f);
+            daysRt.sizeDelta = new Vector2(820f, 45f);
+            daysRt.anchoredPosition = new Vector2(0f, 110f);
             modalDaysText = daysObj.GetComponent<TextMeshProUGUI>();
-            modalDaysText.fontSize = 16;
+            modalDaysText.fontSize = 30;
             modalDaysText.fontStyle = FontStyles.Italic;
             modalDaysText.alignment = TextAlignmentOptions.Center;
             modalDaysText.color = new Color(1f, 0.75f, 0.3f, 1f);
@@ -262,10 +277,10 @@ namespace BubbleTeaShop
             GameObject descObj = new GameObject("Description", typeof(RectTransform), typeof(TextMeshProUGUI));
             descObj.transform.SetParent(cardObj.transform, false);
             RectTransform descRt = descObj.GetComponent<RectTransform>();
-            descRt.sizeDelta = new Vector2(480f, 85f);
-            descRt.anchoredPosition = new Vector2(0f, 5f);
+            descRt.sizeDelta = new Vector2(820f, 130f);
+            descRt.anchoredPosition = new Vector2(0f, 15f);
             modalDescriptionText = descObj.GetComponent<TextMeshProUGUI>();
-            modalDescriptionText.fontSize = 16;
+            modalDescriptionText.fontSize = 30;
             modalDescriptionText.alignment = TextAlignmentOptions.Center;
             modalDescriptionText.enableWordWrapping = true;
             modalDescriptionText.color = new Color(0.9f, 0.9f, 0.95f, 1f);
@@ -274,10 +289,10 @@ namespace BubbleTeaShop
             GameObject impactObj = new GameObject("Impact", typeof(RectTransform), typeof(TextMeshProUGUI));
             impactObj.transform.SetParent(cardObj.transform, false);
             RectTransform impactRt = impactObj.GetComponent<RectTransform>();
-            impactRt.sizeDelta = new Vector2(480f, 65f);
-            impactRt.anchoredPosition = new Vector2(0f, -65f);
+            impactRt.sizeDelta = new Vector2(820f, 110f);
+            impactRt.anchoredPosition = new Vector2(0f, -115f);
             modalImpactText = impactObj.GetComponent<TextMeshProUGUI>();
-            modalImpactText.fontSize = 15;
+            modalImpactText.fontSize = 28;
             modalImpactText.fontStyle = FontStyles.Bold;
             modalImpactText.alignment = TextAlignmentOptions.Center;
             modalImpactText.color = new Color(0.5f, 0.85f, 1f, 1f);
@@ -286,8 +301,8 @@ namespace BubbleTeaShop
             GameObject closeObj = new GameObject("CloseButton", typeof(RectTransform), typeof(Image), typeof(Button));
             closeObj.transform.SetParent(cardObj.transform, false);
             RectTransform closeRt = closeObj.GetComponent<RectTransform>();
-            closeRt.sizeDelta = new Vector2(160f, 40f);
-            closeRt.anchoredPosition = new Vector2(0f, -135f);
+            closeRt.sizeDelta = new Vector2(260f, 65f);
+            closeRt.anchoredPosition = new Vector2(0f, -230f);
             var closeImg = closeObj.GetComponent<Image>();
             closeImg.color = new Color(0.25f, 0.45f, 0.85f, 1f);
 
@@ -301,7 +316,7 @@ namespace BubbleTeaShop
             closeTxtRt.anchoredPosition = Vector2.zero;
             var closeTxt = closeTxtObj.GetComponent<TextMeshProUGUI>();
             closeTxt.text = "Got It / Close";
-            closeTxt.fontSize = 16;
+            closeTxt.fontSize = 30;
             closeTxt.fontStyle = FontStyles.Bold;
             closeTxt.alignment = TextAlignmentOptions.Center;
             closeTxt.color = Color.white;
@@ -338,111 +353,162 @@ namespace BubbleTeaShop
 
             var ev = MarketEventManager.Instance.ActiveEvent;
 
-            // Shift DayText 60 pixels to the left when a market event is active
+            // Configure Icon and Trend indicator based on event
+            ConfigureEventBadge(ev);
+
+            // Shift DayText to the left to make room for the badge:
+            // Double-icon events shift left more (-85px), single-icon events shift left (-65px)
             if (dayText != null)
             {
-                dayText.rectTransform.anchoredPosition = new Vector2(dayTextOriginalAnchoredPos.x - 60f, dayTextOriginalAnchoredPos.y);
+                GetMarketEventSprites(ev, out _, out Sprite secSprite);
+                float shiftX = (secSprite != null) ? -85f : -65f;
+                dayText.rectTransform.anchoredPosition = new Vector2(dayTextOriginalAnchoredPos.x + shiftX, dayTextOriginalAnchoredPos.y);
             }
+
+            // Dynamically dock the market badge right beside the shifted Day counter
+            UpdateBadgePositionRelativeToDayText();
 
             if (marketEventBadgeObj != null)
             {
                 bool shouldShowBadge = !isSubscreenActive && isStorefrontOpen;
                 marketEventBadgeObj.SetActive(shouldShowBadge);
             }
-
-            // Configure Icon and Trend indicator based on event
-            ConfigureEventBadge(ev);
         }
 
-        private Sprite GetMarketEventSprite(MarketEvent ev)
+        private void UpdateBadgePositionRelativeToDayText()
         {
-            if (ev == null) return null;
+            if (dayText == null || marketEventBadgeObj == null) return;
 
-            Sprite sp = null;
+            RectTransform badgeRt = marketEventBadgeObj.GetComponent<RectTransform>();
+            RectTransform dayRt = dayText.rectTransform;
+
+            if (marketEventBadgeObj.transform.parent != dayRt.parent)
+            {
+                marketEventBadgeObj.transform.SetParent(dayRt.parent, false);
+            }
+
+            badgeRt.anchorMin = dayRt.anchorMin;
+            badgeRt.anchorMax = dayRt.anchorMax;
+            badgeRt.pivot = new Vector2(0f, 0.5f);
+
+            float textWidth = (dayText.preferredWidth > 10f) ? dayText.preferredWidth : 75f;
+            float dayRightEdge = dayRt.anchoredPosition.x;
+
+            if (dayRt.pivot.x == 0.5f)
+            {
+                dayRightEdge += (textWidth * 0.5f);
+            }
+            else if (dayRt.pivot.x == 0f)
+            {
+                dayRightEdge += textWidth;
+            }
+
+            badgeRt.anchoredPosition = new Vector2(dayRightEdge + 10f, dayRt.anchoredPosition.y);
+            badgeRt.localScale = new Vector3(2f, 2f, 1f);
+        }
+
+        private Sprite GetIceSprite()
+        {
+            if (SpriteManager.Instance != null && SpriteManager.Instance.IceCubeSprite != null)
+            {
+                return SpriteManager.Instance.IceCubeSprite;
+            }
+            return SpriteManager.Instance?.GetSprite("Ice");
+        }
+
+        private Sprite GetBabyYippeeSprite()
+        {
+            if (SpriteManager.Instance != null && SpriteManager.Instance.BabyYippeeSprite != null)
+            {
+                return SpriteManager.Instance.BabyYippeeSprite;
+            }
+            return SpriteManager.Instance?.GetSprite("BabyYippee");
+        }
+
+        private Sprite GetIngredientSprite(string key)
+        {
+            if (SpriteManager.Instance != null)
+            {
+                var sp = SpriteManager.Instance.GetSprite(key);
+                if (sp != null) return sp;
+            }
+            if (SupermarketViewController.Instance != null)
+            {
+                var sp = SupermarketViewController.Instance.GetIngredientIcon(key);
+                if (sp != null) return sp;
+            }
+            if (CupStation.Instance != null)
+            {
+                var sp = key switch
+                {
+                    "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
+                    "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
+                    "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
+                    "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
+                    "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
+                    "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
+                    "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
+                    _ => null
+                };
+                if (sp != null) return sp;
+            }
+            return null;
+        }
+
+        private void GetMarketEventSprites(MarketEvent ev, out Sprite primary, out Sprite secondary)
+        {
+            primary = null;
+            secondary = null;
+            if (ev == null) return;
+
             switch (ev.eventId)
             {
                 case "tapioca_delay":
-                    if (CupStation.Instance != null && CupStation.Instance.TapiocaSprite != null)
-                        sp = CupStation.Instance.TapiocaSprite;
-                    else if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_TapiocaPearls");
+                    primary = GetIngredientSprite("Topping_TapiocaPearls");
                     break;
 
                 case "dairy_surplus":
-                    if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_FreshMilk");
+                    primary = GetIngredientSprite("Milk_FreshMilk");
                     break;
 
                 case "tropical_coconut":
-                    if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_CoconutMilk");
-                    if (sp == null && CupStation.Instance != null)
-                        sp = CupStation.Instance.CoconutJellySprite;
+                    primary = GetIngredientSprite("Milk_CoconutMilk");
+                    secondary = GetIngredientSprite("Topping_CoconutJelly");
                     break;
 
                 case "cream_shortage":
-                    if (CupStation.Instance != null && CupStation.Instance.CheeseFoamSprite != null)
-                        sp = CupStation.Instance.CheeseFoamSprite;
-                    else if (CupStation.Instance != null && CupStation.Instance.EggPuddingSprite != null)
-                        sp = CupStation.Instance.EggPuddingSprite;
-                    else if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_CheeseFoam");
+                    primary = GetIngredientSprite("Topping_CheeseFoam");
+                    secondary = GetIngredientSprite("Topping_EggPudding");
                     break;
 
                 case "plant_based_craze":
-                    if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_OatMilk");
+                    primary = GetIngredientSprite("Milk_OatMilk");
+                    secondary = GetIngredientSprite("Milk_CoconutMilk");
                     break;
 
                 case "wellness_trend":
-                    if (CupStation.Instance != null && CupStation.Instance.GrassJellySprite != null)
-                        sp = CupStation.Instance.GrassJellySprite;
-                    else if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GrassJelly");
+                    primary = GetIngredientSprite("Topping_GrassJelly");
                     break;
 
                 case "summer_heatwave":
-                    if (CupStation.Instance != null && CupStation.Instance.PoppingBobaSprite != null)
-                        sp = CupStation.Instance.PoppingBobaSprite;
-                    else if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_PoppingBoba");
+                    primary = GetIngredientSprite("Topping_PoppingBoba");
+                    secondary = GetIceSprite();
                     break;
 
                 case "chilly_rain":
-                    if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_CondensedMilk");
+                    primary = GetIngredientSprite("Milk_CondensedMilk");
                     break;
 
                 case "golden_harvest":
-                    if (CupStation.Instance != null && CupStation.Instance.GoldenHoneyPearlsSprite != null)
-                        sp = CupStation.Instance.GoldenHoneyPearlsSprite;
-                    else if (SupermarketViewController.Instance != null)
-                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GoldenHoneyPearls");
+                    primary = GetBabyYippeeSprite();
+                    if (primary == null) primary = GetIngredientSprite("Topping_GoldenHoneyPearls");
                     break;
             }
 
-            if (sp == null && !string.IsNullOrEmpty(ev.affectedKey))
+            if (primary == null && !string.IsNullOrEmpty(ev.affectedKey))
             {
-                if (SupermarketViewController.Instance != null)
-                    sp = SupermarketViewController.Instance.GetIngredientIcon(ev.affectedKey);
-
-                if (sp == null && CupStation.Instance != null)
-                {
-                    sp = ev.affectedKey switch
-                    {
-                        "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
-                        "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
-                        "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
-                        "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
-                        "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
-                        "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
-                        "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
-                        _ => null
-                    };
-                }
+                primary = GetIngredientSprite(ev.affectedKey);
             }
-
-            return sp;
         }
 
         private void ConfigureEventBadge(MarketEvent ev)
@@ -450,51 +516,51 @@ namespace BubbleTeaShop
             if (marketEventIcon == null || marketEventTrendText == null || marketEventDaysText == null) return;
 
             marketEventDaysText.text = $"{ev.daysRemaining}d";
-            Sprite eventSprite = GetMarketEventSprite(ev);
-            marketEventIcon.sprite = eventSprite;
-            marketEventIcon.enabled = (eventSprite != null);
+
+            GetMarketEventSprites(ev, out Sprite primarySprite, out Sprite secondarySprite);
+
+            marketEventIcon.sprite = primarySprite;
+            marketEventIcon.enabled = (primarySprite != null);
             marketEventIcon.color = Color.white;
+
+            RectTransform badgeRt = marketEventBadgeObj != null ? marketEventBadgeObj.GetComponent<RectTransform>() : null;
+
+            if (secondarySprite != null && marketEventIcon2 != null)
+            {
+                marketEventIcon2.gameObject.SetActive(true);
+                marketEventIcon2.sprite = secondarySprite;
+                marketEventIcon2.enabled = true;
+                marketEventIcon2.color = Color.white;
+                marketEventIcon2.rectTransform.anchoredPosition = new Vector2(27f, 0f);
+
+                marketEventTrendText.rectTransform.anchoredPosition = new Vector2(54f, 0f);
+                marketEventDaysText.rectTransform.anchoredPosition = new Vector2(73f, 0f);
+                if (badgeRt != null) badgeRt.sizeDelta = new Vector2(92f, 32f);
+            }
+            else
+            {
+                if (marketEventIcon2 != null) marketEventIcon2.gameObject.SetActive(false);
+                marketEventTrendText.rectTransform.anchoredPosition = new Vector2(27f, 0f);
+                marketEventDaysText.rectTransform.anchoredPosition = new Vector2(46f, 0f);
+                if (badgeRt != null) badgeRt.sizeDelta = new Vector2(65f, 32f);
+            }
 
             switch (ev.eventId)
             {
-                case "tapioca_delay":
-                    marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
-                    break;
-
                 case "dairy_surplus":
-                    marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
-                    break;
-
                 case "tropical_coconut":
-                    marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
-                    break;
-
-                case "cream_shortage":
                     marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
                     break;
 
+                case "tapioca_delay":
+                case "cream_shortage":
                 case "plant_based_craze":
-                    marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
-                    break;
-
                 case "wellness_trend":
-                    marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
-                    break;
-
                 case "summer_heatwave":
-                    marketEventTrendText.text = "<color=#FFA500><b>▲</b></color>";
-                    break;
-
                 case "chilly_rain":
-                    marketEventTrendText.text = "<color=#3498DB><b>▼</b></color>";
-                    break;
-
                 case "golden_harvest":
-                    marketEventTrendText.text = "<color=#F1C40F><b>2x★</b></color>";
-                    break;
-
                 default:
-                    marketEventTrendText.text = "<color=#FFA500><b>!</b></color>";
+                    marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
                     break;
             }
         }

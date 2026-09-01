@@ -96,4 +96,18 @@ namespace BubbleTeaShop
         NightChauffeur,
         MarketingIntern
     }
+
+    public enum MarketEventType
+    {
+        None = 0,
+        TapiocaPearlShortage,
+        LocalDairySurplus,
+        TropicalCoconutHarvest,
+        GourmetCreamShortage,
+        PlantBasedMilkCraze,
+        HerbalWellnessTrend,
+        SummerHeatwave,
+        ChillyMonsoonRain,
+        BountifulForagingSeason
+    }
 }

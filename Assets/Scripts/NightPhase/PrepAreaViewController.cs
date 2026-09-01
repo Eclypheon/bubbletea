@@ -333,17 +333,21 @@ namespace BubbleTeaShop
 
             var activeRawItems = new List<(RawIngredientType type, string name, Sprite icon, string actionLabel)>();
 
+            Sprite babyIcon = (rawBabyYippeesIcon != null) ? rawBabyYippeesIcon : SpriteManager.Instance?.BabyYippeeSprite;
+            Sprite jellyIcon = (rawJellyBlocksIcon != null) ? rawJellyBlocksIcon : SpriteManager.Instance?.RawJellyBlocksSprite;
+            Sprite dewIcon = (rawGoldenDewIcon != null) ? rawGoldenDewIcon : SpriteManager.Instance?.RawGoldenDewSprite;
+
             if (day >= 5)
             {
-                activeRawItems.Add((RawIngredientType.BabyYippees, "Baby Yippees", rawBabyYippeesIcon, "Load Blender"));
+                activeRawItems.Add((RawIngredientType.BabyYippees, "Baby Yippees", babyIcon, "Load Blender"));
             }
             if (day >= 11)
             {
-                activeRawItems.Add((RawIngredientType.JellyBlocks, "Jelly Blocks", rawJellyBlocksIcon, "Load Board"));
+                activeRawItems.Add((RawIngredientType.JellyBlocks, "Jelly Blocks", jellyIcon, "Load Board"));
             }
             if (day >= 18)
             {
-                activeRawItems.Add((RawIngredientType.GoldenDew, "Golden Dew", rawGoldenDewIcon, "Pour Bucket"));
+                activeRawItems.Add((RawIngredientType.GoldenDew, "Golden Dew", dewIcon, "Pour Bucket"));
             }
 
             if (activeRawItems.Count == 0) return;

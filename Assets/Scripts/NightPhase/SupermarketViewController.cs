@@ -177,6 +177,12 @@ namespace BubbleTeaShop
 
         public Sprite GetIngredientIcon(string key)
         {
+            if (SpriteManager.Instance != null)
+            {
+                var sp = SpriteManager.Instance.GetSprite(key);
+                if (sp != null) return sp;
+            }
+
             Sprite icon = key switch
             {
                 "Milk_FreshMilk" => freshMilkIcon,
@@ -193,11 +199,6 @@ namespace BubbleTeaShop
                 _ => null
             };
 
-            if (icon == null && CashRegisterInventoryUI.Instance != null)
-            {
-                icon = CashRegisterInventoryUI.Instance.GetIngredientIcon(key);
-            }
-            
             if (icon == null && CupStation.Instance != null)
             {
                 icon = key switch

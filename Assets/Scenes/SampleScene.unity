@@ -2952,6 +2952,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 182}
+  - {fileID: 1210829753}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!4 &184
@@ -5645,7 +5646,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 162, y: 0}
+  m_AnchoredPosition: {x: 238, y: 0}
   m_SizeDelta: {x: 500, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &427
@@ -6267,7 +6268,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 773, y: -0}
+  m_AnchoredPosition: {x: -756, y: -0}
   m_SizeDelta: {x: 300, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &460
@@ -6598,7 +6599,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -741, y: 0}
+  m_AnchoredPosition: {x: 780, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &480
@@ -11558,6 +11559,7 @@ MonoBehaviour:
   marketEventBadgeObj: {fileID: 0}
   marketEventButton: {fileID: 0}
   marketEventIcon: {fileID: 0}
+  marketEventIcon2: {fileID: 0}
   marketEventTrendText: {fileID: 0}
   marketEventDaysText: {fileID: 0}
   marketEventModal: {fileID: 0}
@@ -12759,6 +12761,7 @@ MonoBehaviour:
     daysRemaining: 3
   hasNewEventToday: 0
   lastEventEndDay: 0
+  testEventSelection: 0
 --- !u!114 &637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13272,7 +13275,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -190, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -17903,6 +17906,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 886670048}
   m_CullTransparentMesh: 1
+--- !u!1 &1210829752
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1210829753}
+  - component: {fileID: 1210829754}
+  m_Layer: 0
+  m_Name: SpriteManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1210829753
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1210829752}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 183}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1210829754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1210829752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1553271687af45aea20071411b225ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BubbleTeaShop.SpriteManager
+  freshMilkSprite: {fileID: -3247569045822105553, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
+  oatMilkSprite: {fileID: -1041802545399106540, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
+  coconutMilkSprite: {fileID: 5877283925931886926, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
+  condensedMilkSprite: {fileID: 7085306471525216664, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
+  tapiocaSprite: {fileID: -5034703955856199138, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  poppingBobaSprite: {fileID: 4129085186536377779, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  grassJellySprite: {fileID: -6734107803153752858, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  coconutJellySprite: {fileID: 7634809879669098404, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  eggPuddingSprite: {fileID: -3161446357135062343, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  cheeseFoamSprite: {fileID: -6960219621324335271, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  goldenHoneyPearlsSprite: {fileID: -7790448460745747974, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
+  iceCubeSprite: {fileID: 114393065734669584, guid: c5fe4474064484b3090655708b7af84e, type: 3}
+  deskBellSprite: {fileID: -8172979266565051687, guid: 29d306a19968b409299e10ce12b55c4b, type: 3}
+  shutterMetalSprite: {fileID: 6159056634475373071, guid: 1cee43d0e183b4789846c9f2af68c415, type: 3}
+  cupEmptySprite: {fileID: -6585589809987453158, guid: d2315857d679d4e8fa380e626b1260e5, type: 3}
+  cupLiquidMaskSprite: {fileID: 1467715286113827524, guid: 7a43d922031ab4418a47450d4221a22d, type: 3}
+  cupSealedLidSprite: {fileID: 5559633544591217615, guid: f69b78b4146224d7c96cf90b61e9af22, type: 3}
+  babyYippeeSprite: {fileID: 9038228410457395441, guid: 51012f5caa0e74659b8e1a17bc1641df, type: 3}
+  rawJellyBlocksSprite: {fileID: -6019608671054731455, guid: 16e448a1cf515439bb36161761741d29, type: 3}
+  rawGoldenDewSprite: {fileID: -8548621078868229173, guid: 16e448a1cf515439bb36161761741d29, type: 3}
+  grassPileSprite: {fileID: -8723978912709568632, guid: 57755a61a6f9140ba949c23716675367, type: 3}
+  jellyTreeSprite: {fileID: -1136432714834833235, guid: 57a83f0e811b04931823e9d2c4733c0d, type: 3}
+  rockShelfSprite: {fileID: 5569634398768493868, guid: 94e407d1eb11c4797ad6647854476baf, type: 3}
+  rockWallSprite: {fileID: -1703383271984481490, guid: 937534c05d66140c5b97760b0c22185d, type: 3}
 --- !u!1 &1345283769
 GameObject:
   m_ObjectHideFlags: 0

@@ -31,13 +31,13 @@ namespace BubbleTeaShop
         [SerializeField] private Sprite goldenHoneyPearlsSprite;
         [SerializeField] private Sprite cheeseFoamSprite;
 
-        public Sprite TapiocaSprite => tapiocaSprite;
-        public Sprite PoppingBobaSprite => poppingBobaSprite;
-        public Sprite GrassJellySprite => grassJellySprite;
-        public Sprite CoconutJellySprite => coconutJellySprite;
-        public Sprite EggPuddingSprite => eggPuddingSprite;
-        public Sprite GoldenHoneyPearlsSprite => goldenHoneyPearlsSprite;
-        public Sprite CheeseFoamSprite => cheeseFoamSprite;
+        public Sprite TapiocaSprite => (tapiocaSprite != null) ? tapiocaSprite : SpriteManager.Instance?.TapiocaSprite;
+        public Sprite PoppingBobaSprite => (poppingBobaSprite != null) ? poppingBobaSprite : SpriteManager.Instance?.PoppingBobaSprite;
+        public Sprite GrassJellySprite => (grassJellySprite != null) ? grassJellySprite : SpriteManager.Instance?.GrassJellySprite;
+        public Sprite CoconutJellySprite => (coconutJellySprite != null) ? coconutJellySprite : SpriteManager.Instance?.CoconutJellySprite;
+        public Sprite EggPuddingSprite => (eggPuddingSprite != null) ? eggPuddingSprite : SpriteManager.Instance?.EggPuddingSprite;
+        public Sprite GoldenHoneyPearlsSprite => (goldenHoneyPearlsSprite != null) ? goldenHoneyPearlsSprite : SpriteManager.Instance?.GoldenHoneyPearlsSprite;
+        public Sprite CheeseFoamSprite => (cheeseFoamSprite != null) ? cheeseFoamSprite : SpriteManager.Instance?.CheeseFoamSprite;
 
         private const float BottomToppingStackedSpacing = 26f;
         private const float CheeseFoamYPos = 240f;
