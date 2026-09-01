@@ -167,17 +167,26 @@ namespace BubbleTeaShop
 
             if (InventoryManager.Instance == null) return;
 
-            // Milks Data
-            var milks = new (string key, string name, int count)[]
+            // Milks Data (Only show items that the player has owned at least 1 of before)
+            var allMilks = new (string key, string name, int count)[]
             {
                 ("Milk_FreshMilk", "Fresh Whole Milk", InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)),
                 ("Milk_OatMilk", "Barista Oat Milk", InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)),
                 ("Milk_CoconutMilk", "Organic Coconut Milk", InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)),
                 ("Milk_CondensedMilk", "Sweet Condensed Milk", InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk))
             };
+            var milksList = new List<(string key, string name, int count)>();
+            foreach (var m in allMilks)
+            {
+                if (InventoryManager.Instance.HasEverHadStock(m.key))
+                {
+                    milksList.Add(m);
+                }
+            }
+            var milks = milksList.ToArray();
 
-            // Toppings Data
-            var toppings = new (string key, string name, int count)[]
+            // Toppings Data (Only show items that the player has owned at least 1 of before)
+            var allToppings = new (string key, string name, int count)[]
             {
                 ("Topping_TapiocaPearls", "Raw Tapioca Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)),
                 ("Topping_PoppingBoba", "Mango Popping Boba", InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)),
@@ -187,6 +196,15 @@ namespace BubbleTeaShop
                 ("Topping_CheeseFoam", "Salted Cheese Foam", InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)),
                 ("Topping_GoldenHoneyPearls", "Golden Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))
             };
+            var toppingsList = new List<(string key, string name, int count)>();
+            foreach (var t in allToppings)
+            {
+                if (InventoryManager.Instance.HasEverHadStock(t.key))
+                {
+                    toppingsList.Add(t);
+                }
+            }
+            var toppings = toppingsList.ToArray();
 
             // Update Fallback Texts (Clean ASCII with Color Coding)
             if (milkStockText != null)

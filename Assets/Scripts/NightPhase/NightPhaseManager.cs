@@ -786,15 +786,24 @@ namespace BubbleTeaShop
                 Destroy(container.GetChild(i).gameObject);
             }
 
-            var milks = new (string key, string name, int count)[]
+            var allMilks = new (string key, string name, int count)[]
             {
                 ("Milk_FreshMilk", "Fresh Milk", InventoryManager.Instance.GetMilkStock(MilkType.FreshMilk)),
                 ("Milk_OatMilk", "Oat Milk", InventoryManager.Instance.GetMilkStock(MilkType.OatMilk)),
                 ("Milk_CoconutMilk", "Coconut Milk", InventoryManager.Instance.GetMilkStock(MilkType.CoconutMilk)),
                 ("Milk_CondensedMilk", "Condensed Milk", InventoryManager.Instance.GetMilkStock(MilkType.CondensedMilk))
             };
+            var milksList = new List<(string key, string name, int count)>();
+            foreach (var m in allMilks)
+            {
+                if (InventoryManager.Instance.HasEverHadStock(m.key))
+                {
+                    milksList.Add(m);
+                }
+            }
+            var milks = milksList.ToArray();
 
-            var toppings = new (string key, string name, int count)[]
+            var allToppings = new (string key, string name, int count)[]
             {
                 ("Topping_TapiocaPearls", "Tapioca Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)),
                 ("Topping_PoppingBoba", "Popping Boba", InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)),
@@ -804,6 +813,15 @@ namespace BubbleTeaShop
                 ("Topping_CheeseFoam", "Cheese Foam", InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)),
                 ("Topping_GoldenHoneyPearls", "Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))
             };
+            var toppingsList = new List<(string key, string name, int count)>();
+            foreach (var t in allToppings)
+            {
+                if (InventoryManager.Instance.HasEverHadStock(t.key))
+                {
+                    toppingsList.Add(t);
+                }
+            }
+            var toppings = toppingsList.ToArray();
 
             // Left column: Milks (width ~260)
             GameObject milkCol = new GameObject("MilksCol", typeof(RectTransform));

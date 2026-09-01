@@ -51,8 +51,24 @@ namespace BubbleTeaShop
         [SerializeField] private int teaTaro = 0;
 
         private Dictionary<string, int> stock = new Dictionary<string, int>();
+        private HashSet<string> discoveredKeys = new HashSet<string>();
 
         public event Action OnInventoryUpdated;
+
+        public bool HasEverHadStock(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return false;
+            return (discoveredKeys != null && discoveredKeys.Contains(key)) || GetStock(key) > 0;
+        }
+
+        private void MarkDiscovered(string key)
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (discoveredKeys == null) discoveredKeys = new HashSet<string>();
+                discoveredKeys.Add(key);
+            }
+        }
 
         private void Awake()
         {
@@ -163,6 +179,9 @@ namespace BubbleTeaShop
         public void SetupDay1StarterStock()
         {
             stock.Clear();
+            if (discoveredKeys == null) discoveredKeys = new HashSet<string>();
+            discoveredKeys.Clear();
+
             stock["Cup"] = 25;
             stock["Sugar"] = 100;
             stock["Ice"] = 100;
@@ -193,6 +212,15 @@ namespace BubbleTeaShop
             stock[$"Raw_{RawIngredientType.BabyYippees}"] = 0;
             stock[$"Raw_{RawIngredientType.JellyBlocks}"] = 0;
             stock[$"Raw_{RawIngredientType.GoldenDew}"] = 0;
+
+            // Mark initial items as discovered
+            foreach (var kvp in stock)
+            {
+                if (kvp.Value > 0)
+                {
+                    MarkDiscovered(kvp.Key);
+                }
+            }
 
             hasPremiumMilkDispenser = false;
             SyncDictionaryToInspector();
@@ -247,6 +275,7 @@ namespace BubbleTeaShop
             if (quantity <= 0) return;
             if (!stock.ContainsKey(key)) stock[key] = 0;
             stock[key] += quantity;
+            MarkDiscovered(key);
             SyncDictionaryToInspector();
             OnInventoryUpdated?.Invoke();
         }
