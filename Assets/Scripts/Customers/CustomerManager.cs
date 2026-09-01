@@ -363,6 +363,33 @@ namespace BubbleTeaShop
             };
         }
 
+        private int GetArtisanalToppingWeight(ToppingType topping)
+        {
+            return topping switch
+            {
+                ToppingType.TapiocaPearls => 1,
+                ToppingType.PoppingBoba => 2,
+                ToppingType.GrassJelly => 3,
+                ToppingType.CoconutJelly => 4,
+                ToppingType.EggPudding => 5,
+                ToppingType.CheeseFoam => 6,
+                ToppingType.GoldenHoneyPearls => 7,
+                _ => 1
+            };
+        }
+
+        private int GetArtisanalMilkWeight(MilkType milk)
+        {
+            return milk switch
+            {
+                MilkType.FreshMilk => 1,
+                MilkType.OatMilk => 2,
+                MilkType.CondensedMilk => 2,
+                MilkType.CoconutMilk => 3,
+                _ => 1
+            };
+        }
+
         private DrinkOrder GenerateRandomOrder()
         {
             var order = new DrinkOrder();
@@ -436,10 +463,13 @@ namespace BubbleTeaShop
                     milkPool.Remove(MilkType.None);
                     if (hasArtisanalMenu)
                     {
-                        // Add extra weight for premium milks
-                        if (milkPool.Contains(MilkType.CoconutMilk)) milkPool.Add(MilkType.CoconutMilk);
-                        if (milkPool.Contains(MilkType.CondensedMilk)) { milkPool.Add(MilkType.CondensedMilk); milkPool.Add(MilkType.CondensedMilk); }
-                        if (milkPool.Contains(MilkType.OatMilk)) milkPool.Add(MilkType.OatMilk);
+                        List<MilkType> weightedMilks = new List<MilkType>();
+                        foreach (var m in milkPool)
+                        {
+                            int w = GetArtisanalMilkWeight(m);
+                            for (int k = 0; k < w; k++) weightedMilks.Add(m);
+                        }
+                        milkPool = weightedMilks;
                     }
                     order.targetMilk = milkPool[UnityEngine.Random.Range(0, milkPool.Count)];
                 }
@@ -452,7 +482,7 @@ namespace BubbleTeaShop
                 order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
 
                 // Toppings: Base chance scales with week (65% in W1/W2, 70% in W3, 80% in W4; 85-90% with Artisanal Menu)
-                float toppingChance = hasArtisanalMenu ? 0.85f : (currentDay >= 22 ? 0.80f : (currentDay >= 15 ? 0.70f : 0.65f));
+                float toppingChance = hasArtisanalMenu ? (currentDay >= 22 ? 0.90f : 0.85f) : (currentDay >= 22 ? 0.80f : (currentDay >= 15 ? 0.70f : 0.65f));
                 if (UnityEngine.Random.value < toppingChance && availableToppings.Count > 0)
                 {
                     bool isWeek4 = (currentDay >= 22);
@@ -463,21 +493,23 @@ namespace BubbleTeaShop
                         List<ToppingType> bottomPool = new List<ToppingType>(availableToppings);
                         bottomPool.Remove(ToppingType.CheeseFoam);
 
-                        // Roll 1 or 2 bottom toppings (40% for 1, 60% for 2)
-                        int bottomCount = (UnityEngine.Random.value < 0.60f) ? 2 : 1;
-                        if (hasArtisanalMenu)
+                        // Roll 1 or 2 bottom toppings (40% for 1, 60% for 2 without Artisanal; 30% for 1, 70% for 2 with Artisanal)
+                        float rollTwoBottomChance = hasArtisanalMenu ? 0.70f : 0.60f;
+                        int bottomCount = (UnityEngine.Random.value < rollTwoBottomChance) ? 2 : 1;
+
+                        List<ToppingType> weightedBottomPool = new List<ToppingType>();
+                        foreach (var t in bottomPool)
                         {
-                            if (bottomPool.Contains(ToppingType.GoldenHoneyPearls)) { bottomPool.Add(ToppingType.GoldenHoneyPearls); bottomPool.Add(ToppingType.GoldenHoneyPearls); }
-                            if (bottomPool.Contains(ToppingType.PoppingBoba)) bottomPool.Add(ToppingType.PoppingBoba);
-                            if (bottomPool.Contains(ToppingType.EggPudding)) bottomPool.Add(ToppingType.EggPudding);
+                            int w = hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1;
+                            for (int k = 0; k < w; k++) weightedBottomPool.Add(t);
                         }
 
-                        for (int i = 0; i < bottomCount && bottomPool.Count > 0; i++)
+                        for (int i = 0; i < bottomCount && weightedBottomPool.Count > 0; i++)
                         {
-                            int randIdx = UnityEngine.Random.Range(0, bottomPool.Count);
-                            ToppingType selected = bottomPool[randIdx];
+                            int randIdx = UnityEngine.Random.Range(0, weightedBottomPool.Count);
+                            ToppingType selected = weightedBottomPool[randIdx];
                             order.targetToppings.Add(selected);
-                            bottomPool.RemoveAll(x => x == selected);
+                            weightedBottomPool.RemoveAll(x => x == selected);
                         }
 
                         // Dedicated roll for Cheese Foam on top (50% base, 70% with Artisanal Menu)
@@ -490,25 +522,26 @@ namespace BubbleTeaShop
                     else
                     {
                         // Weeks 1 - 3: standard 1 to maxToppings
-                        int toppingsCount = UnityEngine.Random.Range(1, maxToppings + 1);
-                        List<ToppingType> toppingPool = new List<ToppingType>(availableToppings);
-
-                        if (hasArtisanalMenu)
+                        int toppingsCount = 1;
+                        if (maxToppings > 1)
                         {
-                            // Weight rare / expensive gourmet toppings heavily
-                            if (toppingPool.Contains(ToppingType.GoldenHoneyPearls)) { toppingPool.Add(ToppingType.GoldenHoneyPearls); toppingPool.Add(ToppingType.GoldenHoneyPearls); }
-                            if (toppingPool.Contains(ToppingType.CheeseFoam)) { toppingPool.Add(ToppingType.CheeseFoam); toppingPool.Add(ToppingType.CheeseFoam); }
-                            if (toppingPool.Contains(ToppingType.PoppingBoba)) toppingPool.Add(ToppingType.PoppingBoba);
-                            if (toppingPool.Contains(ToppingType.EggPudding)) toppingPool.Add(ToppingType.EggPudding);
+                            float rollTwoChance = hasArtisanalMenu ? 0.70f : 0.50f;
+                            toppingsCount = (UnityEngine.Random.value < rollTwoChance) ? 2 : 1;
                         }
 
-                        for (int i = 0; i < toppingsCount && toppingPool.Count > 0; i++)
+                        List<ToppingType> weightedPool = new List<ToppingType>();
+                        foreach (var t in availableToppings)
                         {
-                            int randIdx = UnityEngine.Random.Range(0, toppingPool.Count);
-                            ToppingType selected = toppingPool[randIdx];
+                            int w = hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1;
+                            for (int k = 0; k < w; k++) weightedPool.Add(t);
+                        }
+
+                        for (int i = 0; i < toppingsCount && weightedPool.Count > 0; i++)
+                        {
+                            int randIdx = UnityEngine.Random.Range(0, weightedPool.Count);
+                            ToppingType selected = weightedPool[randIdx];
                             order.targetToppings.Add(selected);
-                            // Remove all instances of selected topping so customer doesn't get duplicate of same topping
-                            toppingPool.RemoveAll(x => x == selected);
+                            weightedPool.RemoveAll(x => x == selected);
                         }
                     }
                 }
