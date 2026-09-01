@@ -40,7 +40,6 @@ namespace BubbleTeaShop
         [SerializeField] private int minGrassPatches = 2;
         [Range(1, 6)]
         [SerializeField] private int maxGrassPatches = 4;
-        [SerializeField] private Sprite grassPileSprite;
         [SerializeField] private Transform grassPatchesContainer;
         [SerializeField] private List<Button> grassPatchButtons = new List<Button>();
 
@@ -51,7 +50,6 @@ namespace BubbleTeaShop
         [SerializeField] private int maxYippeesPerPatch = 3;
         [SerializeField] private Transform crittersContainer;
         [SerializeField] private Sprite[] babyYippeeRunSprites;
-        [SerializeField] private Sprite babyYippeeStaticSprite;
 
         [Header("Critter Scurry Duration & Timer HUD (Editable)")]
         [Tooltip("Seconds the Baby Yippees will scurry on screen before escaping.")]
@@ -167,10 +165,6 @@ namespace BubbleTeaShop
             {
                 bambooGroveBackgroundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Bamboo/bamboogrove.jpg");
             }
-            if (grassPileSprite == null)
-            {
-                grassPileSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Bamboo/grasspile.png");
-            }
             if (babyYippeeRunSprites == null || babyYippeeRunSprites.Length == 0)
             {
                 var allAlien = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Bamboo/bbyalienrun.png");
@@ -182,10 +176,9 @@ namespace BubbleTeaShop
                 if (sprites.Count > 0) babyYippeeRunSprites = sprites.ToArray();
             }
 #endif
-            if (bambooGroveBackgroundSprite == null || grassPileSprite == null)
+            if (bambooGroveBackgroundSprite == null)
             {
                 var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
-                List<Sprite> runSpritesList = new List<Sprite>();
                 for (int i = 0; i < allSprites.Length; i++)
                 {
                     var s = allSprites[i];
@@ -193,19 +186,8 @@ namespace BubbleTeaShop
                     if (bambooGroveBackgroundSprite == null && (s.name.ToLower().Contains("bamboo") || s.name.ToLower().Contains("grove")))
                     {
                         bambooGroveBackgroundSprite = s;
+                        break;
                     }
-                    if (grassPileSprite == null && (s.name.ToLower().Contains("grass") || s.name.ToLower().Contains("pile")))
-                    {
-                        grassPileSprite = s;
-                    }
-                    if (s.name.ToLower().Contains("bbyalien") || s.name.ToLower().Contains("yippee"))
-                    {
-                        runSpritesList.Add(s);
-                    }
-                }
-                if ((babyYippeeRunSprites == null || babyYippeeRunSprites.Length == 0) && runSpritesList.Count > 0)
-                {
-                    babyYippeeRunSprites = runSpritesList.ToArray();
                 }
             }
         }
@@ -405,9 +387,10 @@ namespace BubbleTeaShop
                 rt.anchoredPosition = candidatePositions[i];
 
                 var img = patchObj.GetComponent<Image>();
-                if (grassPileSprite != null)
+                Sprite gSp = SpriteManager.Instance != null ? SpriteManager.Instance.GrassPileSprite : null;
+                if (gSp != null)
                 {
-                    img.sprite = grassPileSprite;
+                    img.sprite = gSp;
                 }
                 img.preserveAspect = true;
 

@@ -22,22 +22,13 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject sealedLidObject;
         [SerializeField] private GameObject strawObject;
 
-        [Header("Optional Custom Topping Sprites")]
-        [SerializeField] private Sprite tapiocaSprite;
-        [SerializeField] private Sprite poppingBobaSprite;
-        [SerializeField] private Sprite grassJellySprite;
-        [SerializeField] private Sprite coconutJellySprite;
-        [SerializeField] private Sprite eggPuddingSprite;
-        [SerializeField] private Sprite goldenHoneyPearlsSprite;
-        [SerializeField] private Sprite cheeseFoamSprite;
-
-        public Sprite TapiocaSprite => (tapiocaSprite != null) ? tapiocaSprite : SpriteManager.Instance?.TapiocaSprite;
-        public Sprite PoppingBobaSprite => (poppingBobaSprite != null) ? poppingBobaSprite : SpriteManager.Instance?.PoppingBobaSprite;
-        public Sprite GrassJellySprite => (grassJellySprite != null) ? grassJellySprite : SpriteManager.Instance?.GrassJellySprite;
-        public Sprite CoconutJellySprite => (coconutJellySprite != null) ? coconutJellySprite : SpriteManager.Instance?.CoconutJellySprite;
-        public Sprite EggPuddingSprite => (eggPuddingSprite != null) ? eggPuddingSprite : SpriteManager.Instance?.EggPuddingSprite;
-        public Sprite GoldenHoneyPearlsSprite => (goldenHoneyPearlsSprite != null) ? goldenHoneyPearlsSprite : SpriteManager.Instance?.GoldenHoneyPearlsSprite;
-        public Sprite CheeseFoamSprite => (cheeseFoamSprite != null) ? cheeseFoamSprite : SpriteManager.Instance?.CheeseFoamSprite;
+        public Sprite TapiocaSprite => SpriteManager.Instance != null ? SpriteManager.Instance.TapiocaSprite : null;
+        public Sprite PoppingBobaSprite => SpriteManager.Instance != null ? SpriteManager.Instance.PoppingBobaSprite : null;
+        public Sprite GrassJellySprite => SpriteManager.Instance != null ? SpriteManager.Instance.GrassJellySprite : null;
+        public Sprite CoconutJellySprite => SpriteManager.Instance != null ? SpriteManager.Instance.CoconutJellySprite : null;
+        public Sprite EggPuddingSprite => SpriteManager.Instance != null ? SpriteManager.Instance.EggPuddingSprite : null;
+        public Sprite GoldenHoneyPearlsSprite => SpriteManager.Instance != null ? SpriteManager.Instance.GoldenHoneyPearlsSprite : null;
+        public Sprite CheeseFoamSprite => SpriteManager.Instance != null ? SpriteManager.Instance.CheeseFoamSprite : null;
 
         private const float BottomToppingStackedSpacing = 26f;
         private const float CheeseFoamYPos = 240f;
@@ -434,17 +425,11 @@ namespace BubbleTeaShop
 
         private Sprite GetToppingSprite(ToppingType topping)
         {
-            return topping switch
+            if (SpriteManager.Instance != null)
             {
-                ToppingType.TapiocaPearls => tapiocaSprite,
-                ToppingType.PoppingBoba => poppingBobaSprite,
-                ToppingType.GrassJelly => grassJellySprite,
-                ToppingType.CoconutJelly => coconutJellySprite,
-                ToppingType.EggPudding => eggPuddingSprite,
-                ToppingType.GoldenHoneyPearls => goldenHoneyPearlsSprite,
-                ToppingType.CheeseFoam => cheeseFoamSprite,
-                _ => null
-            };
+                return SpriteManager.Instance.GetToppingSprite(topping);
+            }
+            return null;
         }
 
         private Color GetTeaColor(TeaBase tea)

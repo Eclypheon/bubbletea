@@ -36,8 +36,6 @@ namespace BubbleTeaShop
         [Header("Jelly Tree & Centerpiece")]
         [SerializeField] private Transform jellyTreeContainer;
         [SerializeField] private Image jellyTreeImage;
-        [SerializeField] private Sprite jellyTreeSprite;
-        [SerializeField] private Sprite rawJellyBlockSprite;
 
         [Header("Harvest Spawning Tuning (Editable)")]
         [Range(2, 8)]
@@ -192,24 +190,8 @@ namespace BubbleTeaShop
             {
                 honeyMeadowBackgroundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Meadows/meadows.jpg");
             }
-            if (jellyTreeSprite == null)
-            {
-                jellyTreeSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Meadows/jellytree.png");
-            }
-            if (rawJellyBlockSprite == null)
-            {
-                var allRaw = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/raw ingre.png");
-                foreach (var a in allRaw)
-                {
-                    if (a is Sprite s && (s.name == "raw ingre_0" || s.name == "raw ingre_1"))
-                    {
-                        rawJellyBlockSprite = s;
-                        break;
-                    }
-                }
-            }
 #endif
-            if (honeyMeadowBackgroundSprite == null || jellyTreeSprite == null || rawJellyBlockSprite == null)
+            if (honeyMeadowBackgroundSprite == null)
             {
                 var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
                 for (int i = 0; i < allSprites.Length; i++)
@@ -219,14 +201,7 @@ namespace BubbleTeaShop
                     if (honeyMeadowBackgroundSprite == null && (s.name.ToLower().Contains("meadow") || s.name.ToLower().Contains("honey")))
                     {
                         honeyMeadowBackgroundSprite = s;
-                    }
-                    if (jellyTreeSprite == null && (s.name.ToLower().Contains("jellytree") || s.name.ToLower().Contains("tree")))
-                    {
-                        jellyTreeSprite = s;
-                    }
-                    if (rawJellyBlockSprite == null && (s.name == "raw ingre_0" || s.name == "raw ingre_1"))
-                    {
-                        rawJellyBlockSprite = s;
+                        break;
                     }
                 }
             }
@@ -326,9 +301,10 @@ namespace BubbleTeaShop
             treeRt.sizeDelta = new Vector2(560f, 540f);
 
             jellyTreeImage = treeObj.GetComponent<Image>();
-            if (jellyTreeSprite != null)
+            Sprite tSp = SpriteManager.Instance != null ? SpriteManager.Instance.JellyTreeSprite : null;
+            if (tSp != null)
             {
-                jellyTreeImage.sprite = jellyTreeSprite;
+                jellyTreeImage.sprite = tSp;
             }
             jellyTreeImage.preserveAspect = true;
             jellyTreeImage.raycastTarget = true;
@@ -376,9 +352,10 @@ namespace BubbleTeaShop
                 backgroundImage.sprite = honeyMeadowBackgroundSprite;
             }
 
-            if (jellyTreeImage != null && jellyTreeSprite != null)
+            if (jellyTreeImage != null)
             {
-                jellyTreeImage.sprite = jellyTreeSprite;
+                Sprite treeSp = SpriteManager.Instance != null ? SpriteManager.Instance.JellyTreeSprite : null;
+                if (treeSp != null) jellyTreeImage.sprite = treeSp;
                 jellyTreeImage.raycastTarget = true;
             }
 
@@ -544,9 +521,10 @@ namespace BubbleTeaShop
                 rt.anchoredPosition = branchPos;
 
                 var img = blockObj.GetComponent<Image>();
-                if (rawJellyBlockSprite != null)
+                Sprite jSp = SpriteManager.Instance != null ? SpriteManager.Instance.RawJellyBlocksSprite : null;
+                if (jSp != null)
                 {
-                    img.sprite = rawJellyBlockSprite;
+                    img.sprite = jSp;
                 }
                 img.preserveAspect = true;
                 img.raycastTarget = true;

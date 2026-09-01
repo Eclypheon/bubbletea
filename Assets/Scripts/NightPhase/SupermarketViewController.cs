@@ -23,18 +23,7 @@ namespace BubbleTeaShop
         [Header("Catalog Container")]
         [SerializeField] private Transform marketCatalogContainer;
 
-        [Header("Ingredient Icons (Optional)")]
-        [SerializeField] private Sprite freshMilkIcon;
-        [SerializeField] private Sprite oatMilkIcon;
-        [SerializeField] private Sprite coconutMilkIcon;
-        [SerializeField] private Sprite condensedMilkIcon;
-        [SerializeField] private Sprite tapiocaIcon;
-        [SerializeField] private Sprite poppingBobaIcon;
-        [SerializeField] private Sprite grassJellyIcon;
-        [SerializeField] private Sprite eggPuddingIcon;
-        [SerializeField] private Sprite coconutJellyIcon;
-        [SerializeField] private Sprite cheeseFoamIcon;
-        [SerializeField] private Sprite goldenHoneyPearlsIcon;
+
 
         [Header("Audio (Optional)")]
         [SerializeField] private AudioClip purchaseChimeSound;
@@ -183,38 +172,13 @@ namespace BubbleTeaShop
                 if (sp != null) return sp;
             }
 
-            Sprite icon = key switch
+            if (CupStation.Instance != null)
             {
-                "Milk_FreshMilk" => freshMilkIcon,
-                "Milk_OatMilk" => oatMilkIcon,
-                "Milk_CoconutMilk" => coconutMilkIcon,
-                "Milk_CondensedMilk" => condensedMilkIcon,
-                "Topping_TapiocaPearls" => tapiocaIcon,
-                "Topping_PoppingBoba" => poppingBobaIcon,
-                "Topping_GrassJelly" => grassJellyIcon,
-                "Topping_EggPudding" => eggPuddingIcon,
-                "Topping_CoconutJelly" => coconutJellyIcon,
-                "Topping_CheeseFoam" => cheeseFoamIcon,
-                "Topping_GoldenHoneyPearls" => goldenHoneyPearlsIcon,
-                _ => null
-            };
-
-            if (icon == null && CupStation.Instance != null)
-            {
-                icon = key switch
-                {
-                    "Topping_TapiocaPearls" => CupStation.Instance.TapiocaSprite,
-                    "Topping_PoppingBoba" => CupStation.Instance.PoppingBobaSprite,
-                    "Topping_GrassJelly" => CupStation.Instance.GrassJellySprite,
-                    "Topping_EggPudding" => CupStation.Instance.EggPuddingSprite,
-                    "Topping_CoconutJelly" => CupStation.Instance.CoconutJellySprite,
-                    "Topping_CheeseFoam" => CupStation.Instance.CheeseFoamSprite,
-                    "Topping_GoldenHoneyPearls" => CupStation.Instance.GoldenHoneyPearlsSprite,
-                    _ => null
-                };
+                var sp = CupStation.Instance.GetToppingSprite(key);
+                if (sp != null) return sp;
             }
 
-            return icon;
+            return null;
         }
 
         public void OpenSupermarketView(int dayNumber)

@@ -39,9 +39,6 @@ namespace BubbleTeaShop
 
         [Header("Top Raw Cards Container (Runtime Generated)")]
         [SerializeField] private Transform topRawCardsContainer;
-        [SerializeField] private Sprite rawBabyYippeesIcon;
-        [SerializeField] private Sprite rawJellyBlocksIcon;
-        [SerializeField] private Sprite rawGoldenDewIcon;
 
         [Header("Station 1: Blender & Sieve (Day 5+)")]
         [SerializeField] private GameObject stationBlenderRoot;
@@ -59,8 +56,6 @@ namespace BubbleTeaShop
         [SerializeField] private Image stationKnifeImage;
         [SerializeField] private Transform choppingContentsContainer;
         [SerializeField] private Sprite choppingEmptySprite;
-        [SerializeField] private Sprite grassJellyIcon;
-        [SerializeField] private Sprite coconutJellyIcon;
 
         [Header("Station 3: Bucket & Centrifuge (Day 18+)")]
         [SerializeField] private GameObject stationCentrifugeRoot;
@@ -333,9 +328,9 @@ namespace BubbleTeaShop
 
             var activeRawItems = new List<(RawIngredientType type, string name, Sprite icon, string actionLabel)>();
 
-            Sprite babyIcon = (rawBabyYippeesIcon != null) ? rawBabyYippeesIcon : SpriteManager.Instance?.BabyYippeeSprite;
-            Sprite jellyIcon = (rawJellyBlocksIcon != null) ? rawJellyBlocksIcon : SpriteManager.Instance?.RawJellyBlocksSprite;
-            Sprite dewIcon = (rawGoldenDewIcon != null) ? rawGoldenDewIcon : SpriteManager.Instance?.RawGoldenDewSprite;
+            Sprite babyIcon = SpriteManager.Instance != null ? SpriteManager.Instance.BabyYippeeSprite : null;
+            Sprite jellyIcon = SpriteManager.Instance != null ? SpriteManager.Instance.RawJellyBlocksSprite : null;
+            Sprite dewIcon = SpriteManager.Instance != null ? SpriteManager.Instance.RawGoldenDewSprite : null;
 
             if (day >= 5)
             {
@@ -716,15 +711,13 @@ namespace BubbleTeaShop
 
         private Sprite GetGrassJellySprite()
         {
-            if (grassJellyIcon != null) return grassJellyIcon;
+            if (SpriteManager.Instance != null && SpriteManager.Instance.GrassJellySprite != null)
+            {
+                return SpriteManager.Instance.GrassJellySprite;
+            }
             if (SupermarketViewController.Instance != null)
             {
                 var sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GrassJelly");
-                if (sp != null) return sp;
-            }
-            if (CashRegisterInventoryUI.Instance != null)
-            {
-                var sp = CashRegisterInventoryUI.Instance.GetIngredientIcon("Topping_GrassJelly");
                 if (sp != null) return sp;
             }
             if (CupStation.Instance != null)
@@ -737,15 +730,13 @@ namespace BubbleTeaShop
 
         private Sprite GetCoconutJellySprite()
         {
-            if (coconutJellyIcon != null) return coconutJellyIcon;
+            if (SpriteManager.Instance != null && SpriteManager.Instance.CoconutJellySprite != null)
+            {
+                return SpriteManager.Instance.CoconutJellySprite;
+            }
             if (SupermarketViewController.Instance != null)
             {
                 var sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_CoconutJelly");
-                if (sp != null) return sp;
-            }
-            if (CashRegisterInventoryUI.Instance != null)
-            {
-                var sp = CashRegisterInventoryUI.Instance.GetIngredientIcon("Topping_CoconutJelly");
                 if (sp != null) return sp;
             }
             if (CupStation.Instance != null)

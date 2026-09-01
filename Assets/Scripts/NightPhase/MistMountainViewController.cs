@@ -34,9 +34,6 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject mistMountainPanelRoot;
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Sprite mountainPanoramaSprite;
-        [SerializeField] private Sprite rockWallSprite;
-        [SerializeField] private Sprite rockShelfSprite;
-        [SerializeField] private Sprite rawGoldenDewSprite;
         [SerializeField] private Sprite bucketSprite;
         [SerializeField] private Button returnToNightHubButton;
 
@@ -206,26 +203,6 @@ namespace BubbleTeaShop
             {
                 mountainPanoramaSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/mistmountain.jpg");
             }
-            if (rockWallSprite == null)
-            {
-                rockWallSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/RockWall.jpg");
-            }
-            if (rockShelfSprite == null)
-            {
-                rockShelfSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/Rockshelf.png");
-            }
-            if (rawGoldenDewSprite == null)
-            {
-                var allRaw = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/raw ingre.png");
-                foreach (var a in allRaw)
-                {
-                    if (a is Sprite s && (s.name == "raw ingre_1" || s.name.Contains("1")))
-                    {
-                        rawGoldenDewSprite = s;
-                        break;
-                    }
-                }
-            }
             if (bucketSprite == null)
             {
                 var allEqm = UnityEditor.AssetDatabase.LoadAllAssetsAtPath("Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png");
@@ -239,7 +216,7 @@ namespace BubbleTeaShop
                 }
             }
 #endif
-            if (mountainPanoramaSprite == null || rockWallSprite == null || rockShelfSprite == null || rawGoldenDewSprite == null || bucketSprite == null)
+            if (mountainPanoramaSprite == null || bucketSprite == null)
             {
                 var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
                 for (int i = 0; i < allSprites.Length; i++)
@@ -247,9 +224,6 @@ namespace BubbleTeaShop
                     var s = allSprites[i];
                     if (s == null) continue;
                     if (mountainPanoramaSprite == null && s.name.ToLower().Contains("mistmountain")) mountainPanoramaSprite = s;
-                    if (rockWallSprite == null && s.name.ToLower().Contains("rockwall")) rockWallSprite = s;
-                    if (rockShelfSprite == null && s.name.ToLower().Contains("rockshelf")) rockShelfSprite = s;
-                    if (rawGoldenDewSprite == null && (s.name == "raw ingre_1" || s.name.ToLower().Contains("dew"))) rawGoldenDewSprite = s;
                     if (bucketSprite == null && (s.name == "prepEquipment_4" || s.name.ToLower().Contains("bucket"))) bucketSprite = s;
                 }
             }
@@ -349,7 +323,8 @@ namespace BubbleTeaShop
             rockShelfRectTransform.sizeDelta = new Vector2(270f, 140f);
 
             var shelfImg = shelfObj.GetComponent<Image>();
-            if (rockShelfSprite != null) shelfImg.sprite = rockShelfSprite;
+            Sprite shelfSp = SpriteManager.Instance != null ? SpriteManager.Instance.RockShelfSprite : null;
+            if (shelfSp != null) shelfImg.sprite = shelfSp;
             shelfImg.preserveAspect = true;
             shelfImg.raycastTarget = true;
 
@@ -368,7 +343,8 @@ namespace BubbleTeaShop
             wallRt.offsetMax = Vector2.zero;
 
             rockWallImage = wallObj.GetComponent<Image>();
-            if (rockWallSprite != null) rockWallImage.sprite = rockWallSprite;
+            Sprite wallSp = SpriteManager.Instance != null ? SpriteManager.Instance.RockWallSprite : null;
+            if (wallSp != null) rockWallImage.sprite = wallSp;
             rockWallImage.color = Color.white;
             rockWallImage.raycastTarget = true;
             rockWallObject = wallObj;
@@ -583,9 +559,10 @@ namespace BubbleTeaShop
             if (rockWallObject != null)
             {
                 rockWallObject.SetActive(true);
-                if (rockWallImage != null && rockWallSprite != null)
+                if (rockWallImage != null)
                 {
-                    rockWallImage.sprite = rockWallSprite;
+                    Sprite wallSp = SpriteManager.Instance != null ? SpriteManager.Instance.RockWallSprite : null;
+                    if (wallSp != null) rockWallImage.sprite = wallSp;
                 }
             }
 
@@ -677,7 +654,8 @@ namespace BubbleTeaShop
                 rt.anchoredPosition = new Vector2(spawnX, spawnY);
 
                 var img = dropObj.GetComponent<Image>();
-                if (rawGoldenDewSprite != null) img.sprite = rawGoldenDewSprite;
+                Sprite dewSp = SpriteManager.Instance != null ? SpriteManager.Instance.RawGoldenDewSprite : null;
+                if (dewSp != null) img.sprite = dewSp;
                 img.preserveAspect = true;
                 img.raycastTarget = false;
 
