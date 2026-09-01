@@ -508,12 +508,12 @@ namespace BubbleTeaShop
 
                     Canvas rootCanvas = GetComponentInParent<Canvas>();
                     float scaleFactor = (rootCanvas != null) ? rootCanvas.scaleFactor : 1f;
-                    navRt.position = bottomCenterWorld + new Vector3(0f, -28f * scaleFactor, 0f);
+                    navRt.position = bottomCenterWorld + new Vector3(0f, 72f * scaleFactor, 0f);
                     return;
                 }
             }
 
-            navRt.anchoredPosition = new Vector2(260f, 95f);
+            navRt.anchoredPosition = new Vector2(260f, 195f);
         }
 
         public void SpawnMentorSequence(string[] lines, float delayPerLine, Sprite mentorSpriteParam, Action onCompletedSequence = null)
