@@ -784,7 +784,7 @@ namespace BubbleTeaShop
             }
             else if (choppingState == PrepStationState.Loaded)
             {
-                StartChoppingProcess();
+                StartCoroutine(ProcessChoppingRoutine());
             }
             else if (choppingState == PrepStationState.Processing)
             {

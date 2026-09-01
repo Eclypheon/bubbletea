@@ -282,7 +282,7 @@ namespace BubbleTeaShop
             modalDescriptionText = descObj.GetComponent<TextMeshProUGUI>();
             modalDescriptionText.fontSize = 30;
             modalDescriptionText.alignment = TextAlignmentOptions.Center;
-            modalDescriptionText.enableWordWrapping = true;
+            modalDescriptionText.textWrappingMode = TextWrappingModes.Normal;
             modalDescriptionText.color = new Color(0.9f, 0.9f, 0.95f, 1f);
 
             // Impact Details Box

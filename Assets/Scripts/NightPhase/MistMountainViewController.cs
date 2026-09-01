@@ -807,7 +807,7 @@ namespace BubbleTeaShop
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (currentStage == MistMountainStage.RockWallCatching && bucketRectTransform != null)
+            if (isDraggingBucket && currentStage == MistMountainStage.RockWallCatching && bucketRectTransform != null)
             {
                 UpdateBucketPositionFromPointer(eventData);
             }

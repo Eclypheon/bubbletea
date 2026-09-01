@@ -15,7 +15,7 @@ namespace BubbleTeaShop
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<RentCollectorController>(true);
+                    _instance = FindFirstObjectByType<RentCollectorController>(FindObjectsInactive.Include);
                 }
                 return _instance;
             }

@@ -1183,7 +1183,7 @@ namespace BubbleTeaShop
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
                 buyTmp.fontSize = 18f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
-                buyTmp.enableWordWrapping = false;
+                buyTmp.textWrappingMode = TextWrappingModes.NoWrap;
                 buyTmp.lineSpacing = -8f;
 
                 if (isOwned)
@@ -1207,7 +1207,7 @@ namespace BubbleTeaShop
                 var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
                 infoTmp.fontSize = 16f;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
-                infoTmp.enableWordWrapping = true;
+                infoTmp.textWrappingMode = TextWrappingModes.Normal;
                 infoTmp.lineSpacing = -2f;
 
                 string titleHeader = isOwned
