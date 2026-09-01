@@ -132,8 +132,12 @@ namespace BubbleTeaShop
             UpdateInventoryDisplay();
             if (inventoryModalPanel != null)
             {
+                inventoryModalPanel.transform.SetAsLastSibling();
                 inventoryModalPanel.SetActive(true);
             }
+
+            // Hide top bar HUD stats while inventory modal is open (status hints remain active)
+            HUDController.Instance?.SetHUDDetailsVisible(false);
         }
 
         public void CloseInventoryModal()
@@ -142,6 +146,9 @@ namespace BubbleTeaShop
             {
                 inventoryModalPanel.SetActive(false);
             }
+
+            // Restore top bar HUD stats when modal is closed
+            HUDController.Instance?.SetHUDDetailsVisible(true);
         }
 
         private string FormatStockCount(int count)
