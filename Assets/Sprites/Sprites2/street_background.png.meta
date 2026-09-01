@@ -3,8 +3,8 @@ guid: 398750e2956aa446c95efa60a7b13ff1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6105319182862654781
-    second: street_background_0
+      213: -667258431702224841
+    second: Street_background_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: street_background_0
+      name: Street_background_0
       rect:
         serializedVersion: 2
-        x: 417
-        y: 397
-        width: 969
-        height: 454
+        x: 0
+        y: 0
+        width: 959
+        height: 444
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3c2e711fc8c854ba0800000000000000
-      internalID: -6105319182862654781
+      spriteID: 730310dddfb6db6f0800000000000000
+      internalID: -667258431702224841
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      street_background_0: -6105319182862654781
+      Street_background_0: -667258431702224841
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
