@@ -50,6 +50,10 @@ namespace BubbleTeaShop
         [Tooltip("Upper height percentage anchor (0.0 to 1.0)")]
         [Range(0f, 1f)]
         [SerializeField] private float cheeseFoamMaxYAnchor = 1.00f;
+        [Tooltip("Horizontal scale multiplier of the Cheese Foam layer (e.g. 1.0 = normal, 1.2 = wider, 0.8 = thinner)")]
+        [SerializeField] private float cheeseFoamXScale = 1.0f;
+        [Tooltip("Vertical scale multiplier of the Cheese Foam layer (e.g. 1.0 = normal)")]
+        [SerializeField] private float cheeseFoamYScale = 1.0f;
         [Tooltip("Whether the cheese foam image preserves aspect ratio or fills the top rim band")]
         [SerializeField] private bool cheeseFoamPreserveAspect = false;
 
@@ -390,6 +394,7 @@ namespace BubbleTeaShop
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
                 rt.anchoredPosition = new Vector2(cheeseFoamXPosition, cheeseFoamYPosition);
+                rt.localScale = new Vector3(cheeseFoamXScale, cheeseFoamYScale, 1f);
 
                 Sprite foamSp = cheeseFoamSprite != null ? cheeseFoamSprite : defaultLiquidMaskSprite;
                 img.sprite = foamSp;
