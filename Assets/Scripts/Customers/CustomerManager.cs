@@ -32,13 +32,20 @@ namespace BubbleTeaShop
         [SerializeField] private float dyslexiaPatience = 50f;
 
         [Header("Customer Dismissal Safety Settings")]
-        [Tooltip("When enabled, ringing the bell while a drink is prepared in the cup requires a second confirmation ring before dismissing the customer.")]
-        [SerializeField] private bool confirmDismissIfCupNotEmpty = true;
+        [Tooltip("When enabled, ringing the bell while a waiting customer has not yet been served requires a second confirmation ring before dismissing them.")]
+        [SerializeField] private bool confirmDismissIfCustomerWaiting = true;
 
+        public bool ConfirmDismissIfCustomerWaiting
+        {
+            get => confirmDismissIfCustomerWaiting;
+            set => confirmDismissIfCustomerWaiting = value;
+        }
+
+        // Backward compatibility alias
         public bool ConfirmDismissIfCupNotEmpty
         {
-            get => confirmDismissIfCupNotEmpty;
-            set => confirmDismissIfCupNotEmpty = value;
+            get => confirmDismissIfCustomerWaiting;
+            set => confirmDismissIfCustomerWaiting = value;
         }
 
         private bool awaitingDismissalConfirmation = false;
@@ -154,17 +161,12 @@ namespace BubbleTeaShop
             {
                 if (customerController.IsWaitingDrink)
                 {
-                    // Check if current cup has contents (not empty)
-                    bool hasPreparedDrink = CupStation.Instance != null &&
-                                            CupStation.Instance.CurrentCup != null &&
-                                            !CupStation.Instance.CurrentCup.IsEmpty;
-
-                    // Safety check: require a second ring if the player has a drink in progress
-                    if (confirmDismissIfCupNotEmpty && hasPreparedDrink && !awaitingDismissalConfirmation)
+                    // Safety check: require a second ring if the customer has not yet been served
+                    if (confirmDismissIfCustomerWaiting && !awaitingDismissalConfirmation)
                     {
                         awaitingDismissalConfirmation = true;
                         HUDController.Instance?.SetStatusHint("Are you sure you want to dismiss this customer? Ring again to dismiss them.");
-                        HUDController.Instance?.ShowNotification("Drink prepared in cup! Ring again to confirm skipping customer.", 3.5f);
+                        HUDController.Instance?.ShowNotification("Customer is still waiting! Ring bell again to confirm skipping.", 3.5f);
                         return false;
                     }
 
