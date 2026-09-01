@@ -498,8 +498,8 @@ namespace BubbleTeaShop
                 rt.pivot = new Vector2(0.5f, 0.5f);
 
                 var img = critterObj.GetComponent<Image>();
-                Sprite critterSprite = (babyYippeeStaticSprite != null)
-                    ? babyYippeeStaticSprite
+                Sprite critterSprite = SpriteManager.Instance != null && SpriteManager.Instance.BabyYippeeSprite != null
+                    ? SpriteManager.Instance.BabyYippeeSprite
                     : ((babyYippeeRunSprites != null && babyYippeeRunSprites.Length > 0) ? babyYippeeRunSprites[0] : null);
 
                 img.sprite = critterSprite;

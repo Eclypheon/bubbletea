@@ -426,7 +426,7 @@ namespace BubbleTeaShop
                 countTmp.text = FormatCount(stockCount);
                 countTmp.fontSize = 18;
                 countTmp.alignment = TextAlignmentOptions.Center;
-                countTmp.enableWordWrapping = false;
+                countTmp.textWrappingMode = TextWrappingModes.NoWrap;
                 countTmp.raycastTarget = false;
 
                 // Middle: Item Name and Action Subtitle
@@ -443,7 +443,7 @@ namespace BubbleTeaShop
                 tmp.fontSize = 17;
                 tmp.alignment = TextAlignmentOptions.MidlineLeft;
                 tmp.color = Color.white;
-                tmp.enableWordWrapping = false;
+                tmp.textWrappingMode = TextWrappingModes.NoWrap;
                 tmp.raycastTarget = false;
 
                 // Button Click -> Deposit Raw Ingredient
@@ -570,7 +570,9 @@ namespace BubbleTeaShop
 
         private void SpawnYippeeInBlender()
         {
-            if (blenderContentsContainer == null || rawBabyYippeesIcon == null) return;
+            if (blenderContentsContainer == null) return;
+            Sprite yippeeSp = SpriteManager.Instance != null ? SpriteManager.Instance.BabyYippeeSprite : null;
+            if (yippeeSp == null) return;
 
             GameObject yippeeObj = new GameObject($"Yippee_{blenderContentsContainer.childCount + 1}", typeof(RectTransform), typeof(Image));
             yippeeObj.transform.SetParent(blenderContentsContainer, false);
@@ -592,7 +594,7 @@ namespace BubbleTeaShop
             rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-45f, 45f));
 
             var img = yippeeObj.GetComponent<Image>();
-            img.sprite = rawBabyYippeesIcon;
+            img.sprite = yippeeSp;
             img.preserveAspect = true;
             img.raycastTarget = false;
         }
@@ -746,6 +748,33 @@ namespace BubbleTeaShop
             }
             return null;
         }
+        // STATION 2: CHOPPING BOARD & KNIFE (DAY 11+)
+        // =========================================================================
+        private void EnsureChoppingStationHierarchy()
+        {
+            if (stationChoppingRoot == null)
+            {
+                stationChoppingRoot = transform.Find("Station2_ChoppingBoard")?.gameObject ??
+                                      transform.Find("StationChopping")?.gameObject;
+            }
+
+            if (stationChoppingRoot != null)
+            {
+                if (stationChoppingImage == null) stationChoppingImage = stationChoppingRoot.GetComponent<Image>();
+                if (stationChoppingButton == null) stationChoppingButton = stationChoppingRoot.GetComponent<Button>();
+                if (stationKnifeImage == null)
+                {
+                    var knifeChild = stationChoppingRoot.transform.Find("KnifeImage");
+                    if (knifeChild != null) stationKnifeImage = knifeChild.GetComponent<Image>();
+                }
+                if (choppingContentsContainer == null)
+                {
+                    var contChild = stationChoppingRoot.transform.Find("ContentsContainer");
+                    if (contChild != null) choppingContentsContainer = contChild;
+                    else choppingContentsContainer = stationChoppingRoot.transform;
+                }
+            }
+        }
 
         private void OnChoppingClicked()
         {
@@ -755,7 +784,11 @@ namespace BubbleTeaShop
             }
             else if (choppingState == PrepStationState.Loaded)
             {
-                StartCoroutine(ProcessChoppingRoutine());
+                StartChoppingProcess();
+            }
+            else if (choppingState == PrepStationState.Processing)
+            {
+                HUDController.Instance?.ShowNotification("Jelly Blocks are being sliced...", 1.5f);
             }
             else if (choppingState == PrepStationState.ReadyToCollect)
             {
@@ -766,7 +799,9 @@ namespace BubbleTeaShop
         private void SpawnJellyBlockOnBoard()
         {
             Transform parent = GetChoppingContainer();
-            if (parent == null || rawJellyBlocksIcon == null) return;
+            if (parent == null) return;
+            Sprite jellySp = SpriteManager.Instance != null ? SpriteManager.Instance.RawJellyBlocksSprite : null;
+            if (jellySp == null) return;
 
             int index = choppingLoadedCount - 1;
             GameObject blockObj = new GameObject($"JellyBlock_{choppingLoadedCount}", typeof(RectTransform), typeof(Image));
@@ -796,7 +831,7 @@ namespace BubbleTeaShop
             rt.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-10f, 10f));
 
             var img = blockObj.GetComponent<Image>();
-            img.sprite = rawJellyBlocksIcon;
+            img.sprite = jellySp;
             img.preserveAspect = true;
             img.raycastTarget = false;
 

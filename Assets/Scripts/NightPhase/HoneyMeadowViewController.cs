@@ -156,7 +156,7 @@ namespace BubbleTeaShop
                 if (img != null)
                 {
                     img.raycastTarget = true;
-                    if (jellyTreeSprite != null && img.sprite == null) img.sprite = jellyTreeSprite;
+                    if (img.sprite == null && SpriteManager.Instance != null) img.sprite = SpriteManager.Instance.JellyTreeSprite;
                 }
 
                 var btn = treeTarget.GetComponent<Button>();
@@ -220,7 +220,7 @@ namespace BubbleTeaShop
             }
             else
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = FindFirstObjectByType<Canvas>();
                 if (canvas != null) parentCanvas = canvas.transform;
             }
 

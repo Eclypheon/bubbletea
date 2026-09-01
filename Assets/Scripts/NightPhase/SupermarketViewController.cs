@@ -330,7 +330,7 @@ namespace BubbleTeaShop
                 var buyTmp = buyTextObj.GetComponent<TextMeshProUGUI>();
                 buyTmp.fontSize = 17f;
                 buyTmp.alignment = TextAlignmentOptions.Center;
-                buyTmp.enableWordWrapping = false;
+                buyTmp.textWrappingMode = TextWrappingModes.NoWrap;
                 buyTmp.lineSpacing = -4f;
                 buyTmp.text = $"<b>BUY</b>\n<size=14>${item.price:F2}</size>";
 
@@ -347,7 +347,7 @@ namespace BubbleTeaShop
                 infoTmp.fontSize = 18f;
                 infoTmp.lineSpacing = 2f;
                 infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
-                infoTmp.enableWordWrapping = true;
+                infoTmp.textWrappingMode = TextWrappingModes.Normal;
                 infoTmp.text = $"<b>{item.displayName}</b>\n" +
                                $"<size=14><color=#BDC3C7>Pack of {item.bundleQuantity}</color>   In Store: {FormatStockCount(currentStock)}</size>";
 

@@ -379,7 +379,7 @@ namespace BubbleTeaShop
                 countTmp.text = FormatStockCount(item.count);
                 countTmp.fontSize = 20;
                 countTmp.alignment = TextAlignmentOptions.Center;
-                countTmp.enableWordWrapping = false;
+                countTmp.textWrappingMode = TextWrappingModes.NoWrap;
 
                 // Middle: Item Name
                 GameObject nameObj = new GameObject("Name", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -395,7 +395,7 @@ namespace BubbleTeaShop
                 nameTmp.fontSize = 21;
                 nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 nameTmp.color = Color.white;
-                nameTmp.enableWordWrapping = false;
+                nameTmp.textWrappingMode = TextWrappingModes.NoWrap;
             }
         }
     }

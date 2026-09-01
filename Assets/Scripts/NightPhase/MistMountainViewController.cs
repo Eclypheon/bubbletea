@@ -246,7 +246,7 @@ namespace BubbleTeaShop
             }
             else
             {
-                var canvas = FindObjectOfType<Canvas>();
+                var canvas = FindFirstObjectByType<Canvas>();
                 if (canvas != null) parentCanvas = canvas.transform;
             }
 

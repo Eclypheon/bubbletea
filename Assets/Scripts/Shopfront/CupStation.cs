@@ -382,7 +382,7 @@ namespace BubbleTeaShop
                 rt.anchoredPosition = new Vector2(0f, CheeseFoamYPos);
                 rt.localScale = new Vector3(CheeseFoamScaleX, 1f, 1f);
 
-                Sprite foamSp = cheeseFoamSprite != null ? cheeseFoamSprite : defaultLiquidMaskSprite;
+                Sprite foamSp = CheeseFoamSprite != null ? CheeseFoamSprite : defaultLiquidMaskSprite;
                 img.sprite = foamSp;
                 img.color = GetToppingColor(ToppingType.CheeseFoam);
                 img.preserveAspect = false;
@@ -423,11 +423,20 @@ namespace BubbleTeaShop
             };
         }
 
-        private Sprite GetToppingSprite(ToppingType topping)
+        public Sprite GetToppingSprite(ToppingType topping)
         {
             if (SpriteManager.Instance != null)
             {
                 return SpriteManager.Instance.GetToppingSprite(topping);
+            }
+            return null;
+        }
+
+        public Sprite GetToppingSprite(string key)
+        {
+            if (SpriteManager.Instance != null)
+            {
+                return SpriteManager.Instance.GetSprite(key);
             }
             return null;
         }
