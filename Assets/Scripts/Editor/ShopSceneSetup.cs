@@ -379,17 +379,35 @@ namespace BubbleTeaShop.Editor
             SetSerializedProperty(modalCtrl, "messageText", modMsg);
             SetSerializedProperty(modalCtrl, "restartButton", restartBtn.GetComponent<Button>());
 
-            // 9. Honey Meadow View Controller
+            // 9. Bamboo Grove View Controller
+            GameObject bambooObj = CreateUIElement("BambooGroveViewController", canvasObj.transform);
+            SetFullStretch(bambooObj.GetComponent<RectTransform>());
+            bambooObj.AddComponent<BambooGroveViewController>();
+            bambooObj.SetActive(false);
+
+            // 10. Honey Meadow View Controller
             GameObject meadowObj = CreateUIElement("HoneyMeadowViewController", canvasObj.transform);
             SetFullStretch(meadowObj.GetComponent<RectTransform>());
-            var meadowCtrl = meadowObj.AddComponent<HoneyMeadowViewController>();
+            meadowObj.AddComponent<HoneyMeadowViewController>();
             meadowObj.SetActive(false);
 
-            // 10. Mist Mountain View Controller
+            // 11. Mist Mountain View Controller
             GameObject mountainObj = CreateUIElement("MistMountainViewController", canvasObj.transform);
             SetFullStretch(mountainObj.GetComponent<RectTransform>());
-            var mountainCtrl = mountainObj.AddComponent<MistMountainViewController>();
+            mountainObj.AddComponent<MistMountainViewController>();
             mountainObj.SetActive(false);
+
+            // 12. Kitchen Prep Area View Controller
+            GameObject prepObj = CreateUIElement("PrepAreaViewController", canvasObj.transform);
+            SetFullStretch(prepObj.GetComponent<RectTransform>());
+            prepObj.AddComponent<PrepAreaViewController>();
+            prepObj.SetActive(false);
+
+            // 13. Wholesale Supermarket View Controller
+            GameObject mktCtrlObj = CreateUIElement("SupermarketViewController", canvasObj.transform);
+            SetFullStretch(mktCtrlObj.GetComponent<RectTransform>());
+            mktCtrlObj.AddComponent<SupermarketViewController>();
+            mktCtrlObj.SetActive(false);
 
             EditorUtility.SetDirty(canvasObj);
             Debug.Log("[ShopSceneSetup] Complete Bubble Tea Game Scene setup successfully!");

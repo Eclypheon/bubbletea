@@ -49,6 +49,9 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+
+            EnsureFallbackAssets();
+            EnsureSupermarketPanelHierarchy();
         }
 
         private void Start()
@@ -67,6 +70,138 @@ namespace BubbleTeaShop
             {
                 supermarketPanelRoot.SetActive(false);
             }
+        }
+
+        private void EnsureFallbackAssets()
+        {
+#if UNITY_EDITOR
+            if (supermarketInteriorSprite == null)
+            {
+                supermarketInteriorSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Sprites2/Sprites 3/market.png");
+            }
+#endif
+            if (supermarketInteriorSprite == null)
+            {
+                var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+                for (int i = 0; i < allSprites.Length; i++)
+                {
+                    var s = allSprites[i];
+                    if (s == null) continue;
+                    if (supermarketInteriorSprite == null && (s.name.ToLower().Contains("market") || s.name.ToLower().Contains("supermarket")))
+                    {
+                        supermarketInteriorSprite = s;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void EnsureSupermarketPanelHierarchy()
+        {
+            if (supermarketPanelRoot != null && supermarketBackgroundImage != null && marketCatalogContainer != null) return;
+
+            Transform parentCanvas = null;
+            if (NightPhaseManager.Instance != null && NightPhaseManager.Instance.transform.parent != null)
+            {
+                parentCanvas = NightPhaseManager.Instance.transform.parent;
+            }
+            else
+            {
+                var canvas = FindObjectOfType<Canvas>();
+                if (canvas != null) parentCanvas = canvas.transform;
+            }
+
+            if (parentCanvas == null) parentCanvas = transform;
+
+            // Fullscreen panel root
+            GameObject rootObj = new GameObject("SupermarketViewPanel", typeof(RectTransform), typeof(Image));
+            rootObj.transform.SetParent(parentCanvas, false);
+            var rootRt = rootObj.GetComponent<RectTransform>();
+            rootRt.anchorMin = Vector2.zero;
+            rootRt.anchorMax = Vector2.one;
+            rootRt.offsetMin = Vector2.zero;
+            rootRt.offsetMax = Vector2.zero;
+
+            supermarketBackgroundImage = rootObj.GetComponent<Image>();
+            if (supermarketInteriorSprite != null)
+            {
+                supermarketBackgroundImage.sprite = supermarketInteriorSprite;
+            }
+            supermarketBackgroundImage.color = Color.white;
+            supermarketBackgroundImage.raycastTarget = true;
+
+            supermarketPanelRoot = rootObj;
+
+            // Header Title
+            GameObject titleObj = new GameObject("MarketAisleTitleText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            titleObj.transform.SetParent(rootObj.transform, false);
+            var titleRt = titleObj.GetComponent<RectTransform>();
+            titleRt.anchorMin = new Vector2(0.5f, 1f);
+            titleRt.anchorMax = new Vector2(0.5f, 1f);
+            titleRt.pivot = new Vector2(0.5f, 1f);
+            titleRt.anchoredPosition = new Vector2(0f, -20f);
+            titleRt.sizeDelta = new Vector2(500f, 40f);
+            marketAisleTitleText = titleObj.GetComponent<TextMeshProUGUI>();
+            marketAisleTitleText.text = "Wholesale Supermarket";
+            marketAisleTitleText.fontSize = 24;
+            marketAisleTitleText.fontStyle = FontStyles.Bold;
+            marketAisleTitleText.alignment = TextAlignmentOptions.Center;
+            marketAisleTitleText.color = Color.white;
+
+            // Wallet Balance
+            GameObject cashObj = new GameObject("CashBalanceText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            cashObj.transform.SetParent(rootObj.transform, false);
+            var cashRt = cashObj.GetComponent<RectTransform>();
+            cashRt.anchorMin = new Vector2(0f, 1f);
+            cashRt.anchorMax = new Vector2(0f, 1f);
+            cashRt.pivot = new Vector2(0f, 1f);
+            cashRt.anchoredPosition = new Vector2(30f, -20f);
+            cashRt.sizeDelta = new Vector2(250f, 40f);
+            cashBalanceText = cashObj.GetComponent<TextMeshProUGUI>();
+            cashBalanceText.fontSize = 20;
+            cashBalanceText.alignment = TextAlignmentOptions.Left;
+            cashBalanceText.color = Color.yellow;
+
+            // Return / Exit Button
+            GameObject exitObj = new GameObject("ReturnToNightHubButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            exitObj.transform.SetParent(rootObj.transform, false);
+            var exitRt = exitObj.GetComponent<RectTransform>();
+            exitRt.anchorMin = new Vector2(1f, 1f);
+            exitRt.anchorMax = new Vector2(1f, 1f);
+            exitRt.pivot = new Vector2(1f, 1f);
+            exitRt.anchoredPosition = new Vector2(-30f, -20f);
+            exitRt.sizeDelta = new Vector2(150f, 45f);
+            var exitImg = exitObj.GetComponent<Image>();
+            exitImg.color = new Color(0.2f, 0.2f, 0.28f, 0.95f);
+            returnToNightHubButton = exitObj.GetComponent<Button>();
+            returnToNightHubButton.onClick.AddListener(CloseSupermarketView);
+
+            GameObject exitTxtObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            exitTxtObj.transform.SetParent(exitObj.transform, false);
+            var exitTxtRt = exitTxtObj.GetComponent<RectTransform>();
+            exitTxtRt.anchorMin = Vector2.zero;
+            exitTxtRt.anchorMax = Vector2.one;
+            exitTxtRt.offsetMin = Vector2.zero;
+            exitTxtRt.offsetMax = Vector2.zero;
+            var exitTmp = exitTxtObj.GetComponent<TextMeshProUGUI>();
+            exitTmp.text = "Exit Market";
+            exitTmp.fontSize = 16;
+            exitTmp.fontStyle = FontStyles.Bold;
+            exitTmp.alignment = TextAlignmentOptions.Center;
+            exitTmp.color = Color.white;
+
+            // Catalog Container
+            GameObject catalogObj = new GameObject("MarketCatalogContainer", typeof(RectTransform));
+            catalogObj.transform.SetParent(rootObj.transform, false);
+            var catalogRt = catalogObj.GetComponent<RectTransform>();
+            catalogRt.anchorMin = new Vector2(0.5f, 0.5f);
+            catalogRt.anchorMax = new Vector2(0.5f, 0.5f);
+            catalogRt.pivot = new Vector2(0.5f, 0.5f);
+            catalogRt.anchoredPosition = new Vector2(0f, -30f);
+            catalogRt.sizeDelta = new Vector2(980f, 460f);
+            marketCatalogContainer = catalogObj.transform;
+
+            rootObj.SetActive(false);
         }
 
         public Sprite GetIngredientIcon(string key)

@@ -53,10 +53,53 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+            EnsureNightSubviews();
+        }
+
+        private void EnsureNightSubviews()
+        {
+            Transform parentCanvas = (transform.parent != null) ? transform.parent : transform;
+
+            if (BambooGroveViewController.Instance == null)
+            {
+                var go = new GameObject("BambooGroveViewController", typeof(RectTransform));
+                go.transform.SetParent(parentCanvas, false);
+                go.AddComponent<BambooGroveViewController>();
+            }
+
+            if (HoneyMeadowViewController.Instance == null)
+            {
+                var go = new GameObject("HoneyMeadowViewController", typeof(RectTransform));
+                go.transform.SetParent(parentCanvas, false);
+                go.AddComponent<HoneyMeadowViewController>();
+            }
+
+            if (MistMountainViewController.Instance == null)
+            {
+                var go = new GameObject("MistMountainViewController", typeof(RectTransform));
+                go.transform.SetParent(parentCanvas, false);
+                go.AddComponent<MistMountainViewController>();
+            }
+
+            if (PrepAreaViewController.Instance == null)
+            {
+                var go = new GameObject("PrepAreaViewController", typeof(RectTransform));
+                go.transform.SetParent(parentCanvas, false);
+                go.AddComponent<PrepAreaViewController>();
+            }
+
+            if (SupermarketViewController.Instance == null)
+            {
+                var go = new GameObject("SupermarketViewController", typeof(RectTransform));
+                go.transform.SetParent(parentCanvas, false);
+                go.AddComponent<SupermarketViewController>();
+            }
         }
 
         private void Start()
         {
+            EnsureNightSubviews();
+
             if (tabMarketButton != null) tabMarketButton.onClick.AddListener(() => SwitchTab(0));
             if (tabForagingButton != null) tabForagingButton.onClick.AddListener(() => SwitchTab(1));
             if (tabUpgradesButton != null) tabUpgradesButton.onClick.AddListener(() => SwitchTab(2));
@@ -517,6 +560,7 @@ namespace BubbleTeaShop
         public void OpenPrepArea()
         {
             StopPrepAreaButtonPulse();
+            EnsureNightSubviews();
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             if (PrepAreaViewController.Instance != null)
             {
@@ -544,6 +588,7 @@ namespace BubbleTeaShop
 
             RecordActivity(NightActivityType.Foraging, "BambooGrove");
             ForagingManager.Instance?.SetForagedTonight();
+            EnsureNightSubviews();
 
             if (BambooGroveViewController.Instance != null)
             {
@@ -571,6 +616,7 @@ namespace BubbleTeaShop
 
             RecordActivity(NightActivityType.Foraging, "HoneyMeadow");
             ForagingManager.Instance?.SetForagedTonight();
+            EnsureNightSubviews();
 
             if (HoneyMeadowViewController.Instance != null)
             {
@@ -598,6 +644,7 @@ namespace BubbleTeaShop
 
             RecordActivity(NightActivityType.Foraging, "MistMountain");
             ForagingManager.Instance?.SetForagedTonight();
+            EnsureNightSubviews();
 
             if (MistMountainViewController.Instance != null)
             {
