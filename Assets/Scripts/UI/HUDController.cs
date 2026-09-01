@@ -17,6 +17,8 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI customerCountText;
         [SerializeField] private TextMeshProUGUI statusHintText;
 
+        public TextMeshProUGUI StatusHintText => statusHintText;
+
         [Header("Market Event HUD Badge")]
         [SerializeField] private GameObject marketEventBadgeObj;
         [SerializeField] private Button marketEventButton;
