@@ -512,5 +512,367 @@ namespace BubbleTeaShop.Editor
                 so.ApplyModifiedProperties();
             }
         }
+
+        [MenuItem("Tools/Bubble Tea Shop/Auto-Wire Recovered Scene")]
+        [MenuItem("Bubble Tea Shop/Auto-Wire Recovered Scene")]
+        public static void AutoWireRecoveredScene()
+        {
+            var allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            System.Func<string, GameObject> findGo = (name) =>
+            {
+                foreach (var go in allObjects)
+                {
+                    if (go != null && go.name == name && go.scene.isLoaded) return go;
+                }
+                return null;
+            };
+
+            // 1. Managers
+            var mgrRoot = findGo("---Managers---") ?? findGo("--- MANAGERS ---");
+            if (mgrRoot != null)
+            {
+                GetOrAddComponent<GameManager>(mgrRoot);
+                GetOrAddComponent<EconomyManager>(mgrRoot);
+                GetOrAddComponent<InventoryManager>(mgrRoot);
+                GetOrAddComponent<DayManager>(mgrRoot);
+                GetOrAddComponent<CustomerManager>(mgrRoot);
+                GetOrAddComponent<UpgradeManager>(mgrRoot);
+                GetOrAddComponent<MarketManager>(mgrRoot);
+                GetOrAddComponent<ForagingManager>(mgrRoot);
+                GetOrAddComponent<MarketPriceManager>(mgrRoot);
+                GetOrAddComponent<MarketEventManager>(mgrRoot);
+                GetOrAddComponent<MentorController>(mgrRoot);
+            }
+
+            // 2. HUD Controller
+            var hudGo = findGo("HUD_TopBar") ?? findGo("HUD_Top_Panel");
+            if (hudGo != null)
+            {
+                var hud = GetOrAddComponent<HUDController>(hudGo);
+                var day = findGo("DayText")?.GetComponent<TextMeshProUGUI>();
+                var cash = findGo("CashText")?.GetComponent<TextMeshProUGUI>();
+                var rent = findGo("RentTimerText")?.GetComponent<TextMeshProUGUI>() ?? findGo("RentText")?.GetComponent<TextMeshProUGUI>();
+                var cust = findGo("CustomerCountText")?.GetComponent<TextMeshProUGUI>() ?? findGo("CustCountText")?.GetComponent<TextMeshProUGUI>();
+                var hint = findGo("StatusHintText")?.GetComponent<TextMeshProUGUI>() ?? findGo("HintText")?.GetComponent<TextMeshProUGUI>();
+                if (day != null) SetSerializedProperty(hud, "dayText", day);
+                if (cash != null) SetSerializedProperty(hud, "cashText", cash);
+                if (rent != null) SetSerializedProperty(hud, "rentTimerText", rent);
+                if (cust != null) SetSerializedProperty(hud, "customerCountText", cust);
+                if (hint != null) SetSerializedProperty(hud, "statusHintText", hint);
+                EditorUtility.SetDirty(hud);
+            }
+
+            // 3. NightPhaseManager
+            var nightRoot = findGo("Night Phase Canvas") ?? findGo("NightPhaseCanvas");
+            if (nightRoot != null)
+            {
+                var npm = GetOrAddComponent<NightPhaseManager>(nightRoot);
+                SetSerializedProperty(npm, "nightPanelRoot", nightRoot);
+                var mktPanel = findGo("MarketPanel");
+                var forPanel = findGo("ForagingPanel");
+                var upgPanel = findGo("UpgradesPanel");
+                var ledPanel = findGo("LedgerPanel");
+                if (mktPanel != null) SetSerializedProperty(npm, "marketTabPanel", mktPanel);
+                if (forPanel != null) SetSerializedProperty(npm, "foragingTabPanel", forPanel);
+                if (upgPanel != null) SetSerializedProperty(npm, "upgradesTabPanel", upgPanel);
+                if (ledPanel != null) SetSerializedProperty(npm, "ledgerTabPanel", ledPanel);
+
+                var tabMkt = findGo("TabMarket")?.GetComponent<Button>();
+                var tabFor = findGo("TabForage")?.GetComponent<Button>();
+                var tabUpg = findGo("TabUpgrades")?.GetComponent<Button>();
+                var tabLed = findGo("TabLedger")?.GetComponent<Button>();
+                var prepBtn = findGo("PrepAreaButton")?.GetComponent<Button>();
+                var sleepBtn = findGo("SleepButton")?.GetComponent<Button>();
+                var bmbBtn = findGo("ForageBambooBtn")?.GetComponent<Button>();
+                var hnyBtn = findGo("ForageHoneyBtn")?.GetComponent<Button>();
+                var mntBtn = findGo("ForageMountainBtn")?.GetComponent<Button>();
+                var forLog = findGo("ForageLogText")?.GetComponent<TextMeshProUGUI>();
+                var ledSum = findGo("LedgerSummary")?.GetComponent<TextMeshProUGUI>();
+                var rentStat = findGo("RentStatus")?.GetComponent<TextMeshProUGUI>();
+                var buyoutBtn = findGo("BuyoutButton")?.GetComponent<Button>();
+
+                if (tabMkt != null) SetSerializedProperty(npm, "tabMarketButton", tabMkt);
+                if (tabFor != null) SetSerializedProperty(npm, "tabForagingButton", tabFor);
+                if (tabUpg != null) SetSerializedProperty(npm, "tabUpgradesButton", tabUpg);
+                if (tabLed != null) SetSerializedProperty(npm, "tabLedgerButton", tabLed);
+                if (prepBtn != null) SetSerializedProperty(npm, "prepAreaButton", prepBtn);
+                if (sleepBtn != null) SetSerializedProperty(npm, "sleepButton", sleepBtn);
+                if (bmbBtn != null) SetSerializedProperty(npm, "forageBambooBtn", bmbBtn);
+                if (hnyBtn != null) SetSerializedProperty(npm, "forageHoneyBtn", hnyBtn);
+                if (mntBtn != null) SetSerializedProperty(npm, "forageMountainBtn", mntBtn);
+                if (forLog != null) SetSerializedProperty(npm, "foragingLogText", forLog);
+                if (ledSum != null) SetSerializedProperty(npm, "ledgerSummaryText", ledSum);
+                if (rentStat != null) SetSerializedProperty(npm, "rentStatusText", rentStat);
+                if (buyoutBtn != null)
+                {
+                    SetSerializedProperty(npm, "buyoutShopButton", buyoutBtn);
+                    var bTxt = buyoutBtn.GetComponentInChildren<TextMeshProUGUI>();
+                    if (bTxt != null) SetSerializedProperty(npm, "buyoutButtonText", bTxt);
+                }
+                EditorUtility.SetDirty(npm);
+            }
+
+            // 4. CupStation & Sealer
+            var cupStGo = findGo("CupStation");
+            if (cupStGo != null)
+            {
+                var cs = GetOrAddComponent<CupStation>(cupStGo);
+                var serve = findGo("ServeButton")?.GetComponent<Button>();
+                var trash = findGo("TrashButton")?.GetComponent<Button>();
+                var seal = findGo("SealerButton")?.GetComponent<Button>();
+                var emptyCup = findGo("CupContainer")?.GetComponent<Image>() ?? findGo("CupOutline")?.GetComponent<Image>();
+                var sealedLid = findGo("SealedLid")?.GetComponent<Image>();
+                var teaLiquid = findGo("TeaLiquidLayer")?.GetComponent<Image>();
+                var milkLiquid = findGo("MilkLayer")?.GetComponent<Image>();
+                var iceVis = findGo("IceVisual")?.transform;
+                var topVis = findGo("ToppingsVisual")?.transform;
+
+                if (serve != null) SetSerializedProperty(cs, "serveButton", serve);
+                if (trash != null) SetSerializedProperty(cs, "trashButton", trash);
+                if (seal != null) SetSerializedProperty(cs, "sealerButton", seal);
+                if (emptyCup != null) SetSerializedProperty(cs, "emptyCupImage", emptyCup);
+                if (sealedLid != null) SetSerializedProperty(cs, "sealedLidImage", sealedLid);
+                if (teaLiquid != null) SetSerializedProperty(cs, "teaLiquidImage", teaLiquid);
+                if (milkLiquid != null) SetSerializedProperty(cs, "milkLiquidImage", milkLiquid);
+                if (iceVis != null) SetSerializedProperty(cs, "iceVisualContainer", iceVis);
+                if (topVis != null) SetSerializedProperty(cs, "toppingsContainer", topVis);
+                EditorUtility.SetDirty(cs);
+            }
+
+            var sealerGo = findGo("SealerButton");
+            if (sealerGo != null)
+            {
+                var sealer = GetOrAddComponent<CupSealer>(sealerGo);
+                SetSerializedProperty(sealer, "sealerButton", sealerGo.GetComponent<Button>());
+                EditorUtility.SetDirty(sealer);
+            }
+
+            // 5. Deskbell
+            var bellGo = findGo("Deskbell") ?? findGo("Desk_Bell");
+            if (bellGo != null)
+            {
+                var bell = GetOrAddComponent<DeskBell>(bellGo);
+                SetSerializedProperty(bell, "bellButton", bellGo.GetComponent<Button>());
+                EditorUtility.SetDirty(bell);
+            }
+
+            // 6. ShutterController
+            var shutterGo = findGo("MetalShutter");
+            var leverGo = findGo("ShutterLever");
+            if (leverGo != null)
+            {
+                var sc = GetOrAddComponent<ShutterController>(leverGo);
+                if (shutterGo != null) SetSerializedProperty(sc, "shutterTransform", shutterGo.GetComponent<RectTransform>());
+                SetSerializedProperty(sc, "leverButton", leverGo.GetComponent<Button>());
+                EditorUtility.SetDirty(sc);
+            }
+
+            // 7. Customer & Dialogue
+            var custGo = findGo("Customer");
+            if (custGo != null)
+            {
+                var cc = GetOrAddComponent<CustomerController>(custGo);
+                var cImg = custGo.GetComponent<Image>();
+                var sb = findGo("Speech Bubble")?.GetComponent<SpeechBubbleUI>() ?? findGo("SpeechBubble")?.GetComponent<SpeechBubbleUI>();
+                var pBar = findGo("Fill")?.GetComponent<Image>() ?? findGo("PatienceBar")?.GetComponentInChildren<Image>();
+                if (cImg != null) SetSerializedProperty(cc, "customerImage", cImg);
+                if (sb != null) SetSerializedProperty(cc, "speechBubble", sb);
+                if (pBar != null) SetSerializedProperty(cc, "patienceFillImage", pBar);
+                EditorUtility.SetDirty(cc);
+            }
+
+            // 8. OrderTicketUI
+            var ticketGo = findGo("OrderTicket");
+            if (ticketGo != null)
+            {
+                var ot = GetOrAddComponent<OrderTicketUI>(ticketGo);
+                SetSerializedProperty(ot, "ticketRoot", ticketGo);
+                var tTitle = findGo("TicketTitle")?.GetComponent<TextMeshProUGUI>();
+                var tDetails = findGo("TicketDetails")?.GetComponent<TextMeshProUGUI>();
+                if (tTitle != null) SetSerializedProperty(ot, "titleText", tTitle);
+                if (tDetails != null) SetSerializedProperty(ot, "detailsText", tDetails);
+                EditorUtility.SetDirty(ot);
+            }
+
+            // 9. CashRegisterInventoryUI
+            var crGo = findGo("CashRegisterButton");
+            if (crGo != null)
+            {
+                var cr = GetOrAddComponent<CashRegisterInventoryUI>(crGo);
+                SetSerializedProperty(cr, "inventoryButton", crGo.GetComponent<Button>());
+                var invModal = findGo("InventoryModal");
+                var closeBtn = findGo("CloseButton")?.GetComponent<Button>();
+                var cardCont = findGo("InventoryCardContainer")?.transform;
+                if (invModal != null) SetSerializedProperty(cr, "inventoryModalRoot", invModal);
+                if (closeBtn != null) SetSerializedProperty(cr, "closeModalButton", closeBtn);
+                if (cardCont != null) SetSerializedProperty(cr, "cardContainer", cardCont);
+                EditorUtility.SetDirty(cr);
+            }
+
+            // 10. Foraging Screens
+            var bmbScreen = findGo("BambooGroveScreen");
+            if (bmbScreen != null)
+            {
+                var bgc = GetOrAddComponent<BambooGroveViewController>(bmbScreen);
+                SetSerializedProperty(bgc, "bambooGrovePanelRoot", bmbScreen);
+                var bg = findGo("BambooGroveBG")?.GetComponent<Image>();
+                var ret = findGo("ReturnShopButton")?.GetComponent<Button>();
+                var cnt = findGo("HarvestCounter")?.GetComponent<TextMeshProUGUI>();
+                var sp = findGo("Signpost")?.GetComponent<Signpost>();
+                if (bg != null) SetSerializedProperty(bgc, "backgroundImage", bg);
+                if (ret != null) SetSerializedProperty(bgc, "returnToNightHubButton", ret);
+                if (cnt != null) SetSerializedProperty(bgc, "harvestCounterText", cnt);
+                if (sp != null) SetSerializedProperty(bgc, "signpost", sp);
+                EditorUtility.SetDirty(bgc);
+            }
+
+            var hnyScreen = findGo("HoneyMeadowScreen");
+            if (hnyScreen != null)
+            {
+                var hmc = GetOrAddComponent<HoneyMeadowViewController>(hnyScreen);
+                SetSerializedProperty(hmc, "honeyMeadowPanelRoot", hnyScreen);
+                var bg = findGo("HoneyMeadowBG")?.GetComponent<Image>();
+                var ret = findGo("ReturnShopButton (1)")?.GetComponent<Button>();
+                var cnt = findGo("HarvestCounter (1)")?.GetComponent<TextMeshProUGUI>();
+                var tree = findGo("JellyTree")?.GetComponent<Button>();
+                if (bg != null) SetSerializedProperty(hmc, "backgroundImage", bg);
+                if (ret != null) SetSerializedProperty(hmc, "returnToNightHubButton", ret);
+                if (cnt != null) SetSerializedProperty(hmc, "harvestCounterText", cnt);
+                if (tree != null) SetSerializedProperty(hmc, "jellyTreeButton", tree);
+                EditorUtility.SetDirty(hmc);
+            }
+
+            var mntScreen = findGo("MistMountainScreen");
+            if (mntScreen != null)
+            {
+                var mmc = GetOrAddComponent<MistMountainViewController>(mntScreen);
+                SetSerializedProperty(mmc, "mistMountainPanelRoot", mntScreen);
+                var bg = findGo("MistMountainBG")?.GetComponent<Image>();
+                var ret = findGo("ReturnShopButton (3)")?.GetComponent<Button>();
+                var cnt = findGo("HarvestCounter (2)")?.GetComponent<TextMeshProUGUI>();
+                var shelf = findGo("RockShelf")?.GetComponent<Button>();
+                var wall = findGo("Rockwall");
+                var bkt = findGo("Bucket")?.GetComponent<Image>();
+                if (bg != null) SetSerializedProperty(mmc, "panoramaBackground", bg);
+                if (ret != null) SetSerializedProperty(mmc, "returnToNightHubButton", ret);
+                if (cnt != null) SetSerializedProperty(mmc, "harvestCounterText", cnt);
+                if (shelf != null) SetSerializedProperty(mmc, "rockShelfButton", shelf);
+                if (wall != null) SetSerializedProperty(mmc, "rockWallObject", wall);
+                if (bkt != null) SetSerializedProperty(mmc, "bucketImage", bkt);
+                EditorUtility.SetDirty(mmc);
+            }
+
+            var prepScreen = findGo("PrepAreaScreen");
+            if (prepScreen != null)
+            {
+                var pvc = GetOrAddComponent<PrepAreaViewController>(prepScreen);
+                SetSerializedProperty(pvc, "prepAreaPanelRoot", prepScreen);
+                var ret = findGo("ReturnShopButton (2)")?.GetComponent<Button>();
+                var bld = findGo("Blender")?.GetComponent<Button>();
+                var chp = findGo("Chopping")?.GetComponent<Button>();
+                var cen = findGo("Centrifuge")?.GetComponent<Button>();
+                var sieve = findGo("Sieve")?.GetComponent<Image>();
+                var knife = findGo("Knife")?.GetComponent<Image>();
+                var topRaw = findGo("TopRawPanel")?.transform;
+                if (ret != null) SetSerializedProperty(pvc, "returnToNightHubButton", ret);
+                if (bld != null) SetSerializedProperty(pvc, "stationBlenderButton", bld);
+                if (chp != null) SetSerializedProperty(pvc, "stationChoppingButton", chp);
+                if (cen != null) SetSerializedProperty(pvc, "stationCentrifugeButton", cen);
+                if (sieve != null) SetSerializedProperty(pvc, "stationSieveImage", sieve);
+                if (knife != null) SetSerializedProperty(pvc, "stationKnifeImage", knife);
+                if (topRaw != null) SetSerializedProperty(pvc, "topRawCardsContainer", topRaw);
+                EditorUtility.SetDirty(pvc);
+            }
+
+            var mktScreen = findGo("SupermarketScreen");
+            if (mktScreen != null)
+            {
+                var svc = GetOrAddComponent<SupermarketViewController>(mktScreen);
+                SetSerializedProperty(svc, "supermarketPanelRoot", mktScreen);
+                var bg = findGo("SupermarketBg")?.GetComponent<Image>();
+                var ret = findGo("ReturnShopButton")?.GetComponent<Button>();
+                var cash = findGo("CashBalanceText (1)")?.GetComponent<TextMeshProUGUI>();
+                var cat = findGo("MarketCatalogContainer")?.transform;
+                if (bg != null) SetSerializedProperty(svc, "supermarketBackgroundImage", bg);
+                if (ret != null) SetSerializedProperty(svc, "returnToNightHubButton", ret);
+                if (cash != null) SetSerializedProperty(svc, "cashBalanceText", cash);
+                if (cat != null) SetSerializedProperty(svc, "marketCatalogContainer", cat);
+                EditorUtility.SetDirty(svc);
+            }
+
+            // 11. Tea Dispensers, Milk Dispensers, Topping Stations
+            System.Action<string, TeaBase> wireTea = (name, tb) =>
+            {
+                var go = findGo(name);
+                if (go != null)
+                {
+                    var d = GetOrAddComponent<TeaDispenser>(go);
+                    SetSerializedProperty(d, "teaType", tb);
+                    SetSerializedProperty(d, "dispenseButton", go.GetComponent<Button>());
+                    EditorUtility.SetDirty(d);
+                }
+            };
+            wireTea("Tea_Black", TeaBase.BlackTea);
+            wireTea("Tea_Green", TeaBase.GreenTea);
+            wireTea("Tea_Oolong", TeaBase.OolongTea);
+            wireTea("Tea_Thai", TeaBase.ThaiTea);
+            wireTea("Tea_Taro", TeaBase.TaroTea);
+
+            System.Action<string, MilkType> wireMilk = (name, mt) =>
+            {
+                var go = findGo(name);
+                if (go != null)
+                {
+                    var d = GetOrAddComponent<MilkDispenser>(go);
+                    SetSerializedProperty(d, "milkType", mt);
+                    SetSerializedProperty(d, "dispenseButton", go.GetComponent<Button>());
+                    EditorUtility.SetDirty(d);
+                }
+            };
+            wireMilk("Milk_Fresh", MilkType.FreshMilk);
+            wireMilk("Milk_Oat", MilkType.OatMilk);
+            wireMilk("Milk_Coconut", MilkType.CoconutMilk);
+            wireMilk("Milk_Condensed", MilkType.CondensedMilk);
+
+            System.Action<string, ToppingType> wireTop = (name, tt) =>
+            {
+                var go = findGo(name);
+                if (go != null)
+                {
+                    var d = GetOrAddComponent<ToppingStation>(go);
+                    SetSerializedProperty(d, "toppingType", tt);
+                    SetSerializedProperty(d, "scoopButton", go.GetComponent<Button>());
+                    EditorUtility.SetDirty(d);
+                }
+            };
+            wireTop("Topping_Boba", ToppingType.TapiocaPearls);
+            wireTop("Topping_Popping", ToppingType.PoppingBoba);
+            wireTop("Topping_GrassJelly", ToppingType.GrassJelly);
+            wireTop("Topping_Pudding", ToppingType.EggPudding);
+            wireTop("Topping_CoconutJelly", ToppingType.CoconutJelly);
+            wireTop("Topping_CheeseFoam", ToppingType.CheeseFoam);
+            wireTop("Topping_GoldenPearl", ToppingType.GoldenHoneyPearls);
+
+            var iceGo = findGo("IceButton");
+            if (iceGo != null)
+            {
+                var id = GetOrAddComponent<IceDispenser>(iceGo);
+                SetSerializedProperty(id, "dispenseButton", iceGo.GetComponent<Button>());
+                EditorUtility.SetDirty(id);
+            }
+
+            var sugGo = findGo("SugarButton");
+            if (sugGo != null)
+            {
+                var sd = GetOrAddComponent<SugarDispenser>(sugGo);
+                SetSerializedProperty(sd, "dispenseButton", sugGo.GetComponent<Button>());
+                EditorUtility.SetDirty(sd);
+            }
+
+            // Save Scene
+            UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+            UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
+            Debug.Log("[ShopSceneSetup] Auto-wired all recovered scene components successfully!");
+        }
     }
 }
