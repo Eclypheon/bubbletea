@@ -321,11 +321,14 @@ namespace BubbleTeaShop
             }
 
             int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
-            bool isNight = GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.NightPhase;
+            bool isStorefrontOpen = GameManager.Instance != null &&
+                                    (GameManager.Instance.CurrentState == GameState.ShopOpen ||
+                                     GameManager.Instance.CurrentState == GameState.CustomerWaiting ||
+                                     GameManager.Instance.CurrentState == GameState.ShopClosing);
 
             if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null ||
                 string.IsNullOrEmpty(MarketEventManager.Instance.ActiveEvent.title) ||
-                currentDay <= 3 || isNight)
+                currentDay <= 3 || !isStorefrontOpen)
             {
                 if (marketEventBadgeObj != null) marketEventBadgeObj.SetActive(false);
                 if (marketEventModal != null) marketEventModal.SetActive(false);
@@ -343,10 +346,7 @@ namespace BubbleTeaShop
 
             if (marketEventBadgeObj != null)
             {
-                bool shouldShowBadge = !isSubscreenActive && GameManager.Instance != null &&
-                                       GameManager.Instance.CurrentState != GameState.GameOver &&
-                                       GameManager.Instance.CurrentState != GameState.GameWon &&
-                                       GameManager.Instance.CurrentState != GameState.NightPhase;
+                bool shouldShowBadge = !isSubscreenActive && isStorefrontOpen;
                 marketEventBadgeObj.SetActive(shouldShowBadge);
             }
 
@@ -677,7 +677,11 @@ namespace BubbleTeaShop
             if (marketEventBadgeObj != null)
             {
                 bool hasActiveEvent = MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null;
-                marketEventBadgeObj.SetActive(visible && hasActiveEvent);
+                bool isStorefrontOpen = GameManager.Instance != null &&
+                                        (GameManager.Instance.CurrentState == GameState.ShopOpen ||
+                                         GameManager.Instance.CurrentState == GameState.CustomerWaiting ||
+                                         GameManager.Instance.CurrentState == GameState.ShopClosing);
+                marketEventBadgeObj.SetActive(visible && hasActiveEvent && isStorefrontOpen && !isSubscreenActive);
             }
         }
 
