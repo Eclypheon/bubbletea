@@ -39,30 +39,13 @@ namespace BubbleTeaShop
         public Sprite GoldenHoneyPearlsSprite => goldenHoneyPearlsSprite;
         public Sprite CheeseFoamSprite => cheeseFoamSprite;
 
-        [Header("Cheese Foam Layer Settings")]
-        [Tooltip("Vertical pixel position offset of the Cheese Foam layer")]
-        [SerializeField] private float cheeseFoamYPosition = 0f;
-        [Tooltip("Horizontal pixel position offset of the Cheese Foam layer")]
-        [SerializeField] private float cheeseFoamXPosition = 0f;
-        [Tooltip("Lower height percentage anchor (0.0 to 1.0)")]
-        [Range(0f, 1f)]
-        [SerializeField] private float cheeseFoamMinYAnchor = 0.70f;
-        [Tooltip("Upper height percentage anchor (0.0 to 1.0)")]
-        [Range(0f, 1f)]
-        [SerializeField] private float cheeseFoamMaxYAnchor = 1.00f;
-        [Tooltip("Horizontal scale multiplier of the Cheese Foam layer (e.g. 1.0 = normal, 1.2 = wider, 0.8 = thinner)")]
-        [SerializeField] private float cheeseFoamXScale = 1.0f;
-        [Tooltip("Vertical scale multiplier of the Cheese Foam layer (e.g. 1.0 = normal)")]
-        [SerializeField] private float cheeseFoamYScale = 1.0f;
-        [Tooltip("Whether the cheese foam image preserves aspect ratio or fills the top rim band")]
-        [SerializeField] private bool cheeseFoamPreserveAspect = false;
+        private const float BottomToppingStackedSpacing = 26f;
+        private const float CheeseFoamYPos = 240f;
+        private const float CheeseFoamMinY = 0.27f;
+        private const float CheeseFoamMaxY = 1.0f;
+        private const float CheeseFoamScaleX = 1.46f;
 
-        [Header("Bottom Toppings Layer Settings")]
-        [Tooltip("Base vertical pixel position offset for all bottom toppings")]
-        [SerializeField] private float bottomToppingsYOffset = 0f;
-        [Tooltip("Vertical pixel spacing between stacked multi-topping layers")]
-        [SerializeField] private float stackedLayerSpacing = 26f;
-        [Tooltip("Optional - New cups are automatically spawned, but this can be assigned if desired")]
+        [Header("Action Buttons")]
         [SerializeField] private Button newCupButton;
         [SerializeField] private Button trashCupButton;
         [SerializeField] private Button serveCupButton;
@@ -359,7 +342,7 @@ namespace BubbleTeaShop
                 rt.offsetMax = Vector2.zero;
 
                 // Stack additional topping layers slightly higher in the cup
-                float yOffset = bottomToppingsYOffset + (b * stackedLayerSpacing);
+                float yOffset = b * BottomToppingStackedSpacing;
                 rt.anchoredPosition = new Vector2(0f, yOffset);
 
                 Sprite customSp = GetToppingSprite(top);
@@ -388,29 +371,21 @@ namespace BubbleTeaShop
                 RectTransform rt = foamObj.GetComponent<RectTransform>();
                 Image img = foamObj.GetComponent<Image>();
 
-                // Foam layer sits at the top rim of the cup, controllable via Inspector
-                rt.anchorMin = new Vector2(0f, cheeseFoamMinYAnchor);
-                rt.anchorMax = new Vector2(1f, cheeseFoamMaxYAnchor);
+                // Foam layer sits at the top rim of the cup
+                rt.anchorMin = new Vector2(0f, CheeseFoamMinY);
+                rt.anchorMax = new Vector2(1f, CheeseFoamMaxY);
                 rt.offsetMin = Vector2.zero;
                 rt.offsetMax = Vector2.zero;
-                rt.anchoredPosition = new Vector2(cheeseFoamXPosition, cheeseFoamYPosition);
-                rt.localScale = new Vector3(cheeseFoamXScale, cheeseFoamYScale, 1f);
+                rt.anchoredPosition = new Vector2(0f, CheeseFoamYPos);
+                rt.localScale = new Vector3(CheeseFoamScaleX, 1f, 1f);
 
                 Sprite foamSp = cheeseFoamSprite != null ? cheeseFoamSprite : defaultLiquidMaskSprite;
                 img.sprite = foamSp;
                 img.color = GetToppingColor(ToppingType.CheeseFoam);
-                img.preserveAspect = cheeseFoamPreserveAspect;
+                img.preserveAspect = false;
                 img.raycastTarget = false;
 
                 layerIndex++;
-            }
-        }
-
-        private void OnValidate()
-        {
-            if (Application.isPlaying && currentCup != null && currentCup.hasCup)
-            {
-                UpdateVisuals();
             }
         }
 
