@@ -10,7 +10,19 @@ namespace BubbleTeaShop
 {
     public class HoneyMeadowViewController : MonoBehaviour, IPointerClickHandler
     {
-        public static HoneyMeadowViewController Instance { get; private set; }
+        private static HoneyMeadowViewController instance;
+        public static HoneyMeadowViewController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<HoneyMeadowViewController>(FindObjectsInactive.Include);
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         [Header("Root & Screen Panels")]
         [SerializeField] private GameObject honeyMeadowPanelRoot;
@@ -88,11 +100,14 @@ namespace BubbleTeaShop
         private void Start()
         {
             WireTreeAndButtonListeners();
-            if (honeyMeadowPanelRoot != null)
+            if (!isMeadowOpen)
             {
-                honeyMeadowPanelRoot.SetActive(false);
+                if (honeyMeadowPanelRoot != null)
+                {
+                    honeyMeadowPanelRoot.SetActive(false);
+                }
+                gameObject.SetActive(false);
             }
-            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()
@@ -342,6 +357,7 @@ namespace BubbleTeaShop
 
             WireTreeAndButtonListeners();
 
+            gameObject.SetActive(true);
             if (honeyMeadowPanelRoot != null)
             {
                 honeyMeadowPanelRoot.SetActive(true);
@@ -391,6 +407,7 @@ namespace BubbleTeaShop
                 if (rt != null) rt.anchoredPosition = rootPanelBaseAnchoredPos;
                 honeyMeadowPanelRoot.SetActive(false);
             }
+            gameObject.SetActive(false);
 
             if (sessionCaughtCount > 0)
             {

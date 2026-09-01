@@ -10,7 +10,19 @@ namespace BubbleTeaShop
 {
     public class MistMountainViewController : MonoBehaviour, IPointerClickHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
-        public static MistMountainViewController Instance { get; private set; }
+        private static MistMountainViewController instance;
+        public static MistMountainViewController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<MistMountainViewController>(FindObjectsInactive.Include);
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         public enum MistMountainStage
         {
@@ -103,11 +115,14 @@ namespace BubbleTeaShop
         private void Start()
         {
             WireButtonsAndListeners();
-            if (mistMountainPanelRoot != null)
+            if (!isMountainOpen)
             {
-                mistMountainPanelRoot.SetActive(false);
+                if (mistMountainPanelRoot != null)
+                {
+                    mistMountainPanelRoot.SetActive(false);
+                }
+                gameObject.SetActive(false);
             }
-            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()
@@ -435,6 +450,7 @@ namespace BubbleTeaShop
 
             WireButtonsAndListeners();
 
+            gameObject.SetActive(true);
             if (mistMountainPanelRoot != null)
             {
                 mistMountainPanelRoot.SetActive(true);
@@ -466,6 +482,7 @@ namespace BubbleTeaShop
                 if (rt != null) rt.anchoredPosition = rootPanelBaseAnchoredPos;
                 mistMountainPanelRoot.SetActive(false);
             }
+            gameObject.SetActive(false);
 
             if (sessionCaughtCount > 0)
             {

@@ -9,7 +9,19 @@ namespace BubbleTeaShop
 {
     public class BambooGroveViewController : MonoBehaviour
     {
-        public static BambooGroveViewController Instance { get; private set; }
+        private static BambooGroveViewController instance;
+        public static BambooGroveViewController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<BambooGroveViewController>(FindObjectsInactive.Include);
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         [Header("Root & Screen Panels")]
         [SerializeField] private GameObject bambooGrovePanelRoot;
@@ -92,11 +104,14 @@ namespace BubbleTeaShop
 
         private void Start()
         {
-            if (bambooGrovePanelRoot != null)
+            if (!isGroveOpen)
             {
-                bambooGrovePanelRoot.SetActive(false);
+                if (bambooGrovePanelRoot != null)
+                {
+                    bambooGrovePanelRoot.SetActive(false);
+                }
+                gameObject.SetActive(false);
             }
-            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()
@@ -242,6 +257,7 @@ namespace BubbleTeaShop
             sessionCaughtCount = 0;
             remainingActiveCritters = 0;
 
+            gameObject.SetActive(true);
             if (bambooGrovePanelRoot != null)
             {
                 bambooGrovePanelRoot.SetActive(true);
@@ -301,6 +317,7 @@ namespace BubbleTeaShop
             {
                 bambooGrovePanelRoot.SetActive(false);
             }
+            gameObject.SetActive(false);
 
             HUDController.Instance?.SetSubscreenMode(false);
             OnBambooGroveClosed?.Invoke();

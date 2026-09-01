@@ -9,7 +9,19 @@ namespace BubbleTeaShop
 {
     public class PrepAreaViewController : MonoBehaviour
     {
-        public static PrepAreaViewController Instance { get; private set; }
+        private static PrepAreaViewController instance;
+        public static PrepAreaViewController Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<PrepAreaViewController>(FindObjectsInactive.Include);
+                }
+                return instance;
+            }
+            private set => instance = value;
+        }
 
         public enum PrepStationState
         {
@@ -84,6 +96,7 @@ namespace BubbleTeaShop
         private const int MAX_CHOPPING_CAPACITY = 3;
         private const int MAX_CENTRIFUGE_CAPACITY = 9;
         private int currentDayNumber = 1;
+        private bool isPrepAreaOpen = false;
         public event Action OnPrepAreaClosed;
 
         private void Awake()
@@ -119,7 +132,7 @@ namespace BubbleTeaShop
             {
                 returnToNightHubButton.onClick.RemoveListener(ClosePrepAreaView);
                 returnToNightHubButton.onClick.AddListener(ClosePrepAreaView);
-                returnToNightHubButton.gameObject.SetActive(false);
+                if (!isPrepAreaOpen) returnToNightHubButton.gameObject.SetActive(false);
             }
 
             if (prepAreaBackgroundImage != null && prepAreaInteriorSprite != null)
@@ -144,11 +157,14 @@ namespace BubbleTeaShop
                 stationCentrifugeButton.onClick.AddListener(OnCentrifugeClicked);
             }
 
-            if (prepAreaPanelRoot != null)
+            if (!isPrepAreaOpen)
             {
-                prepAreaPanelRoot.SetActive(false);
+                if (prepAreaPanelRoot != null)
+                {
+                    prepAreaPanelRoot.SetActive(false);
+                }
+                gameObject.SetActive(false);
             }
-            gameObject.SetActive(false);
         }
 
         private void ResolveComponentReferences()
@@ -236,7 +252,9 @@ namespace BubbleTeaShop
             EnsurePrepAreaPanelHierarchy();
 
             currentDayNumber = dayNumber;
+            isPrepAreaOpen = true;
 
+            gameObject.SetActive(true);
             if (prepAreaPanelRoot != null)
             {
                 prepAreaPanelRoot.SetActive(true);
@@ -259,6 +277,8 @@ namespace BubbleTeaShop
 
         public void ClosePrepAreaView()
         {
+            isPrepAreaOpen = false;
+
             if (prepAreaPanelRoot != null)
             {
                 prepAreaPanelRoot.SetActive(false);
@@ -268,6 +288,7 @@ namespace BubbleTeaShop
             {
                 returnToNightHubButton.gameObject.SetActive(false);
             }
+            gameObject.SetActive(false);
 
             HUDController.Instance?.SetSubscreenMode(false);
             OnPrepAreaClosed?.Invoke();
