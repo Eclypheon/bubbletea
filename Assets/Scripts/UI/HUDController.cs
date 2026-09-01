@@ -136,11 +136,11 @@ namespace BubbleTeaShop
         {
             if (marketEventBadgeObj != null)
             {
-                // Ensure correct updated positioning, transparent background, and 200% scale
+                // Ensure correct updated positioning (-685f), transparent background, and 200% scale
                 RectTransform existingRt = marketEventBadgeObj.GetComponent<RectTransform>();
                 if (existingRt != null)
                 {
-                    existingRt.anchoredPosition = new Vector2(-625f, 0f);
+                    existingRt.anchoredPosition = new Vector2(-685f, 0f);
                     existingRt.localScale = new Vector3(2f, 2f, 1f);
                 }
                 var existingBg = marketEventBadgeObj.GetComponent<Image>();
@@ -157,8 +157,8 @@ namespace BubbleTeaShop
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(65f, 32f);
-            // Shifted 60 pixels to the left (-625f) and scaled by 200% (2x)
-            rt.anchoredPosition = new Vector2(-625f, 0f);
+            // Shifted left to -685f and scaled by 200% (2x)
+            rt.anchoredPosition = new Vector2(-685f, 0f);
             rt.localScale = new Vector3(2f, 2f, 1f);
 
             var bgImg = marketEventBadgeObj.GetComponent<Image>();
@@ -378,80 +378,130 @@ namespace BubbleTeaShop
             ConfigureEventBadge(ev);
         }
 
+        private Sprite GetMarketEventSprite(MarketEvent ev)
+        {
+            Sprite sp = null;
+            switch (ev.eventId)
+            {
+                case "tapioca_delay":
+                    if (CupStation.Instance != null && CupStation.Instance.TapiocaSprite != null)
+                        sp = CupStation.Instance.TapiocaSprite;
+                    else if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_TapiocaPearls");
+                    break;
+
+                case "dairy_surplus":
+                    if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_FreshMilk");
+                    break;
+
+                case "tropical_coconut":
+                    if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_CoconutMilk");
+                    if (sp == null && CupStation.Instance != null)
+                        sp = CupStation.Instance.CoconutJellySprite;
+                    break;
+
+                case "cream_shortage":
+                    if (CupStation.Instance != null && CupStation.Instance.CheeseFoamSprite != null)
+                        sp = CupStation.Instance.CheeseFoamSprite;
+                    else if (CupStation.Instance != null && CupStation.Instance.EggPuddingSprite != null)
+                        sp = CupStation.Instance.EggPuddingSprite;
+                    else if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_CheeseFoam");
+                    break;
+
+                case "plant_based_craze":
+                    if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_OatMilk");
+                    break;
+
+                case "wellness_trend":
+                    if (CupStation.Instance != null && CupStation.Instance.GrassJellySprite != null)
+                        sp = CupStation.Instance.GrassJellySprite;
+                    else if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GrassJelly");
+                    break;
+
+                case "summer_heatwave":
+                    sp = iceSprite;
+                    break;
+
+                case "chilly_rain":
+                    if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Milk_CondensedMilk");
+                    if (sp == null)
+                        sp = iceSprite;
+                    break;
+
+                case "golden_harvest":
+                    if (CupStation.Instance != null && CupStation.Instance.GoldenHoneyPearlsSprite != null)
+                        sp = CupStation.Instance.GoldenHoneyPearlsSprite;
+                    else if (SupermarketViewController.Instance != null)
+                        sp = SupermarketViewController.Instance.GetIngredientIcon("Topping_GoldenHoneyPearls");
+                    break;
+            }
+
+            if (sp == null && !string.IsNullOrEmpty(ev.affectedKey) && SupermarketViewController.Instance != null)
+            {
+                sp = SupermarketViewController.Instance.GetIngredientIcon(ev.affectedKey);
+            }
+
+            if (sp == null)
+            {
+                sp = bobaSprite;
+            }
+
+            return sp;
+        }
+
         private void ConfigureEventBadge(MarketEvent ev)
         {
             if (marketEventIcon == null || marketEventTrendText == null || marketEventDaysText == null) return;
 
             marketEventDaysText.text = $"{ev.daysRemaining}d";
+            marketEventIcon.sprite = GetMarketEventSprite(ev);
+            marketEventIcon.color = Color.white;
 
             switch (ev.eventId)
             {
                 case "tapioca_delay":
-                    // Tapioca Pearl Shortage: Tapioca Sprite + Red Down Triangle (shortage / high wholesale price)
-                    marketEventIcon.sprite = bobaSprite;
-                    marketEventIcon.color = new Color(0.2f, 0.15f, 0.12f, 1f);
                     marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
                     break;
 
                 case "dairy_surplus":
-                    // Local Dairy Surplus: Milk Sprite + Green Down Triangle (discount!)
-                    marketEventIcon.sprite = milkSprite != null ? milkSprite : bobaSprite;
-                    marketEventIcon.color = new Color(0.85f, 0.95f, 1f, 1f);
                     marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
                     break;
 
                 case "tropical_coconut":
-                    // Tropical Coconut Harvest: Jelly Sprite + Green Down Triangle (discount!)
-                    marketEventIcon.sprite = jellySprite != null ? jellySprite : bobaSprite;
-                    marketEventIcon.color = new Color(0.92f, 0.98f, 1f, 1f);
                     marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
                     break;
 
                 case "cream_shortage":
-                    // Gourmet Cream Shortage: Cream Sprite + Red Down Triangle (shortage / tip bonus)
-                    marketEventIcon.sprite = milkSprite != null ? milkSprite : bobaSprite;
-                    marketEventIcon.color = new Color(1f, 0.92f, 0.7f, 1f);
                     marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
                     break;
 
                 case "plant_based_craze":
-                    // Plant-Based Milk Craze: Oat Milk + Green Up Arrow (demand surge)
-                    marketEventIcon.sprite = milkSprite != null ? milkSprite : bobaSprite;
-                    marketEventIcon.color = new Color(0.9f, 0.82f, 0.65f, 1f);
                     marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
                     break;
 
                 case "wellness_trend":
-                    // Herbal Wellness Trend: Grass Jelly + Green Up Arrow (demand & discount)
-                    marketEventIcon.sprite = jellySprite != null ? jellySprite : bobaSprite;
-                    marketEventIcon.color = new Color(0.12f, 0.25f, 0.15f, 1f);
                     marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
                     break;
 
                 case "summer_heatwave":
-                    // Summer Heatwave: Ice Cube + Orange Up Arrow (ice demand surge)
-                    marketEventIcon.sprite = iceSprite;
-                    marketEventIcon.color = new Color(0.75f, 0.92f, 1f, 1f);
                     marketEventTrendText.text = "<color=#FFA500><b>▲</b></color>";
                     break;
 
                 case "chilly_rain":
-                    // Chilly Monsoon Rain: Ice/Rain + Blue Down Triangle (no ice / hot comfort drinks)
-                    marketEventIcon.sprite = iceSprite;
-                    marketEventIcon.color = new Color(0.5f, 0.75f, 1f, 1f);
                     marketEventTrendText.text = "<color=#3498DB><b>▼</b></color>";
                     break;
 
                 case "golden_harvest":
-                    // Bountiful Foraging Season: Golden Harvest Star
-                    marketEventIcon.sprite = bobaSprite;
-                    marketEventIcon.color = new Color(1f, 0.85f, 0.2f, 1f);
                     marketEventTrendText.text = "<color=#F1C40F><b>2x★</b></color>";
                     break;
 
                 default:
-                    marketEventIcon.sprite = bobaSprite;
-                    marketEventIcon.color = Color.white;
                     marketEventTrendText.text = "<color=#FFA500><b>!</b></color>";
                     break;
             }
