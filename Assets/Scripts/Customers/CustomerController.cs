@@ -556,7 +556,7 @@ namespace BubbleTeaShop
 
         private void DisplayCurrentMentorLine()
         {
-            if (activeMentorLines == null || activeMentorLines.Length == 0)
+            if (activeMentorLines == null || activeMentorLines.Length == 0 || currentMentorLineIndex < 0 || currentMentorLineIndex >= activeMentorLines.Length)
             {
                 FinishMentorDialogue();
                 return;
@@ -570,7 +570,7 @@ namespace BubbleTeaShop
             }
 
             string line = activeMentorLines[currentMentorLineIndex];
-            if (speechBubble != null)
+            if (speechBubble != null && !string.IsNullOrEmpty(line))
             {
                 speechBubble.ShowMessage(line);
             }
@@ -581,13 +581,16 @@ namespace BubbleTeaShop
                 mentorNextButtonText.text = isLastLine ? "Got it! >" : "Next >";
             }
 
-            if (line.Contains("Cash Register"))
+            if (!string.IsNullOrEmpty(line))
             {
-                CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
-            }
-            if (line.Contains("desk bell") || line.Contains("Desk Bell"))
-            {
-                DeskBell.Instance?.StartAttentionWiggle();
+                if (line.Contains("Cash Register"))
+                {
+                    CashRegisterInventoryUI.Instance?.TriggerAttentionPulse(3.0f);
+                }
+                if (line.Contains("desk bell") || line.Contains("Desk Bell"))
+                {
+                    DeskBell.Instance?.StartAttentionWiggle();
+                }
             }
         }
 
@@ -621,8 +624,15 @@ namespace BubbleTeaShop
                 mentorNavPanel.SetActive(false);
             }
 
-            bool isBellPrompt = activeMentorLines != null && activeMentorLines.Length > 0 &&
-                (activeMentorLines[activeMentorLines.Length - 1].Contains("desk bell") || activeMentorLines[activeMentorLines.Length - 1].Contains("Desk Bell"));
+            bool isBellPrompt = false;
+            if (activeMentorLines != null && activeMentorLines.Length > 0)
+            {
+                string lastLine = activeMentorLines[activeMentorLines.Length - 1];
+                if (!string.IsNullOrEmpty(lastLine) && (lastLine.Contains("desk bell") || lastLine.Contains("Desk Bell")))
+                {
+                    isBellPrompt = true;
+                }
+            }
 
             if (isBellPrompt)
             {

@@ -292,10 +292,13 @@ namespace BubbleTeaShop
                 return;
             }
 
+            string title = !string.IsNullOrEmpty(marketEvent.title) ? marketEvent.title : "Special Market Conditions";
+            string desc = !string.IsNullOrEmpty(marketEvent.description) ? marketEvent.description : "Special market supply and demand conditions are now active!";
+
             string[] briefingLines = new string[]
             {
-                $"Good morning! There's breaking market news today: {marketEvent.title}!",
-                marketEvent.description,
+                $"Good morning! There's breaking market news today: {title}!",
+                desc,
                 "This market condition will probably last for the next 3 days, so plan your stock and preparations accordingly!",
                 "Ring the desk bell whenever you're ready to serve your first customer!"
             };
