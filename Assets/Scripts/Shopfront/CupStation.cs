@@ -231,67 +231,8 @@ namespace BubbleTeaShop
                 iceVisualParent.SetActive(currentCup.icePercent > 0);
             }
 
-            // Toppings visual
-            if (toppingsVisualParent != null)
-            {
-                toppingsVisualParent.SetActive(currentCup.toppings.Count > 0);
-            }
-
-            // Auto-locate primary topping image if not explicitly assigned
-            if (primaryToppingImage == null && toppingsVisualParent != null)
-            {
-                primaryToppingImage = toppingsVisualParent.GetComponent<Image>();
-                if (primaryToppingImage == null)
-                {
-                    primaryToppingImage = toppingsVisualParent.GetComponentInChildren<Image>();
-                }
-            }
-
-            if (primaryToppingImage != null)
-            {
-                if (currentCup.toppings.Count > 0)
-                {
-                    primaryToppingImage.gameObject.SetActive(true);
-                    ToppingType firstTop = currentCup.toppings[0];
-                    Sprite customSp = GetToppingSprite(firstTop);
-                    if (customSp != null)
-                    {
-                        primaryToppingImage.sprite = customSp;
-                        primaryToppingImage.color = Color.white;
-                    }
-                    else
-                    {
-                        primaryToppingImage.color = GetToppingColor(firstTop);
-                    }
-                }
-                else
-                {
-                    primaryToppingImage.gameObject.SetActive(false);
-                }
-            }
-
-            if (secondaryToppingImage != null)
-            {
-                if (currentCup.toppings.Count > 1)
-                {
-                    secondaryToppingImage.gameObject.SetActive(true);
-                    ToppingType secondTop = currentCup.toppings[1];
-                    Sprite customSp = GetToppingSprite(secondTop);
-                    if (customSp != null)
-                    {
-                        secondaryToppingImage.sprite = customSp;
-                        secondaryToppingImage.color = Color.white;
-                    }
-                    else
-                    {
-                        secondaryToppingImage.color = GetToppingColor(secondTop);
-                    }
-                }
-                else
-                {
-                    secondaryToppingImage.gameObject.SetActive(false);
-                }
-            }
+            // Toppings visual (Supports multiple stacked & layered toppings + floating cheese foam)
+            UpdateToppingsVisual();
 
             // Sealing & straw
             if (sealedLidObject != null) sealedLidObject.SetActive(currentCup.isSealed);
@@ -308,6 +249,167 @@ namespace BubbleTeaShop
             }
 
             OnCupUpdated?.Invoke();
+        }
+
+        private Sprite defaultBobaSprite;
+        private Sprite defaultLiquidMaskSprite;
+
+        private void EnsureFallbackSprites()
+        {
+#if UNITY_EDITOR
+            if (defaultBobaSprite == null)
+            {
+                defaultBobaSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Topping_Boba.png");
+            }
+            if (defaultLiquidMaskSprite == null)
+            {
+                defaultLiquidMaskSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Cup_LiquidMask.png");
+            }
+#endif
+            if (defaultBobaSprite == null || defaultLiquidMaskSprite == null)
+            {
+                var allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+                foreach (var s in allSprites)
+                {
+                    if (s == null) continue;
+                    if (defaultBobaSprite == null && (s.name.Contains("Boba") || s.name.Contains("boba"))) defaultBobaSprite = s;
+                    if (defaultLiquidMaskSprite == null && s.name.Contains("LiquidMask")) defaultLiquidMaskSprite = s;
+                }
+            }
+        }
+
+        private void UpdateToppingsVisual()
+        {
+            if (toppingsVisualParent == null) return;
+
+            toppingsVisualParent.SetActive(currentCup.toppings.Count > 0);
+            if (currentCup.toppings.Count == 0)
+            {
+                for (int i = 0; i < toppingsVisualParent.transform.childCount; i++)
+                {
+                    toppingsVisualParent.transform.GetChild(i).gameObject.SetActive(false);
+                }
+                var baseImg = toppingsVisualParent.GetComponent<Image>();
+                if (baseImg != null) baseImg.enabled = false;
+                return;
+            }
+
+            EnsureFallbackSprites();
+
+            // Disable the base Image component on toppingsVisualParent if it has one so it doesn't conflict
+            var rootImg = toppingsVisualParent.GetComponent<Image>();
+            if (rootImg != null) rootImg.enabled = false;
+
+            // Separate Cheese Foam (top foam layer) and bottom toppings (pearls/jellies)
+            bool hasCheeseFoam = currentCup.toppings.Contains(ToppingType.CheeseFoam);
+            List<ToppingType> bottomToppings = new List<ToppingType>();
+            foreach (var top in currentCup.toppings)
+            {
+                if (top != ToppingType.CheeseFoam)
+                {
+                    bottomToppings.Add(top);
+                }
+            }
+
+            // Hide all children first
+            for (int i = 0; i < toppingsVisualParent.transform.childCount; i++)
+            {
+                toppingsVisualParent.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            int layerIndex = 0;
+
+            // 1. Render Bottom Toppings (Tapioca, Popping Boba, Grass Jelly, Coconut Jelly, Egg Pudding, Golden Honey Pearls)
+            int bottomCount = bottomToppings.Count;
+            for (int b = 0; b < bottomCount; b++)
+            {
+                ToppingType top = bottomToppings[b];
+                GameObject layerObj = GetOrCreateToppingLayer(layerIndex, $"BottomTopping_{b}_{top}");
+                layerObj.SetActive(true);
+
+                RectTransform rt = layerObj.GetComponent<RectTransform>();
+                Image img = layerObj.GetComponent<Image>();
+
+                // Calculate stacked layer bounds inside the cup
+                float yMin, yMax;
+                if (bottomCount == 1)
+                {
+                    yMin = 0f;
+                    yMax = 0.38f;
+                }
+                else if (bottomCount == 2)
+                {
+                    if (b == 0) { yMin = 0f; yMax = 0.22f; }
+                    else { yMin = 0.18f; yMax = 0.40f; }
+                }
+                else
+                {
+                    if (b == 0) { yMin = 0f; yMax = 0.16f; }
+                    else if (b == 1) { yMin = 0.14f; yMax = 0.30f; }
+                    else { yMin = 0.28f; yMax = 0.44f; }
+                }
+
+                rt.anchorMin = new Vector2(0f, yMin);
+                rt.anchorMax = new Vector2(1f, yMax);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+
+                Sprite customSp = GetToppingSprite(top);
+                if (customSp != null)
+                {
+                    img.sprite = customSp;
+                    img.color = Color.white;
+                }
+                else
+                {
+                    img.sprite = defaultBobaSprite != null ? defaultBobaSprite : (primaryToppingImage != null ? primaryToppingImage.sprite : null);
+                    img.color = GetToppingColor(top);
+                }
+                img.preserveAspect = false;
+                img.raycastTarget = false;
+
+                layerIndex++;
+            }
+
+            // 2. Render Cheese Foam on Top Rim (if present)
+            if (hasCheeseFoam)
+            {
+                GameObject foamObj = GetOrCreateToppingLayer(layerIndex, "TopFoam_CheeseFoam");
+                foamObj.SetActive(true);
+
+                RectTransform rt = foamObj.GetComponent<RectTransform>();
+                Image img = foamObj.GetComponent<Image>();
+
+                // Cheese foam floats on the top rim (72% to 100% height)
+                rt.anchorMin = new Vector2(0f, 0.72f);
+                rt.anchorMax = new Vector2(1f, 1f);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+
+                Sprite foamSp = cheeseFoamSprite != null ? cheeseFoamSprite : defaultLiquidMaskSprite;
+                img.sprite = foamSp;
+                img.color = GetToppingColor(ToppingType.CheeseFoam);
+                img.preserveAspect = false;
+                img.raycastTarget = false;
+
+                layerIndex++;
+            }
+        }
+
+        private GameObject GetOrCreateToppingLayer(int index, string layerName)
+        {
+            if (toppingsVisualParent == null) return null;
+
+            if (index < toppingsVisualParent.transform.childCount)
+            {
+                var child = toppingsVisualParent.transform.GetChild(index).gameObject;
+                child.name = layerName;
+                return child;
+            }
+
+            GameObject newLayer = new GameObject(layerName, typeof(RectTransform), typeof(Image));
+            newLayer.transform.SetParent(toppingsVisualParent.transform, false);
+            return newLayer;
         }
 
         public static Color GetToppingColor(ToppingType topping)
