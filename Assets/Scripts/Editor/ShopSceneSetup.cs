@@ -527,6 +527,20 @@ namespace BubbleTeaShop.Editor
                 return null;
             };
 
+            System.Func<string, Sprite> loadSprite = (path) =>
+            {
+                var sp = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (sp == null)
+                {
+                    var all = AssetDatabase.LoadAllAssetsAtPath(path);
+                    foreach (var a in all)
+                    {
+                        if (a is Sprite s) return s;
+                    }
+                }
+                return sp;
+            };
+
             // 1. Managers
             var mgrRoot = findGo("---Managers---") ?? findGo("--- MANAGERS ---");
             if (mgrRoot != null)
@@ -869,10 +883,111 @@ namespace BubbleTeaShop.Editor
                 EditorUtility.SetDirty(sd);
             }
 
+            // 12. Auto-Restore Images & Sprites
+            System.Action<string, string, Color?> setImg = (goName, spritePath, col) =>
+            {
+                var go = findGo(goName);
+                if (go != null)
+                {
+                    var img = go.GetComponent<Image>();
+                    if (img != null)
+                    {
+                        if (!string.IsNullOrEmpty(spritePath))
+                        {
+                            var sp = loadSprite(spritePath);
+                            if (sp != null) img.sprite = sp;
+                        }
+                        if (col.HasValue)
+                        {
+                            img.color = col.Value;
+                        }
+                        else if (img.sprite != null && (img.color == Color.clear || (img.color.a == 0 && goName != "TeaLiquidLayer" && goName != "MilkLayer")))
+                        {
+                            img.color = Color.white;
+                        }
+                        EditorUtility.SetDirty(img);
+                    }
+                }
+            };
+
+            setImg("StreetBackground", "Assets/Sprites/Sprites2/street_background.png", Color.white);
+            if (findGo("StreetBackground")?.GetComponent<Image>()?.sprite == null)
+                setImg("StreetBackground", "Assets/Sprites/Street_Background.png", Color.white);
+
+            setImg("MetalShutter", "Assets/Sprites/Sprites2/shutters.png", Color.white);
+            if (findGo("MetalShutter")?.GetComponent<Image>()?.sprite == null)
+                setImg("MetalShutter", "Assets/Sprites/Shutter_Metal.png", Color.white);
+
+            setImg("ShopfrontFrame", "Assets/Sprites/Sprites2/Shopfront.png", Color.white);
+            if (findGo("ShopfrontFrame")?.GetComponent<Image>()?.sprite == null)
+                setImg("ShopfrontFrame", "Assets/Sprites/Shopfront_Frame.png", Color.white);
+
+            setImg("Deskbell", "Assets/Sprites/Sprites2/deskbell.png", Color.white);
+            if (findGo("Deskbell")?.GetComponent<Image>()?.sprite == null)
+                setImg("Deskbell", "Assets/Sprites/Desk_Bell.png", Color.white);
+
+            setImg("Customer", "Assets/Sprites/Customer_Student.png", Color.white);
+            setImg("Speech Bubble", "Assets/Sprites/SpeechBubble.png", Color.white);
+            setImg("CupContainer", "Assets/Sprites/Cup_Empty.png", Color.white);
+            setImg("CupOutline", "Assets/Sprites/Cup_Empty.png", Color.white);
+            setImg("SealedLid", "Assets/Sprites/Cup_SealedLid.png", Color.white);
+            setImg("TeaLiquidLayer", "Assets/Sprites/Cup_LiquidMask.png", new Color(0.85f, 0.5f, 0.2f, 0f));
+            setImg("MilkLayer", "Assets/Sprites/Cup_LiquidMask.png", new Color(1f, 0.98f, 0.92f, 0f));
+            setImg("IceVisual", "Assets/Sprites/Ice_Cubes.png", Color.white);
+            setImg("Topping_Boba", "Assets/Sprites/Topping_Boba.png", Color.white);
+            setImg("Fill", null, new Color(0.2f, 0.8f, 0.3f, 1f));
+            setImg("OrderTicket", null, new Color(0.98f, 0.94f, 0.84f, 1f));
+            setImg("BambooGroveBG", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Bamboo/bamboogrove.jpg", Color.white);
+            setImg("HoneyMeadowBG", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Meadows/meadows.jpg", Color.white);
+            setImg("MistMountainBG", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/mistmountain.jpg", Color.white);
+            setImg("RockShelf", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/Rockshelf.png", Color.white);
+            setImg("Rockwall", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/mountains/RockWall.jpg", Color.white);
+            setImg("Bucket", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+            setImg("Signpost", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Bamboo/isitworthsignboard.png", Color.white);
+            setImg("JellyTree", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Meadows/jellytree.png", Color.white);
+            setImg("SupermarketBg", "Assets/Sprites/Sprites2/Sprites 3/market.png", Color.white);
+            setImg("TopRawPanel", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/raw ingre.png", Color.white);
+            setImg("Blender", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+            setImg("Chopping", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+            setImg("Centrifuge", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+            setImg("Sieve", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+            setImg("Knife", "Assets/Sprites/Sprites2/Sprites 3/Forage and prep/Preparea/prepEquipment.png", Color.white);
+
+            // 13. Auto-Restore TextMeshPro Fonts and Opacities
+            TMP_FontAsset defaultFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset")
+                ?? TMP_Settings.defaultFontAsset;
+            var allTexts = Resources.FindObjectsOfTypeAll<TextMeshProUGUI>();
+            foreach (var txt in allTexts)
+            {
+                if (txt != null && txt.gameObject.scene.isLoaded)
+                {
+                    if (defaultFont != null && (txt.font == null || txt.font.name == ""))
+                    {
+                        txt.font = defaultFont;
+                    }
+                    if (txt.color.a <= 0.05f)
+                    {
+                        txt.color = Color.white;
+                    }
+                    // Speech bubble dialogue text is dark
+                    if (txt.transform.IsChildOf(findGo("Speech Bubble")?.transform ?? findGo("Customer")?.transform))
+                    {
+                        txt.color = new Color(0.15f, 0.15f, 0.15f, 1f);
+                    }
+                    // Ticket text is dark charcoal
+                    if (txt.transform.IsChildOf(findGo("OrderTicket")?.transform ?? hudGo?.transform))
+                    {
+                        if (txt.name == "TicketTitle" || txt.name == "TicketDetails")
+                            txt.color = new Color(0.18f, 0.12f, 0.08f, 1f);
+                    }
+                    EditorUtility.SetDirty(txt);
+                }
+            }
+
             // Save Scene
             UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
             UnityEditor.SceneManagement.EditorSceneManager.SaveOpenScenes();
-            Debug.Log("[ShopSceneSetup] Auto-wired all recovered scene components successfully!");
+            Debug.Log("[ShopSceneSetup] Auto-wired all recovered scene components and restored sprites, fonts, and colors successfully!");
         }
     }
 }
