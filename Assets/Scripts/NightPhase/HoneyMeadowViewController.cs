@@ -46,7 +46,7 @@ namespace BubbleTeaShop
         [Header("Soil Absorption Speed (Editable)")]
         [Tooltip("Seconds before a fallen jelly block on the floor completely dissolves into the soil.")]
         [Range(0.5f, 10f)]
-        [SerializeField] private float soilAbsorptionSeconds = 2.0f;
+        [SerializeField] private float soilAbsorptionSeconds = 4.0f;
 
         [Header("Audio SFX")]
         [SerializeField] private AudioClip treeKickSound;

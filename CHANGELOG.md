@@ -4,6 +4,36 @@ All notable changes to the Yippee Tea project are documented in this file.
 
 ---
 
+## [v1.4.0] - 2026-09-02
+
+### Centralized Sprite Management & Architecture
+* **Centralized `SpriteManager`**: Established a single source of truth for all project sprites (Milks, Sliced Toppings, Dispenser Objects including exact Ice Cube sprite `Store Objects_2`, Foraging Critters, and Raw Ingredients).
+* **One-Click Asset Discovery**: Implemented `SpriteManagerEditor` allowing instant auto-population and asset resolution directly in the Unity Inspector.
+* **Inspector & Controller Clean-Up**: Removed dozens of duplicate, redundant serialized sprite variables across `SupermarketViewController`, `CupStation`, `PrepAreaViewController`, `BambooGroveViewController`, `HoneyMeadowViewController`, and `MistMountainViewController`.
+
+### Market Conditions Badge & Event System
+* **Multi-Icon Badge Support**: Market event badges dynamically render single or dual icons (e.g., displaying both Milk and Ice Cube icons for Summer Heatwave).
+* **Dynamic Day Counter Docking**: Implemented dynamic positional docking where the Day counter automatically shifts left (`-85px` for dual icons, `-65px` for single icons) and the badge aligns seamlessly alongside it based on text width.
+* **Shutter-Synchronized Visibility**: Market event badges remain concealed behind closed shutters and cleanly appear once the storefront opens and morning briefing initiates.
+* **Live Inspector Testing**: Added `MarketEventManagerEditor` with an event dropdown and preview buttons to trigger or clear market events on demand during testing.
+* **2× Scaled Modal Typography**: Doubled font sizes (28pt–44pt) and enlarged the information card (900×600) for crystal-clear readability of event lore and financial impacts.
+
+### Cup Visuals & Multi-Topping Stacking
+* **Dynamic Multi-Topping Layering**: Cups instantiate distinct visual layers that stack with calibrated vertical offsets when multiple bottom toppings (Tapioca, Popping Boba, Grass Jelly, Coconut Jelly, Egg Pudding, Golden Honey Pearls) are selected.
+* **Proportional Aspect Ratios**: Enforced aspect ratio preservation so pearls and toppings maintain crisp, circular shapes without vertical compression.
+* **Calibrated Cheese Foam Layer**: Fine-tuned Cheese Foam positioning at the cup rim with custom scale, width, and froth opacity.
+
+### Foraging & Minigame Calibration
+* **Honey Meadow Soil Absorption Timing**: Increased fallen jelly block floor duration from 2.0s to 4.0s for a more relaxed and enjoyable harvesting rhythm.
+* **Mist Mountain Bucket Dragging**: Refined pointer drag event handling and boundary clamping for smooth Golden Dew catching.
+* **Self-Healing Subview Lifecycles**: Standardized activation and fallback hierarchy resolution across all night phase subviews.
+
+### Inventory & UI Quality of Life
+* **Owned-Items Inventory Filter**: Cash Register Inventory UI and Nightly Ledger now exclusively display items the player has previously unlocked or purchased.
+* **Z-Sorting & Transparency**: Fixed render order so HUD hints remain interactable and legible over translucent inventory overlays.
+
+---
+
 ## [v1.3.0] - 2026-09-01
 
 ### Cup Visuals and Topping Layering

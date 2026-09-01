@@ -12213,11 +12213,9 @@ MonoBehaviour:
   harvestCounterText: {fileID: 2034096791}
   jellyTreeContainer: {fileID: 507}
   jellyTreeImage: {fileID: 778}
-  jellyTreeSprite: {fileID: -1136432714834833235, guid: 57a83f0e811b04931823e9d2c4733c0d, type: 3}
-  rawJellyBlockSprite: {fileID: -6019608671054731455, guid: 16e448a1cf515439bb36161761741d29, type: 3}
   minJellyBlocks: 3
   maxJellyBlocks: 5
-  soilAbsorptionSeconds: 2
+  soilAbsorptionSeconds: 4
   treeKickSound: {fileID: 0}
   harvestCollectSound: {fileID: 0}
   completeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
@@ -12543,13 +12541,6 @@ MonoBehaviour:
   secondaryToppingImage: {fileID: 0}
   sealedLidObject: {fileID: 60}
   strawObject: {fileID: 0}
-  tapiocaSprite: {fileID: -5034703955856199138, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  poppingBobaSprite: {fileID: 4129085186536377779, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  grassJellySprite: {fileID: -6734107803153752858, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  coconutJellySprite: {fileID: 7634809879669098404, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  eggPuddingSprite: {fileID: -3161446357135062343, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  goldenHoneyPearlsSprite: {fileID: -7790448460745747974, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
-  cheeseFoamSprite: {fileID: -6960219621324335271, guid: d8e0f3b52b259467a8843ce1a6eb69ca, type: 3}
   newCupButton: {fileID: 0}
   trashCupButton: {fileID: 724}
   serveCupButton: {fileID: 600}
@@ -14294,7 +14285,6 @@ MonoBehaviour:
   signpost: {fileID: 715}
   minGrassPatches: 2
   maxGrassPatches: 4
-  grassPileSprite: {fileID: -8723978912709568632, guid: 57755a61a6f9140ba949c23716675367, type: 3}
   grassPatchesContainer: {fileID: 0}
   grassPatchButtons: []
   minYippeesPerPatch: 1
@@ -14305,7 +14295,6 @@ MonoBehaviour:
   - {fileID: 9038228410457395441, guid: 51012f5caa0e74659b8e1a17bc1641df, type: 3}
   - {fileID: -2625352813954471709, guid: 51012f5caa0e74659b8e1a17bc1641df, type: 3}
   - {fileID: 7427802478581441535, guid: 51012f5caa0e74659b8e1a17bc1641df, type: 3}
-  babyYippeeStaticSprite: {fileID: 0}
   scurryDurationSeconds: 6
   timerBarRoot: {fileID: 0}
   timerBarFill: {fileID: 0}
@@ -15663,9 +15652,6 @@ MonoBehaviour:
   mistMountainPanelRoot: {fileID: 117}
   backgroundImage: {fileID: 639}
   mountainPanoramaSprite: {fileID: 6708294732094850749, guid: 7939481ed37514eeebc55244711632d6, type: 3}
-  rockWallSprite: {fileID: -1703383271984481490, guid: 937534c05d66140c5b97760b0c22185d, type: 3}
-  rockShelfSprite: {fileID: 5569634398768493868, guid: 94e407d1eb11c4797ad6647854476baf, type: 3}
-  rawGoldenDewSprite: {fileID: -8548621078868229173, guid: 16e448a1cf515439bb36161761741d29, type: 3}
   bucketSprite: {fileID: -8642061735718477380, guid: 5364cf23261e54413b1fe4decd8b7b08, type: 3}
   returnToNightHubButton: {fileID: 698}
   harvestCounterText: {fileID: 531}
@@ -17151,17 +17137,6 @@ MonoBehaviour:
   marketAisleTitleText: {fileID: 0}
   returnToNightHubButton: {fileID: 1795197340}
   marketCatalogContainer: {fileID: 443}
-  freshMilkIcon: {fileID: -3247569045822105553, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
-  oatMilkIcon: {fileID: -1041802545399106540, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
-  coconutMilkIcon: {fileID: 5877283925931886926, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
-  condensedMilkIcon: {fileID: 7085306471525216664, guid: fb7ecdb57252a40b5ac5b41671412fd7, type: 3}
-  tapiocaIcon: {fileID: 0}
-  poppingBobaIcon: {fileID: 0}
-  grassJellyIcon: {fileID: 0}
-  eggPuddingIcon: {fileID: 0}
-  coconutJellyIcon: {fileID: 0}
-  cheeseFoamIcon: {fileID: 0}
-  goldenHoneyPearlsIcon: {fileID: 0}
   purchaseChimeSound: {fileID: 0}
 --- !u!114 &780
 MonoBehaviour:
@@ -17463,9 +17438,6 @@ MonoBehaviour:
   prepAreaInteriorSprite: {fileID: -8366513872135517744, guid: 35c5b7ec957574979b14e02366ba08f9, type: 3}
   returnToNightHubButton: {fileID: 767}
   topRawCardsContainer: {fileID: 496}
-  rawBabyYippeesIcon: {fileID: 9038228410457395441, guid: 51012f5caa0e74659b8e1a17bc1641df, type: 3}
-  rawJellyBlocksIcon: {fileID: -6019608671054731455, guid: 16e448a1cf515439bb36161761741d29, type: 3}
-  rawGoldenDewIcon: {fileID: -8548621078868229173, guid: 16e448a1cf515439bb36161761741d29, type: 3}
   stationBlenderRoot: {fileID: 158}
   stationBlenderButton: {fileID: 770}
   stationBlenderImage: {fileID: 771}
@@ -17479,8 +17451,6 @@ MonoBehaviour:
   stationKnifeImage: {fileID: 752}
   choppingContentsContainer: {fileID: 0}
   choppingEmptySprite: {fileID: 0}
-  grassJellyIcon: {fileID: 0}
-  coconutJellyIcon: {fileID: 0}
   stationCentrifugeRoot: {fileID: 51}
   stationCentrifugeButton: {fileID: 652}
   stationBucketImage: {fileID: 607}
