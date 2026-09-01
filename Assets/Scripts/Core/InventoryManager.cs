@@ -182,25 +182,25 @@ namespace BubbleTeaShop
             if (discoveredKeys == null) discoveredKeys = new HashSet<string>();
             discoveredKeys.Clear();
 
-            stock["Cup"] = 25;
-            stock["Sugar"] = 100;
-            stock["Ice"] = 100;
+            stock["Cup"] = startingCups;
+            stock["Sugar"] = startingSugarServings;
+            stock["Ice"] = startingIceServings;
 
             // Day 1 Teas
-            stock[$"Tea_{TeaBase.BlackTea}"] = 15;
-            stock[$"Tea_{TeaBase.GreenTea}"] = 15;
+            stock[$"Tea_{TeaBase.BlackTea}"] = startingTeaServings;
+            stock[$"Tea_{TeaBase.GreenTea}"] = startingTeaServings;
             stock[$"Tea_{TeaBase.OolongTea}"] = 10;
             stock[$"Tea_{TeaBase.ThaiTea}"] = 10;
             stock[$"Tea_{TeaBase.TaroTea}"] = 10;
 
-            // Day 1 Milk: 15 Fresh Milk
-            stock[$"Milk_{MilkType.FreshMilk}"] = 15;
+            // Day 1 Milk: Fresh Milk
+            stock[$"Milk_{MilkType.FreshMilk}"] = startingMilkServings;
             stock[$"Milk_{MilkType.OatMilk}"] = 0;
             stock[$"Milk_{MilkType.CoconutMilk}"] = 0;
             stock[$"Milk_{MilkType.CondensedMilk}"] = 0;
 
-            // Day 1 Toppings: 15 Tapioca Pearls
-            stock[$"Topping_{ToppingType.TapiocaPearls}"] = 15;
+            // Day 1 Toppings: Tapioca Pearls
+            stock[$"Topping_{ToppingType.TapiocaPearls}"] = startingToppings;
             stock[$"Topping_{ToppingType.PoppingBoba}"] = 0;
             stock[$"Topping_{ToppingType.GrassJelly}"] = 0;
             stock[$"Topping_{ToppingType.EggPudding}"] = 0;
