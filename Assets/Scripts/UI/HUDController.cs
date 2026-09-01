@@ -38,6 +38,9 @@ namespace BubbleTeaShop
         private Sprite milkSprite;
         private Sprite jellySprite;
 
+        private Vector2 dayTextOriginalAnchoredPos = new Vector2(-700f, 0f);
+        private bool hasCapturedDayTextPos = false;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -48,12 +51,24 @@ namespace BubbleTeaShop
             Instance = this;
             DisableRaycasts();
             BringToFront();
+
+            if (dayText != null && !hasCapturedDayTextPos)
+            {
+                dayTextOriginalAnchoredPos = dayText.rectTransform.anchoredPosition;
+                hasCapturedDayTextPos = true;
+            }
         }
 
         private void Start()
         {
             DisableRaycasts();
             BringToFront();
+            if (dayText != null && !hasCapturedDayTextPos)
+            {
+                dayTextOriginalAnchoredPos = dayText.rectTransform.anchoredPosition;
+                hasCapturedDayTextPos = true;
+            }
+
             LoadFallbackSprites();
             EnsureMarketEventUI();
             EnsureMarketEventModal();
@@ -119,7 +134,19 @@ namespace BubbleTeaShop
 
         private void EnsureMarketEventUI()
         {
-            if (marketEventBadgeObj != null) return;
+            if (marketEventBadgeObj != null)
+            {
+                // Ensure correct updated positioning, transparent background, and 200% scale
+                RectTransform existingRt = marketEventBadgeObj.GetComponent<RectTransform>();
+                if (existingRt != null)
+                {
+                    existingRt.anchoredPosition = new Vector2(-625f, 0f);
+                    existingRt.localScale = new Vector3(2f, 2f, 1f);
+                }
+                var existingBg = marketEventBadgeObj.GetComponent<Image>();
+                if (existingBg != null) existingBg.color = Color.clear;
+                return;
+            }
 
             // Create interactive badge right beside day counter
             marketEventBadgeObj = new GameObject("MarketEventBadge", typeof(RectTransform), typeof(Image), typeof(Button));
@@ -129,11 +156,14 @@ namespace BubbleTeaShop
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(125f, 42f);
-            rt.anchoredPosition = new Vector2(-565f, 0f);
+            rt.sizeDelta = new Vector2(65f, 32f);
+            // Shifted 60 pixels to the left (-625f) and scaled by 200% (2x)
+            rt.anchoredPosition = new Vector2(-625f, 0f);
+            rt.localScale = new Vector3(2f, 2f, 1f);
 
             var bgImg = marketEventBadgeObj.GetComponent<Image>();
-            bgImg.color = new Color(0.18f, 0.15f, 0.25f, 0.95f);
+            // Transparent background so only the icon shows
+            bgImg.color = Color.clear;
 
             marketEventButton = marketEventBadgeObj.GetComponent<Button>();
             marketEventButton.onClick.AddListener(OpenMarketEventModal);
@@ -145,8 +175,8 @@ namespace BubbleTeaShop
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.sizeDelta = new Vector2(30f, 30f);
-            iconRt.anchoredPosition = new Vector2(8f, 0f);
+            iconRt.sizeDelta = new Vector2(26f, 26f);
+            iconRt.anchoredPosition = new Vector2(0f, 0f);
             marketEventIcon = iconObj.GetComponent<Image>();
             marketEventIcon.raycastTarget = false;
             marketEventIcon.preserveAspect = true;
@@ -158,10 +188,10 @@ namespace BubbleTeaShop
             trendRt.anchorMin = new Vector2(0f, 0.5f);
             trendRt.anchorMax = new Vector2(0f, 0.5f);
             trendRt.pivot = new Vector2(0f, 0.5f);
-            trendRt.sizeDelta = new Vector2(24f, 30f);
-            trendRt.anchoredPosition = new Vector2(44f, 0f);
+            trendRt.sizeDelta = new Vector2(18f, 26f);
+            trendRt.anchoredPosition = new Vector2(27f, 0f);
             marketEventTrendText = trendObj.GetComponent<TextMeshProUGUI>();
-            marketEventTrendText.fontSize = 20;
+            marketEventTrendText.fontSize = 17;
             marketEventTrendText.alignment = TextAlignmentOptions.Center;
             marketEventTrendText.raycastTarget = false;
 
@@ -171,11 +201,11 @@ namespace BubbleTeaShop
             RectTransform daysRt = daysObj.GetComponent<RectTransform>();
             daysRt.anchorMin = new Vector2(0f, 0.5f);
             daysRt.anchorMax = new Vector2(1f, 0.5f);
-            daysRt.pivot = new Vector2(0.5f, 0.5f);
-            daysRt.sizeDelta = new Vector2(0f, 30f);
-            daysRt.anchoredPosition = new Vector2(34f, 0f);
+            daysRt.pivot = new Vector2(0f, 0.5f);
+            daysRt.sizeDelta = new Vector2(0f, 26f);
+            daysRt.anchoredPosition = new Vector2(46f, 0f);
             marketEventDaysText = daysObj.GetComponent<TextMeshProUGUI>();
-            marketEventDaysText.fontSize = 16;
+            marketEventDaysText.fontSize = 12;
             marketEventDaysText.fontStyle = FontStyles.Bold;
             marketEventDaysText.color = new Color(1f, 0.85f, 0.4f, 1f);
             marketEventDaysText.alignment = TextAlignmentOptions.Left;
@@ -308,10 +338,17 @@ namespace BubbleTeaShop
             EnsureMarketEventUI();
             EnsureMarketEventModal();
 
+            if (dayText != null && !hasCapturedDayTextPos)
+            {
+                dayTextOriginalAnchoredPos = dayText.rectTransform.anchoredPosition;
+                hasCapturedDayTextPos = true;
+            }
+
             if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null)
             {
                 if (marketEventBadgeObj != null) marketEventBadgeObj.SetActive(false);
                 if (marketEventModal != null) marketEventModal.SetActive(false);
+                if (dayText != null) dayText.rectTransform.anchoredPosition = dayTextOriginalAnchoredPos;
                 return;
             }
 
@@ -319,7 +356,14 @@ namespace BubbleTeaShop
             if (string.IsNullOrEmpty(ev.title))
             {
                 if (marketEventBadgeObj != null) marketEventBadgeObj.SetActive(false);
+                if (dayText != null) dayText.rectTransform.anchoredPosition = dayTextOriginalAnchoredPos;
                 return;
+            }
+
+            // Shift DayText 60 pixels to the left when a market event is active
+            if (dayText != null)
+            {
+                dayText.rectTransform.anchoredPosition = new Vector2(dayTextOriginalAnchoredPos.x - 60f, dayTextOriginalAnchoredPos.y);
             }
 
             if (marketEventBadgeObj != null)
