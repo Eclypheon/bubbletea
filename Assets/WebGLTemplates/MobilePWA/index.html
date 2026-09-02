@@ -277,6 +277,8 @@
       }
       window.addEventListener('load', attemptLandscapeLock);
       document.addEventListener('fullscreenchange', attemptLandscapeLock);
+      window.addEventListener('touchstart', attemptLandscapeLock, { passive: true });
+      window.addEventListener('click', attemptLandscapeLock, { passive: true });
 
       // 5. Unity Loader Initialization
       var canvas = document.querySelector("#unity-canvas");
