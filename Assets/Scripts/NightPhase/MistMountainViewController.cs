@@ -541,7 +541,6 @@ namespace BubbleTeaShop
         public void OnRockShelfClicked()
         {
             if (currentStage != MistMountainStage.PanoramaApproach) return;
-            PlaySound(rockKickSound);
             StopPulsingShelf();
             TransitionToRockWallStage();
         }
