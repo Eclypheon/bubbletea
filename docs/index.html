@@ -44,47 +44,38 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #12141c;
+        background: #000000;
         overflow: hidden;
       }
 
-      /* Desktop: Maintain 16:9 aspect ratio so nothing is cut off on Mac/PC/widescreen */
-      #unity-container.unity-desktop #unity-canvas {
-        width: min(100vw, calc(100vh * 16 / 9)) !important;
-        height: min(100vh, calc(100vw * 9 / 16)) !important;
+      /* Desktop & Fullscreen 16:9 Wrapper (Centers canvas and adds top/bottom black bars on 16:10 screens) */
+      #unity-canvas-wrapper {
+        width: 100vw;
+        height: 100vh;
+        max-width: calc(100vh * (16 / 9));
+        max-height: calc(100vw * (9 / 16));
         aspect-ratio: 16 / 9;
-        display: block;
-        background: #12141c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin: auto;
       }
 
-      /* Native Fullscreen: Add top/bottom black bars on 16:10 screens to preserve 16:9 ratio */
-      canvas:fullscreen,
-      canvas:-webkit-full-screen,
-      canvas:-moz-full-screen,
-      canvas:-ms-fullscreen,
-      #unity-canvas:fullscreen,
-      #unity-canvas:-webkit-full-screen,
-      #unity-canvas:-moz-full-screen,
-      :fullscreen #unity-canvas,
-      :-webkit-full-screen #unity-canvas,
-      :-moz-full-screen #unity-canvas {
-        width: min(100vw, calc(100vh * 16 / 9)) !important;
-        height: min(100vh, calc(100vw * 9 / 16)) !important;
-        position: absolute !important;
-        top: 0 !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        margin: auto !important;
-        background: #12141c !important;
-      }
-
-      /* Mobile: Full-bleed edge-to-edge landscape */
-      #unity-container.unity-mobile #unity-canvas {
+      #unity-canvas {
         width: 100% !important;
         height: 100% !important;
         display: block;
         background: #12141c;
+      }
+
+      /* Mobile: full-bleed edge to edge */
+      .unity-mobile #unity-canvas-wrapper {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        aspect-ratio: auto !important;
       }
 
       /* Portrait Orientation Notice */
@@ -195,14 +186,16 @@
     </div>
 
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+      <div id="unity-canvas-wrapper">
+        <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+          <div id="unity-logo"></div>
+          <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+          </div>
         </div>
+        <div id="unity-warning"> </div>
       </div>
-      <div id="unity-warning"> </div>
       <div id="unity-footer" style="display:none;">
         <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
