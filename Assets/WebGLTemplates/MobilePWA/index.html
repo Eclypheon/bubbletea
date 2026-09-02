@@ -36,19 +36,16 @@
       }
 
       #unity-container {
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
+        width: 100%;
+        height: 100%;
+        position: absolute;
         top: 0;
         left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #12141c;
-        overflow: hidden;
       }
 
       #unity-canvas {
+        width: 100% !important;
+        height: 100% !important;
         display: block;
         background: #12141c;
       }
@@ -283,43 +280,8 @@
       window.addEventListener('touchstart', attemptLandscapeLock, { passive: true });
       window.addEventListener('click', attemptLandscapeLock, { passive: true });
 
-      // 5. Dynamic Cross-Browser 16:9 Canvas Scaler
+      // 5. Unity Loader Initialization
       var canvas = document.querySelector("#unity-canvas");
-
-      function resizeCanvas() {
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-          canvas.style.width = "100%";
-          canvas.style.height = "100%";
-          return;
-        }
-
-        var winW = window.innerWidth;
-        var winH = window.innerHeight;
-        var targetRatio = 16 / 9;
-        var currentRatio = winW / winH;
-
-        var w, h;
-        if (currentRatio > targetRatio) {
-          // Screen is wider than 16:9 -> pillarbox (fit height)
-          h = winH;
-          w = h * targetRatio;
-        } else {
-          // Screen is taller than 16:9 (e.g. 16:10 MacBook) -> letterbox (fit width)
-          w = winW;
-          h = w / targetRatio;
-        }
-
-        canvas.style.width = Math.round(w) + "px";
-        canvas.style.height = Math.round(h) + "px";
-      }
-
-      window.addEventListener('resize', resizeCanvas);
-      window.addEventListener('orientationchange', resizeCanvas);
-      document.addEventListener('fullscreenchange', resizeCanvas);
-      document.addEventListener('webkitfullscreenchange', resizeCanvas);
-      document.addEventListener('mozfullscreenchange', resizeCanvas);
-      document.addEventListener('MSFullscreenChange', resizeCanvas);
-      resizeCanvas();
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
@@ -385,7 +347,6 @@
         }).then((unityInstance) => {
           document.querySelector("#unity-loading-bar").style.display = "none";
           unlockAudio();
-          resizeCanvas();
         }).catch((message) => {
           alert(message);
         });
