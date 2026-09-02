@@ -58,6 +58,36 @@ namespace BubbleTeaShop
         public event Action<float> OnBlitzTimerUpdated;
         public event Action<GameDifficulty> OnDifficultyChanged;
 
+        [Header("16:9 Content Root")]
+        [SerializeField] private RectTransform aspectRoot;
+        private int lastScreenWidth = -1;
+        private int lastScreenHeight = -1;
+
+        public void AdjustAspectScale()
+        {
+            if (aspectRoot == null)
+            {
+                GameObject obj = GameObject.Find("16:9");
+                if (obj != null) aspectRoot = obj.GetComponent<RectTransform>();
+            }
+
+            if (aspectRoot == null) return;
+
+            float targetRatio = 16f / 9f;
+            float currentRatio = (float)Screen.width / Mathf.Max(1f, (float)Screen.height);
+
+            // If screen is taller than 16:9 (e.g. 16:10 = 1.6), scale down by delta so sides are never cut off
+            if (currentRatio < targetRatio)
+            {
+                float scale = currentRatio / targetRatio;
+                aspectRoot.localScale = new Vector3(scale, scale, 1f);
+            }
+            else
+            {
+                aspectRoot.localScale = Vector3.one;
+            }
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -71,6 +101,7 @@ namespace BubbleTeaShop
             QualitySettings.vSyncCount = 0;
 
             currentDifficulty = (GameDifficulty)PlayerPrefs.GetInt(PREFS_DIFFICULTY, (int)GameDifficulty.Normal);
+            AdjustAspectScale();
         }
 
         public void SetDifficulty(GameDifficulty difficulty)
@@ -89,6 +120,8 @@ namespace BubbleTeaShop
 
         private void Start()
         {
+            AdjustAspectScale();
+
             // Initialize Day 1 in MorningPrep so the storefront & HUD are ready behind the Title Screen
             StartNewDaySequence();
 
@@ -106,6 +139,13 @@ namespace BubbleTeaShop
 
         private void Update()
         {
+            if (Screen.width != lastScreenWidth || Screen.height != lastScreenHeight)
+            {
+                lastScreenWidth = Screen.width;
+                lastScreenHeight = Screen.height;
+                AdjustAspectScale();
+            }
+
             bool isStorefrontRunning = currentState == GameState.ShopOpen ||
                                        currentState == GameState.CustomerWaiting ||
                                        currentState == GameState.DrinkBrewing ||

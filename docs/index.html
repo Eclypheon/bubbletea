@@ -352,42 +352,16 @@
         var currentRatio = winW / winH;
 
         if (currentRatio < targetRatio) {
-          // Screen is 16:10 or taller: Letterbox with top and bottom black bars
-          var targetH = Math.floor(winW / targetRatio);
-          var barH = Math.max(0, Math.floor((winH - targetH) / 2));
-
-          if (topBar) topBar.style.height = barH + "px";
-          if (bottomBar) bottomBar.style.height = barH + "px";
-
-          if (canvasWrapper) {
-            canvasWrapper.style.width = winW + "px";
-            canvasWrapper.style.height = targetH + "px";
-            canvasWrapper.style.position = "fixed";
-            canvasWrapper.style.top = barH + "px";
-            canvasWrapper.style.left = "0px";
-          }
+          // Screen is 16:10 or taller than 16:9 (e.g. MacBook 16:10):
+          // Shrink canvas by aspect delta to pull clipped left/right edges into view and create top/bottom black bars
+          var scaleDelta = currentRatio / targetRatio;
           if (canvas) {
-            canvas.style.setProperty("width", winW + "px", "important");
-            canvas.style.setProperty("height", targetH + "px", "important");
+            canvas.style.setProperty("transform", "scale(" + scaleDelta + ")", "important");
+            canvas.style.setProperty("transform-origin", "center center", "important");
           }
         } else {
-          // Screen is 16:9 or wider (pillarbox)
-          var targetW = Math.floor(winH * targetRatio);
-          var barW = Math.max(0, Math.floor((winW - targetW) / 2));
-
-          if (topBar) topBar.style.height = "0px";
-          if (bottomBar) bottomBar.style.height = "0px";
-
-          if (canvasWrapper) {
-            canvasWrapper.style.width = targetW + "px";
-            canvasWrapper.style.height = winH + "px";
-            canvasWrapper.style.position = "fixed";
-            canvasWrapper.style.top = "0px";
-            canvasWrapper.style.left = barW + "px";
-          }
           if (canvas) {
-            canvas.style.setProperty("width", targetW + "px", "important");
-            canvas.style.setProperty("height", winH + "px", "important");
+            canvas.style.setProperty("transform", "none", "important");
           }
         }
 
