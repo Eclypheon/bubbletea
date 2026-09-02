@@ -150,27 +150,27 @@ namespace BubbleTeaShop
                 }
             }
 
-            return (float)Math.Round(Mathf.Max(3.50f, basePrice), 2);
+            return (float)(Math.Round(Mathf.Max(3.50f, basePrice) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
         }
 
         public float GetMarketPackPrice(string stockKey)
         {
-            if (stockKey == "Cup") return cupCost * cupPackSize * 1.5f;
+            if (stockKey == "Cup") return (float)(Math.Round((cupCost * cupPackSize * 1.5f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
 
             if (stockKey.StartsWith("Tea_") && Enum.TryParse(stockKey.Substring(4), out TeaBase tea))
             {
-                return (float)Math.Round(GetTeaCost(tea) * ingredientPackSize * 1.6f, 2);
+                return (float)(Math.Round((GetTeaCost(tea) * ingredientPackSize * 1.6f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             }
 
             if (stockKey.StartsWith("Milk_") && Enum.TryParse(stockKey.Substring(5), out MilkType milk))
             {
-                return (float)Math.Round(GetMilkCost(milk) * ingredientPackSize * 1.5f, 2);
+                return (float)(Math.Round((GetMilkCost(milk) * ingredientPackSize * 1.5f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             }
 
             if (stockKey.StartsWith("Topping_") && Enum.TryParse(stockKey.Substring(8), out ToppingType topping))
             {
                 int packSize = (topping == ToppingType.TapiocaPearls) ? tapiocaPackSize : ingredientPackSize;
-                return (float)Math.Round(GetToppingCost(topping) * packSize * 1.6f, 2);
+                return (float)(Math.Round((GetToppingCost(topping) * packSize * 1.6f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             }
 
             return 8.00f;

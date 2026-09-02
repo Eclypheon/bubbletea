@@ -26,6 +26,7 @@ All notable changes to the Yippee Tea project are documented in this file.
 * **Slowness Star Deductions**: If the customer's patience meter drops below 20%, 1 star is deducted for every 5% elapsed (15% patience = 4 stars, 10% = 3 stars, 5% = 2 stars, 0% = 1 star for a perfect order). This slowness deduction stacks cumulatively with recipe mistakes (capped at a 1-star floor).
 * **Calibrated Tips & 90% Patience Threshold**: Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30%. Serving when the patience bar is at or above 90% guarantees the maximum speed bonus (+30%), scaling down linearly only when patience drops below 90%.
 * **Real-Time Order Payout Indicator**: Added a centered HUD panel at the bottom of the screen displaying the financial payout in real-time: **Min** (30% unhappy partial payout), **Current** (exact earnings + tip if served right at that moment with the current cup ingredients and patience), and **Max** (Base Price + full 40% Tip with speed bonus & Lucky Cat upgrade).
+* **10-Cent Financial Rounding**: Calibrated all drink selling prices, customer tips, unhappy partial payouts, wholesale ingredient pack costs, and payout indicator ranges to round cleanly to the nearest $0.10.
 
 ---
 

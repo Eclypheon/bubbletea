@@ -124,7 +124,7 @@ namespace BubbleTeaShop
             // 3+ stars earns full base price, 1-2 stars gives 30% unhappy partial payout
             if (result.stars >= 3)
             {
-                result.earnedMoney = order.basePrice;
+                result.earnedMoney = (float)(Math.Round(order.basePrice * 10.0, MidpointRounding.AwayFromZero) / 10.0);
 
                 // Base tip is 10% of drink price.
                 // Speed bonus is up to +30%: Full +30% tip when patience >= 90%, scaling down linearly below 90%
@@ -139,7 +139,7 @@ namespace BubbleTeaShop
                     {
                         result.tip *= 1.30f;
                     }
-                    result.tip = (float)Math.Round(result.tip, 2);
+                    result.tip = (float)(Math.Round(result.tip * 10.0, MidpointRounding.AwayFromZero) / 10.0);
                 }
                 else
                 {
@@ -148,7 +148,7 @@ namespace BubbleTeaShop
             }
             else
             {
-                result.earnedMoney = (float)Math.Round(order.basePrice * 0.30f, 2); // unhappy partial payout
+                result.earnedMoney = (float)(Math.Round((order.basePrice * 0.30f) * 10.0, MidpointRounding.AwayFromZero) / 10.0); // unhappy partial payout
                 result.tip = 0f;
                 result.feedbackNotes.Add("Customer was unhappy with the order.");
             }

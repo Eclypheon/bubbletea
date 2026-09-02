@@ -941,13 +941,14 @@ namespace BubbleTeaShop
 
             EnsurePayoutIndicatorUI();
 
-            float basePrice = activeDisplayedOrder.basePrice;
-            float minPrice = (float)Math.Round(basePrice * 0.30f, 2);
+            float basePrice = (float)(Math.Round(activeDisplayedOrder.basePrice * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+            float minPrice = (float)(Math.Round((basePrice * 0.30f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
 
             bool hasLuckyCat = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat);
             // Base tip 10% + Max speed tip 30% = 40% tip (multiplied by 1.30 if Lucky Cat upgrade is active)
             float maxTipMultiplier = 0.40f * (hasLuckyCat ? 1.30f : 1.0f);
-            float maxPrice = (float)Math.Round(basePrice * (1.0f + maxTipMultiplier), 2);
+            float maxTip = (float)(Math.Round((basePrice * maxTipMultiplier) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+            float maxPrice = basePrice + maxTip;
 
             // Calculate current payout if served right at this second with the current cup ingredients and patience
             float currentPatience = 1f;
@@ -961,7 +962,7 @@ namespace BubbleTeaShop
             if (cup != null)
             {
                 var eval = cup.Evaluate(activeDisplayedOrder, currentPatience);
-                currentPayout = (float)Math.Round(eval.earnedMoney + eval.tip, 2);
+                currentPayout = (float)(Math.Round((eval.earnedMoney + eval.tip) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             }
 
             if (payoutIndicatorText != null)
