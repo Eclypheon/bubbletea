@@ -63,6 +63,7 @@ namespace BubbleTeaShop
         [SerializeField] private AudioClip grassRustleSound;
         [SerializeField] private AudioClip catchCritterSound;
         [SerializeField] private AudioClip completeSound;
+        [SerializeField] private AudioClip yippeeScurryLoopSound;
 
         public event Action OnBambooGroveClosed;
 
@@ -486,10 +487,20 @@ namespace BubbleTeaShop
 
             EnsureTimerBarUI(container);
 
+            StartCoroutine(SpawnCrittersStaggeredRoutine(spawnWorldPos, countToSpawn, container));
+
+            if (timerCoroutine != null) StopCoroutine(timerCoroutine);
+            timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
+        }
+
+        private IEnumerator SpawnCrittersStaggeredRoutine(Vector3 spawnWorldPos, int countToSpawn, Transform container)
+        {
             for (int i = 0; i < countToSpawn; i++)
             {
+                if (!isGroveOpen) yield break;
+
                 remainingActiveCritters++;
-                GameObject critterObj = new GameObject($"BabyYippee_Wild_{remainingActiveCritters}", typeof(RectTransform), typeof(Image), typeof(Button));
+                GameObject critterObj = new GameObject($"BabyYippee_Wild_{remainingActiveCritters}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(AudioSource));
                 critterObj.transform.SetParent(container, false);
                 critterObj.transform.position = spawnWorldPos;
 
@@ -505,15 +516,30 @@ namespace BubbleTeaShop
                 img.sprite = critterSprite;
                 img.preserveAspect = true;
 
+                // Looping scurry audio per individual Baby Yippee
+                var audioSource = critterObj.GetComponent<AudioSource>();
+                if (audioSource != null && yippeeScurryLoopSound != null)
+                {
+                    audioSource.clip = yippeeScurryLoopSound;
+                    audioSource.loop = true;
+                    audioSource.playOnAwake = false;
+                    audioSource.volume = 0.85f;
+                    audioSource.pitch = UnityEngine.Random.Range(0.95f, 1.05f);
+                    audioSource.Play();
+                }
+
                 var btn = critterObj.GetComponent<Button>();
                 var capturedObj = critterObj;
                 btn.onClick.AddListener(() => OnCritterCaught(capturedObj));
 
                 StartCoroutine(CritterScurryRoutine(rt, img));
-            }
 
-            if (timerCoroutine != null) StopCoroutine(timerCoroutine);
-            timerCoroutine = StartCoroutine(ScurryTimerBarRoutine(scurryDurationSeconds));
+                if (i < countToSpawn - 1)
+                {
+                    float staggerDelay = UnityEngine.Random.Range(0.05f, 0.10f);
+                    yield return new WaitForSeconds(staggerDelay);
+                }
+            }
         }
 
         private void EnsureTimerBarUI(Transform containerParent = null)
@@ -692,6 +718,12 @@ namespace BubbleTeaShop
             // If time ran out and player did not catch, critter burrows away
             if (rt != null)
             {
+                var audioSource = rt.GetComponent<AudioSource>();
+                if (audioSource != null)
+                {
+                    audioSource.Stop();
+                }
+
                 remainingActiveCritters = Mathf.Max(0, remainingActiveCritters - 1);
                 Destroy(rt.gameObject);
                 HUDController.Instance?.ShowNotification("The baby yippees have escaped successfully!", 3f);
@@ -716,6 +748,12 @@ namespace BubbleTeaShop
         private void OnCritterCaught(GameObject critterObj)
         {
             if (critterObj == null) return;
+
+            var audioSource = critterObj.GetComponent<AudioSource>();
+            if (audioSource != null)
+            {
+                audioSource.Stop();
+            }
 
             PlaySound(catchCritterSound);
 
@@ -796,6 +834,8 @@ namespace BubbleTeaShop
                 Transform child = container.GetChild(i);
                 if (child.name.StartsWith("BabyYippee_Wild_") || child.name.StartsWith("CatchPopText"))
                 {
+                    var audio = child.GetComponent<AudioSource>();
+                    if (audio != null) audio.Stop();
                     Destroy(child.gameObject);
                 }
             }
