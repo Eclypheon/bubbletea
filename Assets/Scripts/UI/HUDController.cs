@@ -83,6 +83,10 @@ namespace BubbleTeaShop
                     UpdateDayDisplay(day);
                     UpdateMarketEventDisplay();
                 };
+                DayManager.Instance.OnDayCompleted += (day, sales, tips) =>
+                {
+                    RefreshHUDDisplay();
+                };
                 DayManager.Instance.OnCustomerProgressUpdated += UpdateCustomerCountDisplay;
                 UpdateDayDisplay(DayManager.Instance.CurrentDay);
             }
@@ -612,6 +616,23 @@ namespace BubbleTeaShop
             if (cashText != null) cashText.text = $"${cash:F2}";
         }
 
+        public void RefreshHUDDisplay()
+        {
+            if (DayManager.Instance != null)
+            {
+                int dayToShow = (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.NightPhase)
+                    ? DayManager.Instance.LastCompletedDay
+                    : DayManager.Instance.CurrentDay;
+                UpdateDayDisplay(Mathf.Max(1, dayToShow));
+                UpdateCustomerCountDisplay(DayManager.Instance.CurrentCustomerIndex, DayManager.Instance.TotalCustomersToday);
+            }
+            if (EconomyManager.Instance != null)
+            {
+                UpdateCashDisplay(EconomyManager.Instance.CurrentCash);
+            }
+            UpdateMarketEventDisplay();
+        }
+
         private void UpdateDayDisplay(int day)
         {
             if (dayText != null) dayText.text = $"Day {day}";
@@ -766,7 +787,12 @@ namespace BubbleTeaShop
             }
 
             // HUD details are visible in storefront gameplay and night bedroom hub
-            SetHUDDetailsVisible(state != GameState.GameOver && state != GameState.GameWon);
+            bool showHUD = (state != GameState.GameOver && state != GameState.GameWon);
+            SetHUDDetailsVisible(showHUD);
+            if (showHUD)
+            {
+                RefreshHUDDisplay();
+            }
 
             if (statusHintText == null) return;
 

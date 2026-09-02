@@ -178,6 +178,7 @@ namespace BubbleTeaShop
                 GameManager.Instance.SetState(GameState.NightPhase);
             }
 
+            HUDController.Instance?.RefreshHUDDisplay();
             HUDController.Instance?.ShowNotification("Endless Mode Activated! Weekly rent will now escalate exponentially!", 5f);
         }
 
