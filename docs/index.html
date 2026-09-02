@@ -57,6 +57,28 @@
         background: #12141c;
       }
 
+      /* Native Fullscreen: Add top/bottom black bars on 16:10 screens to preserve 16:9 ratio */
+      canvas:fullscreen,
+      canvas:-webkit-full-screen,
+      canvas:-moz-full-screen,
+      canvas:-ms-fullscreen,
+      #unity-canvas:fullscreen,
+      #unity-canvas:-webkit-full-screen,
+      #unity-canvas:-moz-full-screen,
+      :fullscreen #unity-canvas,
+      :-webkit-full-screen #unity-canvas,
+      :-moz-full-screen #unity-canvas {
+        width: min(100vw, calc(100vh * 16 / 9)) !important;
+        height: min(100vh, calc(100vw * 9 / 16)) !important;
+        position: absolute !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: auto !important;
+        background: #12141c !important;
+      }
+
       /* Mobile: Full-bleed edge-to-edge landscape */
       #unity-container.unity-mobile #unity-canvas {
         width: 100% !important;
