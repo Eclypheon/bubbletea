@@ -905,6 +905,16 @@ namespace BubbleTeaShop
             payoutIndicatorPanel.SetActive(false);
         }
 
+        private DrinkOrder activeDisplayedOrder = null;
+
+        private void Update()
+        {
+            if (activeDisplayedOrder != null)
+            {
+                UpdateOrderPayoutDisplay();
+            }
+        }
+
         public void ShowOrderPayout(DrinkOrder order)
         {
             if (order == null || isSubscreenActive)
@@ -913,9 +923,25 @@ namespace BubbleTeaShop
                 return;
             }
 
+            activeDisplayedOrder = order;
+            EnsurePayoutIndicatorUI();
+            UpdateOrderPayoutDisplay();
+        }
+
+        private void UpdateOrderPayoutDisplay()
+        {
+            if (activeDisplayedOrder == null || isSubscreenActive)
+            {
+                if (payoutIndicatorPanel != null && payoutIndicatorPanel.activeSelf)
+                {
+                    payoutIndicatorPanel.SetActive(false);
+                }
+                return;
+            }
+
             EnsurePayoutIndicatorUI();
 
-            float basePrice = order.basePrice;
+            float basePrice = activeDisplayedOrder.basePrice;
             float minPrice = (float)Math.Round(basePrice * 0.30f, 2);
 
             bool hasLuckyCat = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat);
@@ -923,12 +949,27 @@ namespace BubbleTeaShop
             float maxTipMultiplier = 0.40f * (hasLuckyCat ? 1.30f : 1.0f);
             float maxPrice = (float)Math.Round(basePrice * (1.0f + maxTipMultiplier), 2);
 
-            if (payoutIndicatorText != null)
+            // Calculate current payout if served right at this second with the current cup ingredients and patience
+            float currentPatience = 1f;
+            if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null)
             {
-                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#FFD700>Base: ${basePrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
+                currentPatience = CustomerManager.Instance.CustomerController.PatiencePercent;
             }
 
-            if (payoutIndicatorPanel != null)
+            float currentPayout = minPrice;
+            BubbleTeaCup cup = CupStation.Instance != null ? CupStation.Instance.CurrentCup : null;
+            if (cup != null)
+            {
+                var eval = cup.Evaluate(activeDisplayedOrder, currentPatience);
+                currentPayout = (float)Math.Round(eval.earnedMoney + eval.tip, 2);
+            }
+
+            if (payoutIndicatorText != null)
+            {
+                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#FFD700>Current: ${currentPayout:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
+            }
+
+            if (payoutIndicatorPanel != null && !payoutIndicatorPanel.activeSelf)
             {
                 payoutIndicatorPanel.SetActive(true);
                 payoutIndicatorPanel.transform.SetAsLastSibling();
@@ -937,6 +978,7 @@ namespace BubbleTeaShop
 
         public void HideOrderPayout()
         {
+            activeDisplayedOrder = null;
             if (payoutIndicatorPanel != null)
             {
                 payoutIndicatorPanel.SetActive(false);
