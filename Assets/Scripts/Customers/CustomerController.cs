@@ -596,6 +596,20 @@ namespace BubbleTeaShop
 
         private void OnMentorNextClicked()
         {
+            if (isEndlessGreetingActive)
+            {
+                currentChubiLineIndex++;
+                if (activeChubiLines != null && currentChubiLineIndex < activeChubiLines.Length)
+                {
+                    DisplayCurrentChubiLine();
+                }
+                else
+                {
+                    FinishChubiDialogue();
+                }
+                return;
+            }
+
             if (!isMentorTalking || activeMentorLines == null) return;
 
             currentMentorLineIndex++;
@@ -611,6 +625,20 @@ namespace BubbleTeaShop
 
         private void OnMentorSkipClicked()
         {
+            if (isEndlessGreetingActive)
+            {
+                if (activeChubiLines != null && activeChubiLines.Length > 0)
+                {
+                    currentChubiLineIndex = activeChubiLines.Length - 1;
+                    DisplayCurrentChubiLine();
+                }
+                else
+                {
+                    FinishChubiDialogue();
+                }
+                return;
+            }
+
             if (!isMentorTalking) return;
             FinishMentorDialogue();
         }
@@ -758,6 +786,14 @@ namespace BubbleTeaShop
         private bool isEndlessGreetingActive = false;
         public bool IsEndlessGreetingActive => isEndlessGreetingActive;
 
+        private string[] activeChubiLines = new string[]
+        {
+            "H-hey! Look at you, all proud now that you own the shop...",
+            "How about making your former landlady, Chubi, her usual drink for free? Consider it good will for being such a great landlady, hmph!",
+            "Make me my usual: Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls!"
+        };
+        private int currentChubiLineIndex = 0;
+
         public void SpawnLandlordEndlessGreeting(Action onFinished)
         {
             if (leaveRoutine != null)
@@ -770,6 +806,7 @@ namespace BubbleTeaShop
             isEndlessGreetingActive = true;
             isWaiting = false;
             activeOrder = null;
+            currentChubiLineIndex = 0;
             onLandlordFinished = onFinished;
             rentDiscountedByDrink = false;
             discountedRentAmount = 0f;
@@ -791,13 +828,55 @@ namespace BubbleTeaShop
             if (payRentButton != null) payRentButton.gameObject.SetActive(false);
             if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
 
-            if (speechBubble != null)
-            {
-                speechBubble.ShowMessage("H-hey! Look at you, all proud now that you own the shop... How about making your former landlady, Chubi, her usual drink for free? You know: Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls! Consider it good will for being such a great landlady, hmph!");
-            }
+            EnsureMentorNavUI();
+            DisplayCurrentChubiLine();
 
             HUDController.Instance?.SetStatusHint("Chubi has arrived for a friendly visit! Prepare her usual drink for free out of goodwill.");
             HUDController.Instance?.ShowNotification("Chubi is visiting! Serve her usual drink for free.", 4.5f);
+        }
+
+        private void DisplayCurrentChubiLine()
+        {
+            if (activeChubiLines == null || activeChubiLines.Length == 0 || currentChubiLineIndex < 0 || currentChubiLineIndex >= activeChubiLines.Length)
+            {
+                FinishChubiDialogue();
+                return;
+            }
+
+            if (mentorNavPanel != null)
+            {
+                mentorNavPanel.SetActive(true);
+                mentorNavPanel.transform.SetAsLastSibling();
+                UpdateMentorNavPosition();
+            }
+
+            string line = activeChubiLines[currentChubiLineIndex];
+            if (speechBubble != null && !string.IsNullOrEmpty(line))
+            {
+                speechBubble.ShowMessage(line);
+            }
+
+            bool isLastLine = (currentChubiLineIndex == activeChubiLines.Length - 1);
+            if (mentorNextButtonText != null)
+            {
+                mentorNextButtonText.text = isLastLine ? "Got it! >" : "Next >";
+            }
+        }
+
+        private void FinishChubiDialogue()
+        {
+            if (mentorNavPanel != null)
+            {
+                mentorNavPanel.SetActive(false);
+            }
+
+            // Ensure last line with recipe remains displayed in speech bubble
+            if (activeChubiLines != null && activeChubiLines.Length > 0 && speechBubble != null)
+            {
+                speechBubble.ShowMessage(activeChubiLines[activeChubiLines.Length - 1]);
+            }
+
+            HUDController.Instance?.SetStatusHint("Chubi is waiting! Prepare her usual drink for free out of goodwill.");
         }
 
         public void ReceiveLandlordDrink(BubbleTeaCup cup)
