@@ -180,7 +180,6 @@ namespace BubbleTeaShop
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
                 CustomerManager.Instance.CustomerController.ReceiveLandlordDrink(currentCup);
-                OrderTicketUI.Instance?.HideTicket();
                 if (serveSound != null) AudioManager.Instance?.PlaySFX(serveSound);
                 currentCup.hasCup = false;
                 UpdateVisuals();
@@ -189,13 +188,22 @@ namespace BubbleTeaShop
             }
             else if (CustomerManager.Instance != null && CustomerManager.Instance.HasCustomerAtWindow)
             {
-                CustomerManager.Instance.ServeCurrentCustomer(currentCup);
-                OrderTicketUI.Instance?.HideTicket();
                 if (serveSound != null) AudioManager.Instance?.PlaySFX(serveSound);
                 currentCup.hasCup = false;
                 UpdateVisuals();
-                // Prepare next empty cup
-                Invoke(nameof(SpawnNewCup), 0.5f);
+
+                // Serve customer (in Blitz Mode, this immediately spawns the next customer and shows their ticket)
+                CustomerManager.Instance.ServeCurrentCustomer(currentCup);
+
+                // Prepare next empty cup (instant in Blitz Mode, 0.5s in Normal Mode)
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    SpawnNewCup();
+                }
+                else
+                {
+                    Invoke(nameof(SpawnNewCup), 0.5f);
+                }
             }
             else
             {

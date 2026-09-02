@@ -101,6 +101,13 @@ namespace BubbleTeaShop
         {
             if (state == GameState.ShopOpen)
             {
+                // In Blitz mode, skip mentor briefings and landlady cutscenes
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    HUDController.Instance?.SetStatusHint("BLITZ MODE: Serve as many drinks as possible before time runs out!");
+                    return;
+                }
+
                 int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
                 bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
 
@@ -138,7 +145,8 @@ namespace BubbleTeaShop
             awaitingDismissalConfirmation = false;
             rentEncounterTriggeredToday = false;
             hasTriggeredDay4EventBriefing = false;
-            int count = DayManager.Instance != null ? DayManager.Instance.TotalCustomersToday : 5;
+
+            int count = (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) ? 100 : (DayManager.Instance != null ? DayManager.Instance.TotalCustomersToday : 5);
 
             for (int i = 0; i < count; i++)
             {
@@ -210,9 +218,20 @@ namespace BubbleTeaShop
             awaitingDismissalConfirmation = false;
             if (dailyCustomerQueue.Count == 0)
             {
-                Debug.Log("No more customers in line today!");
-                CheckRemainingCustomers();
-                return false;
+                // In Blitz mode, replenish queue continuously so customers never run out
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    for (int i = 0; i < 20; i++)
+                    {
+                        dailyCustomerQueue.Enqueue(GenerateRandomOrder());
+                    }
+                }
+                else
+                {
+                    Debug.Log("No more customers in line today!");
+                    CheckRemainingCustomers();
+                    return false;
+                }
             }
 
             DrinkOrder nextOrder = dailyCustomerQueue.Dequeue();
@@ -232,6 +251,13 @@ namespace BubbleTeaShop
             if (HasCustomerAtWindow)
             {
                 customerController.ReceiveDrink(cup);
+
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    // Blitz mode customer transition is handled immediately inside HandleCustomerFinished / ReceiveDrink
+                    return;
+                }
+
                 // If more customers remain in queue, allow ringing bell while current customer leaves
                 if (dailyCustomerQueue.Count > 0)
                 {
@@ -242,11 +268,25 @@ namespace BubbleTeaShop
 
         private void HandleCustomerFinished(CustomerController customer, EvaluationResult result)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode && GameManager.Instance.BlitzTimeRemaining > 0f)
+            {
+                customerController?.DismissCustomer();
+                SpawnNextInQueue();
+                return;
+            }
+
             CheckRemainingCustomers();
         }
 
         private void HandleCustomerFinishedAngry(CustomerController customer)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode && GameManager.Instance.BlitzTimeRemaining > 0f)
+            {
+                customerController?.DismissCustomer();
+                SpawnNextInQueue();
+                return;
+            }
+
             CheckRemainingCustomers();
         }
 
@@ -415,6 +455,11 @@ namespace BubbleTeaShop
             order.archetype = archetype;
 
             int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
+            if (isBlitz)
+            {
+                currentDay = 22; // Always follow Week 4 gourmet order distribution
+            }
 
             // 1. Day Progression: Day 1 & Day 2 Funnel vs Progressive Day 3+ Difficulty
             if (currentDay == 1)

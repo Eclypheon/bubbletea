@@ -17,13 +17,19 @@ namespace BubbleTeaShop
 
         private void CheckVisibility()
         {
-            if (DayManager.Instance == null) return;
-            bool isVisible = DayManager.Instance.CurrentDay > 2;
+            bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
+            bool isVisible = isBlitz || (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser) || (DayManager.Instance != null && DayManager.Instance.CurrentDay > 2);
 
             var graphics = GetComponentsInChildren<Graphic>(true);
             foreach (var g in graphics)
             {
                 g.enabled = isVisible;
+            }
+
+            var buttons = GetComponentsInChildren<Button>(true);
+            foreach (var b in buttons)
+            {
+                b.interactable = isVisible;
             }
         }
     }

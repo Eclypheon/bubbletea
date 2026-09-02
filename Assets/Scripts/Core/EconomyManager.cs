@@ -33,6 +33,11 @@ namespace BubbleTeaShop
             set => isEndlessMode = value;
         }
 
+        public void SetEndlessMode(bool active)
+        {
+            isEndlessMode = active;
+        }
+
         public event Action<float> OnCashChanged;
         public event Action<float, string> OnTransactionOccurred; // amount, description
         public event Action<float, int> OnRentPaid;

@@ -259,6 +259,35 @@ namespace BubbleTeaShop
                 int completedDay = DayManager.Instance != null ? DayManager.Instance.LastCompletedDay : 1;
                 int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
 
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    if (tabMarketButton != null) tabMarketButton.gameObject.SetActive(false);
+                    if (tabForagingButton != null) tabForagingButton.gameObject.SetActive(false);
+                    if (tabUpgradesButton != null) tabUpgradesButton.gameObject.SetActive(false);
+                    if (tabLedgerButton != null) tabLedgerButton.gameObject.SetActive(false);
+                    if (prepAreaButton != null) prepAreaButton.gameObject.SetActive(false);
+
+                    if (marketTabPanel != null) marketTabPanel.SetActive(false);
+                    if (foragingTabPanel != null) foragingTabPanel.SetActive(false);
+                    if (upgradesTabPanel != null) upgradesTabPanel.SetActive(false);
+                    if (ledgerTabPanel != null) ledgerTabPanel.SetActive(true);
+
+                    if (sleepButton != null)
+                    {
+                        sleepButton.gameObject.SetActive(true);
+                        sleepButton.interactable = true;
+                    }
+
+                    UpdateLedger();
+                    return;
+                }
+
+                // Normal Mode setup
+                if (tabMarketButton != null) tabMarketButton.gameObject.SetActive(true);
+                if (tabForagingButton != null) tabForagingButton.gameObject.SetActive(true);
+                if (tabUpgradesButton != null) tabUpgradesButton.gameObject.SetActive(true);
+                if (tabLedgerButton != null) tabLedgerButton.gameObject.SetActive(true);
+
                 if (lastDeductedDay != completedDay)
                 {
                     lastDeductedDay = completedDay;

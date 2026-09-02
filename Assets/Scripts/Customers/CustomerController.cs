@@ -151,6 +151,12 @@ namespace BubbleTeaShop
             activeOrder = order;
             maxPatience = patience;
             
+            // Apply difficulty patience multiplier (Normal Mode only; in Blitz, patience is bypassed)
+            if (GameManager.Instance != null && !GameManager.Instance.IsBlitzMode)
+            {
+                maxPatience *= GameManager.Instance.DifficultyPatienceMultiplier;
+            }
+
             // If Cozy Decor upgrade is active, grant +20% extra patience
             if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.CozyDecor))
             {
@@ -239,6 +245,14 @@ namespace BubbleTeaShop
 
             DayManager.Instance?.RecordCustomerServed(evaluation.earnedMoney, evaluation.tip);
 
+            // Blitz Mode: Instant customer rotation with zero dialogue delay
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+            {
+                DismissCustomer();
+                OnCustomerServed?.Invoke(this, evaluation);
+                return;
+            }
+
             string reactionLine = GetReactionLine(evaluation.stars);
             if (speechBubble != null)
             {
@@ -262,6 +276,16 @@ namespace BubbleTeaShop
                 OrderTicketUI.Instance?.HideTicket();
                 HUDController.Instance?.HideOrderPayout();
                 DayManager.Instance?.RecordCustomerSkipped();
+
+                // Blitz Mode: Instant skip without angry reaction delay
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    DismissCustomer();
+                    OnCustomerLeftAngry?.Invoke(this);
+                    onFinished?.Invoke();
+                    return;
+                }
+
                 string angryLine = GetAngrySkipLine(activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
                 if (speechBubble != null)
                 {

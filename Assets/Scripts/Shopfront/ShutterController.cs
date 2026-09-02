@@ -26,11 +26,23 @@ namespace BubbleTeaShop
         private Coroutine leverFlipRoutine;
         private Coroutine attentionWiggleRoutine;
 
+        public static ShutterController Instance { get; private set; }
+
         public bool IsOpen => isOpen;
         public bool IsMoving => isMoving;
 
         public event Action OnShutterOpened;
         public event Action OnShutterClosed;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -150,8 +162,10 @@ namespace BubbleTeaShop
                     return;
                 }
 
-                // 3. Normal closing condition
-                if (DayManager.Instance.IsDayFinished || GameManager.Instance.CurrentState == GameState.ShopClosing)
+                // 3. Normal / Blitz closing condition
+                bool isBlitzFinished = GameManager.Instance != null && GameManager.Instance.IsBlitzMode && (GameManager.Instance.BlitzTimeRemaining <= 0f || DayManager.Instance.IsDayFinished);
+
+                if (DayManager.Instance.IsDayFinished || GameManager.Instance.CurrentState == GameState.ShopClosing || isBlitzFinished)
                 {
                     StartCoroutine(MoveShutterRoutine(openPosY, closedPosY, false));
                 }
@@ -167,6 +181,20 @@ namespace BubbleTeaShop
                 {
                     StartCoroutine(MoveShutterRoutine(closedPosY, openPosY, true));
                 }
+            }
+        }
+
+        public void ForceCloseShutter()
+        {
+            StopAttentionWiggle();
+            if (isOpen && !isMoving)
+            {
+                AnimateLeverFlip();
+                if (leverSound != null)
+                {
+                    AudioManager.Instance?.PlaySFX(leverSound);
+                }
+                StartCoroutine(MoveShutterRoutine(openPosY, closedPosY, false));
             }
         }
 

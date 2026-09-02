@@ -150,7 +150,13 @@ namespace BubbleTeaShop
                 }
             }
 
-            return (float)(Math.Round(Mathf.Max(3.50f, basePrice) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+            // Apply difficulty price multiplier
+            if (GameManager.Instance != null)
+            {
+                basePrice *= GameManager.Instance.DifficultyPriceMultiplier;
+            }
+
+            return (float)(Math.Round(Mathf.Max(3.00f, basePrice) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
         }
 
         public float GetMarketPackPrice(string stockKey)

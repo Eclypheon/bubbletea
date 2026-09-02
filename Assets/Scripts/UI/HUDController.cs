@@ -43,6 +43,16 @@ namespace BubbleTeaShop
         [Header("Floating Cash Gain Delta")]
         [SerializeField] private TextMeshProUGUI cashGainDeltaText;
 
+        [Header("Blitz Mode Duration Bar & Timer")]
+        [Tooltip("Root panel for the Blitz Mode duration bar and timer (anchored at bottom center).")]
+        [SerializeField] private GameObject blitzTimerPanel;
+        [Tooltip("Filled Image component that depletes horizontally as the 30s countdown ticks down.")]
+        [SerializeField] private Image blitzTimerFillImage;
+        [Tooltip("Background Image track for the duration bar.")]
+        [SerializeField] private Image blitzTimerBackgroundImage;
+        [Tooltip("TextMeshProUGUI label displaying the countdown time.")]
+        [SerializeField] private TextMeshProUGUI blitzTimerText;
+
         public GameObject PayoutIndicatorPanel
         {
             get => payoutIndicatorPanel;
@@ -59,6 +69,30 @@ namespace BubbleTeaShop
         {
             get => cashGainDeltaText;
             set => cashGainDeltaText = value;
+        }
+
+        public GameObject BlitzTimerPanel
+        {
+            get => blitzTimerPanel;
+            set => blitzTimerPanel = value;
+        }
+
+        public Image BlitzTimerFillImage
+        {
+            get => blitzTimerFillImage;
+            set => blitzTimerFillImage = value;
+        }
+
+        public Image BlitzTimerBackgroundImage
+        {
+            get => blitzTimerBackgroundImage;
+            set => blitzTimerBackgroundImage = value;
+        }
+
+        public TextMeshProUGUI BlitzTimerText
+        {
+            get => blitzTimerText;
+            set => blitzTimerText = value;
         }
 
         private Coroutine notificationRoutine;
@@ -685,7 +719,196 @@ namespace BubbleTeaShop
         {
             if (customerCountText != null)
             {
-                customerCountText.text = $"Customer: {current}/{total}";
+                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                {
+                    int served = DayManager.Instance != null ? DayManager.Instance.CustomersServedToday : 0;
+                    customerCountText.text = $"Served: {served}";
+                }
+                else
+                {
+                    customerCountText.text = $"Customer: {current}/{total}";
+                }
+            }
+        }
+
+        private static Sprite whiteFillSprite = null;
+        private static Sprite GetWhiteFillSprite()
+        {
+            if (whiteFillSprite == null)
+            {
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                Color[] colors = new Color[] { Color.white, Color.white, Color.white, Color.white };
+                tex.SetPixels(colors);
+                tex.Apply();
+                whiteFillSprite = Sprite.Create(tex, new Rect(0, 0, 2, 2), new Vector2(0.5f, 0.5f));
+            }
+            return whiteFillSprite;
+        }
+
+        public void EnsureBlitzTimerUI()
+        {
+            if (blitzTimerPanel != null && blitzTimerFillImage != null && blitzTimerText != null) return;
+
+            Canvas rootCanvas = GetComponentInParent<Canvas>();
+            Transform targetParent = rootCanvas != null ? rootCanvas.transform : transform;
+
+            // 1. Root Panel at bottom of screen
+            if (blitzTimerPanel == null)
+            {
+                Transform existing = targetParent.Find("BlitzTimerDurationBarPanel") ?? targetParent.Find("BlitzTimerPanel");
+                if (existing != null)
+                {
+                    blitzTimerPanel = existing.gameObject;
+                }
+                else
+                {
+                    blitzTimerPanel = new GameObject("BlitzTimerDurationBarPanel", typeof(RectTransform), typeof(Image));
+                    blitzTimerPanel.transform.SetParent(targetParent, false);
+
+                    var panelRt = blitzTimerPanel.GetComponent<RectTransform>();
+                    panelRt.anchorMin = new Vector2(0.5f, 0f);
+                    panelRt.anchorMax = new Vector2(0.5f, 0f);
+                    panelRt.pivot = new Vector2(0.5f, 0f);
+                    panelRt.anchoredPosition = new Vector2(0f, 20f);
+                    panelRt.sizeDelta = new Vector2(580f, 36f);
+
+                    blitzTimerBackgroundImage = blitzTimerPanel.GetComponent<Image>();
+                    blitzTimerBackgroundImage.color = new Color(0.06f, 0.06f, 0.10f, 0.92f);
+                    blitzTimerBackgroundImage.raycastTarget = false;
+                }
+            }
+
+            // 2. Depleting Fill Image
+            if (blitzTimerFillImage == null && blitzTimerPanel != null)
+            {
+                Transform fillObj = blitzTimerPanel.transform.Find("FillImage");
+                if (fillObj != null && fillObj.TryGetComponent<Image>(out var foundFill))
+                {
+                    blitzTimerFillImage = foundFill;
+                }
+                else
+                {
+                    GameObject fillGo = new GameObject("FillImage", typeof(RectTransform), typeof(Image));
+                    fillGo.transform.SetParent(blitzTimerPanel.transform, false);
+
+                    var fillRt = fillGo.GetComponent<RectTransform>();
+                    fillRt.anchorMin = Vector2.zero;
+                    fillRt.anchorMax = Vector2.one;
+                    fillRt.offsetMin = new Vector2(4f, 4f);
+                    fillRt.offsetMax = new Vector2(-4f, -4f);
+
+                    blitzTimerFillImage = fillGo.GetComponent<Image>();
+                    blitzTimerFillImage.sprite = GetWhiteFillSprite();
+                    blitzTimerFillImage.type = Image.Type.Filled;
+                    blitzTimerFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    blitzTimerFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    blitzTimerFillImage.color = new Color(0.18f, 0.80f, 0.44f, 0.95f);
+                    blitzTimerFillImage.raycastTarget = false;
+                }
+            }
+
+            // 3. Countdown Text Label centered inside bar
+            if (blitzTimerText == null && blitzTimerPanel != null)
+            {
+                Transform textObj = blitzTimerPanel.transform.Find("TimerText");
+                if (textObj != null && textObj.TryGetComponent<TextMeshProUGUI>(out var foundText))
+                {
+                    blitzTimerText = foundText;
+                }
+                else
+                {
+                    GameObject textGo = new GameObject("TimerText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                    textGo.transform.SetParent(blitzTimerPanel.transform, false);
+
+                    var textRt = textGo.GetComponent<RectTransform>();
+                    textRt.anchorMin = Vector2.zero;
+                    textRt.anchorMax = Vector2.one;
+                    textRt.offsetMin = Vector2.zero;
+                    textRt.offsetMax = Vector2.zero;
+
+                    blitzTimerText = textGo.GetComponent<TextMeshProUGUI>();
+                    blitzTimerText.fontSize = 20;
+                    blitzTimerText.fontStyle = FontStyles.Bold;
+                    blitzTimerText.alignment = TextAlignmentOptions.Center;
+                    blitzTimerText.color = Color.white;
+                    blitzTimerText.raycastTarget = false;
+                }
+            }
+
+            if (blitzTimerPanel != null)
+            {
+                blitzTimerPanel.SetActive(false);
+            }
+        }
+
+        public void UpdateBlitzTimer(float secondsRemaining)
+        {
+            if (GameManager.Instance == null || !GameManager.Instance.IsBlitzMode)
+            {
+                if (blitzTimerPanel != null) blitzTimerPanel.SetActive(false);
+                return;
+            }
+
+            EnsureBlitzTimerUI();
+            if (blitzTimerPanel == null) return;
+
+            bool isStorefrontOpen = GameManager.Instance.CurrentState == GameState.ShopOpen ||
+                                    GameManager.Instance.CurrentState == GameState.CustomerWaiting ||
+                                    GameManager.Instance.CurrentState == GameState.DrinkBrewing ||
+                                    GameManager.Instance.CurrentState == GameState.CustomerReacting;
+
+            blitzTimerPanel.SetActive(isStorefrontOpen && !isSubscreenActive);
+
+            float totalDuration = GameManager.DefaultBlitzDayDuration;
+            float fillRatio = Mathf.Clamp01(secondsRemaining / totalDuration);
+
+            // 1. Update horizontal depletion fill
+            if (blitzTimerFillImage != null)
+            {
+                blitzTimerFillImage.fillAmount = fillRatio;
+
+                // Dynamic gradient color: Green (>25s) -> Gold (10-25s) -> Red (<=10s)
+                if (secondsRemaining > 25f)
+                {
+                    float t = Mathf.Clamp01((secondsRemaining - 25f) / 35f);
+                    blitzTimerFillImage.color = Color.Lerp(new Color(1f, 0.84f, 0f, 0.95f), new Color(0.18f, 0.80f, 0.44f, 0.95f), t);
+                }
+                else if (secondsRemaining > 10f)
+                {
+                    float t = Mathf.Clamp01((secondsRemaining - 10f) / 15f);
+                    blitzTimerFillImage.color = Color.Lerp(new Color(1f, 0.28f, 0.28f, 0.95f), new Color(1f, 0.84f, 0f, 0.95f), t);
+                }
+                else
+                {
+                    // Urgency pulse when under 10 seconds (faster pulse under 5s)
+                    float freq = (secondsRemaining <= 5f) ? 12f : 6f;
+                    float pulse = 0.82f + 0.18f * Mathf.Sin(Time.unscaledTime * freq);
+                    blitzTimerFillImage.color = new Color(1f, 0.20f, 0.20f, pulse);
+                }
+            }
+
+            // 2. Update Countdown Text
+            if (blitzTimerText != null)
+            {
+                int sec = Mathf.CeilToInt(secondsRemaining);
+                if (secondsRemaining <= 0f)
+                {
+                    blitzTimerText.text = "<color=#FF4D4D><b>TIME'S UP!</b></color>";
+                }
+                else if (secondsRemaining <= 5f)
+                {
+                    blitzTimerText.text = $"<color=#FFFFFF><b>HURRY! {secondsRemaining:F1}s</b></color>";
+                }
+                else
+                {
+                    blitzTimerText.text = $"TIME REMAINING: {sec:D2}s";
+                }
+            }
+
+            if (customerCountText != null)
+            {
+                int served = DayManager.Instance != null ? DayManager.Instance.CustomersServedToday : 0;
+                customerCountText.text = $"Served: {served}";
             }
         }
 
@@ -723,6 +946,12 @@ namespace BubbleTeaShop
             if (transform.parent != null)
             {
                 transform.SetAsLastSibling();
+
+                // If Title Screen is active, keep Title Screen on top of HUD
+                if (TitleScreenController.Instance != null && TitleScreenController.Instance.IsTitleScreenActive)
+                {
+                    TitleScreenController.Instance.BringToFront();
+                }
             }
         }
 

@@ -149,47 +149,102 @@ namespace BubbleTeaShop
 
             if (state == GameState.GameOver)
             {
-                ClearConfetti();
+                bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
+                int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+
                 if (modalRoot != null) modalRoot.SetActive(true);
-                if (titleText != null) titleText.text = "<color=#FF4444>EVICTION NOTICE</color>";
-                if (messageText != null) messageText.text = "You were unable to afford weekly rent. The landlord has locked the shutters and taken over the shop.";
 
-                if (restartButton != null)
+                if (isBlitz)
                 {
-                    restartButton.gameObject.SetActive(true);
-                    var rt = restartButton.GetComponent<RectTransform>();
-                    if (rt != null) rt.anchoredPosition = new Vector2(0f, -120f);
-                    var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
-                    if (txt != null) txt.text = "Try Again";
+                    // Blitz Mode Eviction milestone celebration
+                    if (titleText != null) titleText.text = "<color=#FFD700>BLITZ RUN COMPLETE!</color>";
+                    if (messageText != null) messageText.text = $"You made it to Day {currentDay}! Congratulations!";
+
+                    if (restartButton != null)
+                    {
+                        restartButton.gameObject.SetActive(true);
+                        var rt = restartButton.GetComponent<RectTransform>();
+                        if (rt != null) rt.anchoredPosition = new Vector2(0f, -120f);
+                        var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
+                        if (txt != null) txt.text = "Play Again";
+                    }
+
+                    if (endlessModeButton != null)
+                    {
+                        endlessModeButton.gameObject.SetActive(false);
+                    }
+
+                    PlaySound(victorySound);
+                    TriggerConfettiExplosion();
                 }
-
-                if (endlessModeButton != null)
+                else
                 {
-                    endlessModeButton.gameObject.SetActive(false);
+                    ClearConfetti();
+                    if (titleText != null) titleText.text = "<color=#FF4444>EVICTION NOTICE</color>";
+                    if (messageText != null) messageText.text = "You were unable to afford weekly rent. The landlord has locked the shutters and taken over the shop.";
+
+                    if (restartButton != null)
+                    {
+                        restartButton.gameObject.SetActive(true);
+                        var rt = restartButton.GetComponent<RectTransform>();
+                        if (rt != null) rt.anchoredPosition = new Vector2(0f, -120f);
+                        var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
+                        if (txt != null) txt.text = "Try Again";
+                    }
+
+                    if (endlessModeButton != null)
+                    {
+                        endlessModeButton.gameObject.SetActive(false);
+                    }
                 }
             }
             else if (state == GameState.GameWon)
             {
+                bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
                 if (modalRoot != null) modalRoot.SetActive(true);
-                if (titleText != null) titleText.text = "<color=#FFD700>LOCATION BOUGHT OVER!</color>";
-                if (messageText != null) messageText.text = "Congratulations! You earned enough through brewing and selling bubble tea to buy the deed to the building! The shop is forever yours!\n\n<size=80%><color=#A8E6CF>You can now continue in <b>Endless Mode</b> with weekly exponential rent escalation!</color></size>";
 
-                if (restartButton != null)
+                if (isBlitz)
                 {
-                    restartButton.gameObject.SetActive(true);
-                    var rt = restartButton.GetComponent<RectTransform>();
-                    if (rt != null) rt.anchoredPosition = new Vector2(-250f, -250f);
-                    var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
-                    if (txt != null) txt.text = "Play Again";
+                    int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+                    if (titleText != null) titleText.text = "<color=#FFD700>BLITZ RUN COMPLETE!</color>";
+                    if (messageText != null) messageText.text = $"You made it to Day {currentDay}! Congratulations!";
+
+                    if (restartButton != null)
+                    {
+                        restartButton.gameObject.SetActive(true);
+                        var rt = restartButton.GetComponent<RectTransform>();
+                        if (rt != null) rt.anchoredPosition = new Vector2(0f, -120f);
+                        var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
+                        if (txt != null) txt.text = "Play Again";
+                    }
+
+                    if (endlessModeButton != null)
+                    {
+                        endlessModeButton.gameObject.SetActive(false);
+                    }
                 }
-
-                if (endlessModeButton != null)
+                else
                 {
-                    endlessModeButton.gameObject.SetActive(true);
-                    var rt = endlessModeButton.GetComponent<RectTransform>();
-                    if (rt != null) rt.anchoredPosition = new Vector2(200f, -250f);
-                    var txt = endlessModeButton.GetComponentInChildren<TextMeshProUGUI>();
-                    if (txt != null) txt.text = "Endless Mode";
+                    if (titleText != null) titleText.text = "<color=#FFD700>LOCATION BOUGHT OVER!</color>";
+                    if (messageText != null) messageText.text = "Congratulations! You earned enough through brewing and selling bubble tea to buy the deed to the building! The shop is forever yours!\n\n<size=80%><color=#A8E6CF>You can now continue in <b>Endless Mode</b> with weekly exponential rent escalation!</color></size>";
+
+                    if (restartButton != null)
+                    {
+                        restartButton.gameObject.SetActive(true);
+                        var rt = restartButton.GetComponent<RectTransform>();
+                        if (rt != null) rt.anchoredPosition = new Vector2(-250f, -250f);
+                        var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
+                        if (txt != null) txt.text = "Play Again";
+                    }
+
+                    if (endlessModeButton != null)
+                    {
+                        endlessModeButton.gameObject.SetActive(true);
+                        var rt = endlessModeButton.GetComponent<RectTransform>();
+                        if (rt != null) rt.anchoredPosition = new Vector2(200f, -250f);
+                        var txt = endlessModeButton.GetComponentInChildren<TextMeshProUGUI>();
+                        if (txt != null) txt.text = "Endless Mode";
+                    }
                 }
 
                 PlaySound(victorySound);

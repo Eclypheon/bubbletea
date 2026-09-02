@@ -162,6 +162,11 @@ namespace BubbleTeaShop
 
         public bool HasUpgrade(UpgradeType type)
         {
+            if (type == UpgradeType.ImproveStoreAmbience && GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+            {
+                return true;
+            }
+
             var u = availableUpgrades.Find(x => x.type == type);
             return u != null && u.isPurchased;
         }

@@ -10,10 +10,28 @@ namespace BubbleTeaShop
     {
         public static CashRegisterInventoryUI Instance { get; private set; }
 
+        public enum InventoryTab
+        {
+            Items,
+            Upgrades
+        }
+
         [Header("UI Panels")]
         [SerializeField] private GameObject inventoryModalPanel;
         [SerializeField] private Button cashRegisterButton;
         [SerializeField] private Button closeButton;
+
+        [Header("Tab Navigation")]
+        [Tooltip("Button that toggles between Items (Stock) and Upgrades tab. Wire this in Inspector!")]
+        [SerializeField] private Button tabToggleButton;
+        [SerializeField] private TextMeshProUGUI tabToggleText;
+        [SerializeField] private GameObject itemsTabPanel;
+        [SerializeField] private GameObject upgradesTabPanel;
+        [SerializeField] private Transform upgradesScrollContainer;
+
+        [Header("Testing & Cheats")]
+        [Tooltip("When enabled, allows toggling the Upgrades tab even before Day 8 (useful for testing).")]
+        [SerializeField] private bool bypassDayRequirementForTesting = false;
 
         [Header("Display Text (Fallbacks)")]
         [SerializeField] private TextMeshProUGUI cashBalanceText;
@@ -42,6 +60,22 @@ namespace BubbleTeaShop
         [Header("Audio")]
         [SerializeField] private AudioClip registerChimeSound;
 
+        private InventoryTab currentTab = InventoryTab.Items;
+        private int lastToggleFrame = -1;
+
+        public InventoryTab CurrentTab => currentTab;
+        public Button TabToggleButton => tabToggleButton;
+        public GameObject UpgradesTabPanel => upgradesTabPanel;
+        public GameObject ItemsTabPanel => itemsTabPanel;
+
+        public bool IsUpgradesUnlocked()
+        {
+            if (bypassDayRequirementForTesting) return true;
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) return false;
+            int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
+            return day >= 8;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -62,6 +96,8 @@ namespace BubbleTeaShop
             {
                 closeButton.onClick.AddListener(CloseInventoryModal);
             }
+
+            EnsureTabsUI();
 
             if (inventoryModalPanel != null)
             {
@@ -105,6 +141,256 @@ namespace BubbleTeaShop
             return icon;
         }
 
+        public void EnsureTabsUI()
+        {
+            Transform modalRoot = inventoryModalPanel != null ? inventoryModalPanel.transform : transform;
+
+            // 1. Auto-discover Tab Toggle Button if unassigned
+            if (tabToggleButton == null)
+            {
+                tabToggleButton = FindButtonInChildren(modalRoot, "TabToggleButton", "UpgradesButton", "TabSwitchButton", "UpgradeTabBtn", "TabButton", "ToggleTabBtn", "UpgradesBtn", "ToggleBtn", "Upgrades", "Upgrade");
+            }
+
+            if (tabToggleButton != null && tabToggleText == null)
+            {
+                tabToggleText = tabToggleButton.GetComponentInChildren<TextMeshProUGUI>(true);
+            }
+
+            if (tabToggleButton != null)
+            {
+                tabToggleButton.onClick.RemoveListener(ToggleTab);
+                if (tabToggleButton.onClick.GetPersistentEventCount() == 0)
+                {
+                    tabToggleButton.onClick.AddListener(ToggleTab);
+                }
+            }
+
+            // 2. Auto-discover itemsTabPanel
+            if (itemsTabPanel == null)
+            {
+                Transform found = modalRoot.Find("ItemsTabPanel") ?? modalRoot.Find("ItemsPanel") ?? modalRoot.Find("StockPanel");
+                if (found != null)
+                {
+                    itemsTabPanel = found.gameObject;
+                }
+                else if (inventoryCardsContainer != null)
+                {
+                    itemsTabPanel = inventoryCardsContainer.gameObject;
+                }
+            }
+
+            // 3. Auto-discover or dynamically create upgradesTabPanel
+            if (upgradesTabPanel == null)
+            {
+                Transform found = modalRoot.Find("UpgradesTabPanel") ?? modalRoot.Find("UpgradesPanel");
+                if (found != null)
+                {
+                    upgradesTabPanel = found.gameObject;
+                    upgradesScrollContainer = found.Find("ScrollView/Viewport/Content") ??
+                                             found.Find("Scroll View/Viewport/Content") ??
+                                             found.Find("Viewport/Content") ??
+                                             found.Find("Content") ?? found;
+                }
+                else
+                {
+                    // Create dynamic upgrades tab panel matching inventoryCardsContainer's layout
+                    upgradesTabPanel = new GameObject("UpgradesTabPanel", typeof(RectTransform));
+                    Transform parent = itemsTabPanel != null ? itemsTabPanel.transform.parent : modalRoot;
+                    upgradesTabPanel.transform.SetParent(parent, false);
+
+                    var upgRt = upgradesTabPanel.GetComponent<RectTransform>();
+                    if (inventoryCardsContainer != null && inventoryCardsContainer.TryGetComponent<RectTransform>(out var cardsRt))
+                    {
+                        upgRt.anchorMin = cardsRt.anchorMin;
+                        upgRt.anchorMax = cardsRt.anchorMax;
+                        upgRt.pivot = cardsRt.pivot;
+                        upgRt.anchoredPosition = cardsRt.anchoredPosition;
+                        upgRt.sizeDelta = cardsRt.sizeDelta;
+                    }
+                    else
+                    {
+                        upgRt.anchorMin = new Vector2(0.5f, 0.5f);
+                        upgRt.anchorMax = new Vector2(0.5f, 0.5f);
+                        upgRt.pivot = new Vector2(0.5f, 0.5f);
+                        upgRt.anchoredPosition = new Vector2(0f, 115f);
+                        upgRt.sizeDelta = new Vector2(1180f, 715f);
+                    }
+
+                    // Create Scroll View
+                    GameObject scrollGo = new GameObject("ScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
+                    scrollGo.transform.SetParent(upgradesTabPanel.transform, false);
+                    var scrollRt = scrollGo.GetComponent<RectTransform>();
+                    scrollRt.anchorMin = Vector2.zero;
+                    scrollRt.anchorMax = Vector2.one;
+                    scrollRt.offsetMin = Vector2.zero;
+                    scrollRt.offsetMax = Vector2.zero;
+
+                    var scrollImg = scrollGo.GetComponent<Image>();
+                    scrollImg.color = new Color(0f, 0f, 0f, 0.01f);
+                    scrollImg.raycastTarget = true;
+
+                    var scrollRect = scrollGo.GetComponent<ScrollRect>();
+                    scrollRect.horizontal = false;
+                    scrollRect.vertical = true;
+                    scrollRect.scrollSensitivity = 30f;
+
+                    // Viewport with RectMask2D
+                    GameObject viewportGo = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+                    viewportGo.transform.SetParent(scrollGo.transform, false);
+                    var viewRt = viewportGo.GetComponent<RectTransform>();
+                    viewRt.anchorMin = Vector2.zero;
+                    viewRt.anchorMax = Vector2.one;
+                    viewRt.offsetMin = Vector2.zero;
+                    viewRt.offsetMax = Vector2.zero;
+
+                    // Content
+                    GameObject contentGo = new GameObject("Content", typeof(RectTransform));
+                    contentGo.transform.SetParent(viewportGo.transform, false);
+                    var contentRt = contentGo.GetComponent<RectTransform>();
+                    contentRt.anchorMin = new Vector2(0.5f, 1f);
+                    contentRt.anchorMax = new Vector2(0.5f, 1f);
+                    contentRt.pivot = new Vector2(0.5f, 1f);
+                    contentRt.anchoredPosition = Vector2.zero;
+                    contentRt.sizeDelta = new Vector2(upgRt.sizeDelta.x, 600f);
+
+                    scrollRect.viewport = viewRt;
+                    scrollRect.content = contentRt;
+
+                    upgradesScrollContainer = contentGo.transform;
+                }
+            }
+        }
+
+        private Button FindButtonInChildren(Transform root, params string[] names)
+        {
+            if (root == null) return null;
+
+            // Direct children matching names
+            foreach (var n in names)
+            {
+                Transform found = root.Find(n);
+                if (found != null && found.TryGetComponent<Button>(out var b)) return b;
+            }
+
+            // Recursive search by exact name
+            var allButtons = root.GetComponentsInChildren<Button>(true);
+            foreach (var b in allButtons)
+            {
+                foreach (var n in names)
+                {
+                    if (b.name.Equals(n, StringComparison.OrdinalIgnoreCase)) return b;
+                }
+            }
+
+            // Fallback: search by partial name match
+            foreach (var b in allButtons)
+            {
+                if (b == closeButton || b == cashRegisterButton) continue;
+                string lname = b.name.ToLowerInvariant();
+                if (lname.Contains("upgrade") || lname.Contains("tab") || lname.Contains("toggle"))
+                {
+                    return b;
+                }
+            }
+
+            // Fallback: search by text component
+            foreach (var b in allButtons)
+            {
+                if (b == closeButton || b == cashRegisterButton) continue;
+                var tmp = b.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (tmp != null)
+                {
+                    string txt = tmp.text.ToLowerInvariant();
+                    if (txt.Contains("upgrade") || txt.Contains("item") || txt.Contains("stock"))
+                    {
+                        return b;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public void ToggleTab()
+        {
+            if (Time.frameCount == lastToggleFrame) return;
+            lastToggleFrame = Time.frameCount;
+
+            bool isUnlocked = IsUpgradesUnlocked();
+            if (!isUnlocked)
+            {
+                HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!", 2.5f);
+                return;
+            }
+
+            currentTab = (currentTab == InventoryTab.Items) ? InventoryTab.Upgrades : InventoryTab.Items;
+            RefreshTabState();
+        }
+
+        public void SwitchToItemsTab() => SetTab(InventoryTab.Items);
+        public void SwitchToUpgradesTab() => SetTab(InventoryTab.Upgrades);
+
+        public void SetTab(InventoryTab tab)
+        {
+            if (tab == InventoryTab.Upgrades && !IsUpgradesUnlocked())
+            {
+                HUDController.Instance?.ShowNotification("Shop Upgrades unlock on Day 8 (Week 2)!", 2.5f);
+                return;
+            }
+
+            currentTab = tab;
+            RefreshTabState();
+        }
+
+        public void RefreshTabState()
+        {
+            EnsureTabsUI();
+
+            bool isUnlocked = IsUpgradesUnlocked();
+
+            if (!isUnlocked)
+            {
+                currentTab = InventoryTab.Items;
+            }
+
+            // Update Tab Toggle Button state and label (without overwriting custom button sprite color)
+            if (tabToggleButton != null)
+            {
+                tabToggleButton.interactable = isUnlocked;
+
+                if (tabToggleText != null)
+                {
+                    if (!isUnlocked)
+                    {
+                        tabToggleText.text = "Upgrades (Day 8)";
+                    }
+                    else
+                    {
+                        tabToggleText.text = (currentTab == InventoryTab.Items) ? "Upgrades" : "Items";
+                    }
+                }
+            }
+
+            if (currentTab == InventoryTab.Items)
+            {
+                if (itemsTabPanel != null) itemsTabPanel.SetActive(true);
+                if (upgradesTabPanel != null) upgradesTabPanel.SetActive(false);
+
+                UpdateInventoryDisplay();
+            }
+            else
+            {
+                if (itemsTabPanel != null) itemsTabPanel.SetActive(false);
+                if (upgradesTabPanel != null)
+                {
+                    upgradesTabPanel.transform.SetAsLastSibling();
+                    upgradesTabPanel.SetActive(true);
+                }
+
+                PopulateUpgradesDisplay();
+            }
+        }
+
         public void TriggerAttentionPulse(float duration = 2.5f)
         {
             if (cashRegisterButton == null) return;
@@ -129,7 +415,9 @@ namespace BubbleTeaShop
                 AudioManager.Instance?.PlaySFX(registerChimeSound);
             }
 
-            UpdateInventoryDisplay();
+            currentTab = InventoryTab.Items;
+            RefreshTabState();
+
             if (inventoryModalPanel != null)
             {
                 // Bring inventory modal in front of shopfront & HUD top bar (so translucent background covers HUD stats)
@@ -396,6 +684,142 @@ namespace BubbleTeaShop
                 nameTmp.alignment = TextAlignmentOptions.MidlineLeft;
                 nameTmp.color = Color.white;
                 nameTmp.textWrappingMode = TextWrappingModes.NoWrap;
+            }
+        }
+
+        public void PopulateUpgradesDisplay()
+        {
+            if (upgradesScrollContainer == null || UpgradeManager.Instance == null) return;
+
+            var upgrades = UpgradeManager.Instance.Upgrades;
+            int purchasedCount = 0;
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                if (upgrades[i].isPurchased) purchasedCount++;
+            }
+
+            // Clear previous cards
+            for (int i = upgradesScrollContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(upgradesScrollContainer.GetChild(i).gameObject);
+            }
+
+            int cols = 2;
+            int totalRows = Mathf.CeilToInt((float)upgrades.Count / cols);
+
+            RectTransform containerRt = upgradesScrollContainer as RectTransform;
+            float totalWidth = containerRt != null && containerRt.rect.width > 200 ? containerRt.rect.width : 760f;
+            float paddingX = 10f;
+            float paddingY = 12f;
+            float spacingX = 16f;
+            float spacingY = 12f;
+
+            float cardWidth = (totalWidth - (paddingX * 2) - spacingX) / cols;
+            float cardHeight = 112f;
+
+            float totalHeight = (paddingY * 2) + (totalRows * cardHeight) + ((totalRows - 1) * spacingY) + 40f;
+            if (containerRt != null)
+            {
+                containerRt.sizeDelta = new Vector2(totalWidth, totalHeight);
+                containerRt.anchoredPosition = Vector2.zero;
+            }
+
+            // Header summary
+            GameObject headerGo = new GameObject("Header_Summary", typeof(RectTransform), typeof(TextMeshProUGUI));
+            headerGo.transform.SetParent(upgradesScrollContainer, false);
+            var headerRt = headerGo.GetComponent<RectTransform>();
+            headerRt.anchorMin = new Vector2(0.5f, 1f);
+            headerRt.anchorMax = new Vector2(0.5f, 1f);
+            headerRt.pivot = new Vector2(0.5f, 1f);
+            headerRt.sizeDelta = new Vector2(totalWidth - 20f, 32f);
+            headerRt.anchoredPosition = new Vector2(0f, -paddingY);
+
+            var headerTmp = headerGo.GetComponent<TextMeshProUGUI>();
+            headerTmp.text = $"<b>SHOP UPGRADES</b>  |  <color=#2ECC71>{purchasedCount}/{upgrades.Count} Active</color>";
+            headerTmp.fontSize = 20;
+            headerTmp.alignment = TextAlignmentOptions.MidlineLeft;
+            headerTmp.color = Color.white;
+
+            float startX = -totalWidth * 0.5f + paddingX + (cardWidth * 0.5f);
+            float startY = -paddingY - 36f - (cardHeight * 0.5f);
+
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                var u = upgrades[i];
+                bool isOwned = u.isPurchased;
+
+                int row = i / cols;
+                int col = i % cols;
+                Vector2 pos = new Vector2(startX + col * (cardWidth + spacingX), startY - row * (cardHeight + spacingY));
+
+                GameObject cardObj = new GameObject($"Card_{u.type}", typeof(RectTransform), typeof(Image));
+                cardObj.transform.SetParent(upgradesScrollContainer, false);
+                var rt = cardObj.GetComponent<RectTransform>();
+                rt.anchorMin = new Vector2(0.5f, 1f);
+                rt.anchorMax = new Vector2(0.5f, 1f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.sizeDelta = new Vector2(cardWidth, cardHeight);
+                rt.anchoredPosition = pos;
+
+                var img = cardObj.GetComponent<Image>();
+                img.color = isOwned ? new Color(0.10f, 0.22f, 0.16f, 0.95f) : new Color(0.12f, 0.14f, 0.18f, 0.70f);
+
+                // Right Badge Pill
+                float badgeWidth = 90f;
+                GameObject badgeObj = new GameObject("Badge", typeof(RectTransform), typeof(Image));
+                badgeObj.transform.SetParent(cardObj.transform, false);
+                var badgeRt = badgeObj.GetComponent<RectTransform>();
+                badgeRt.anchorMin = new Vector2(1, 0.5f);
+                badgeRt.anchorMax = new Vector2(1, 0.5f);
+                badgeRt.pivot = new Vector2(1, 0.5f);
+                badgeRt.sizeDelta = new Vector2(badgeWidth, 36f);
+                badgeRt.anchoredPosition = new Vector2(-10, 0);
+
+                var badgeImg = badgeObj.GetComponent<Image>();
+                badgeImg.color = isOwned ? new Color(0.18f, 0.55f, 0.34f, 0.95f) : new Color(0.25f, 0.25f, 0.28f, 0.60f);
+
+                GameObject badgeTextObj = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                badgeTextObj.transform.SetParent(badgeObj.transform, false);
+                var badgeTextRt = badgeTextObj.GetComponent<RectTransform>();
+                badgeTextRt.anchorMin = Vector2.zero;
+                badgeTextRt.anchorMax = Vector2.one;
+                badgeTextRt.offsetMin = Vector2.zero;
+                badgeTextRt.offsetMax = Vector2.zero;
+
+                var badgeTmp = badgeTextObj.GetComponent<TextMeshProUGUI>();
+                badgeTmp.text = isOwned ? "<color=#FFFFFF><b>ACTIVE</b></color>" : "<color=#888888>LOCKED</color>";
+                badgeTmp.fontSize = 15;
+                badgeTmp.alignment = TextAlignmentOptions.Center;
+                badgeTmp.textWrappingMode = TextWrappingModes.NoWrap;
+
+                // Left Info Text
+                GameObject infoTextObj = new GameObject("InfoText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                infoTextObj.transform.SetParent(cardObj.transform, false);
+                var infoRt = infoTextObj.GetComponent<RectTransform>();
+                infoRt.anchorMin = new Vector2(0, 0);
+                infoRt.anchorMax = new Vector2(1, 1);
+                infoRt.offsetMin = new Vector2(12f, 6f);
+                infoRt.offsetMax = new Vector2(-(badgeWidth + 18f), -6f);
+
+                var infoTmp = infoTextObj.GetComponent<TextMeshProUGUI>();
+                infoTmp.fontSize = 15f;
+                infoTmp.alignment = TextAlignmentOptions.MidlineLeft;
+                infoTmp.textWrappingMode = TextWrappingModes.Normal;
+                infoTmp.lineSpacing = -2f;
+
+                string titleHeader = isOwned
+                    ? $"<color=#2ECC71><b>{u.title}</b></color>"
+                    : $"<color=#A0A0A0><b>{u.title}</b></color>";
+
+                string desc = isOwned
+                    ? $"<size=13><color=#BDC3C7>{u.description}</color></size>"
+                    : $"<size=13><color=#777777>Available in Night Phase (${u.cost:F2})</color></size>";
+
+                string effect = isOwned
+                    ? $"<size=13><color=#FFAA00><b>Effect:</b> {u.effect}</color></size>"
+                    : $"<size=13><color=#888888><b>Effect:</b> {u.effect}</color></size>";
+
+                infoTmp.text = $"{titleHeader}\n{desc}\n{effect}";
             }
         }
     }

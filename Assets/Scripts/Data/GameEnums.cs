@@ -2,6 +2,19 @@ using System;
 
 namespace BubbleTeaShop
 {
+    public enum GameMode
+    {
+        Normal,
+        Blitz
+    }
+
+    public enum GameDifficulty
+    {
+        Easy = 0,
+        Normal = 1,
+        Hard = 2
+    }
+
     public enum GameState
     {
         MorningPrep,

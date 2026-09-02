@@ -17,7 +17,7 @@ namespace BubbleTeaShop
         [SerializeField] private int startingToppings = 15;
         [Header("Dispensers Unlocked")]
         [SerializeField] private bool hasPremiumMilkDispenser = false;
-        public bool HasPremiumMilkDispenser => hasPremiumMilkDispenser;
+        public bool HasPremiumMilkDispenser => (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) || hasPremiumMilkDispenser;
 
         [Header("Live Stock (Editable in Inspector at Runtime)")]
         [Header("Raw Foraged Ingredients")]
@@ -57,6 +57,7 @@ namespace BubbleTeaShop
 
         public bool HasEverHadStock(string key)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) return true;
             if (string.IsNullOrEmpty(key)) return false;
             return (discoveredKeys != null && discoveredKeys.Contains(key)) || GetStock(key) > 0;
         }
@@ -244,6 +245,10 @@ namespace BubbleTeaShop
 
         public int GetStock(string key)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+            {
+                return 99;
+            }
             return stock.TryGetValue(key, out int count) ? count : 0;
         }
 
@@ -254,11 +259,20 @@ namespace BubbleTeaShop
 
         public bool HasStock(string key, int quantity = 1)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+            {
+                return true;
+            }
             return GetStock(key) >= quantity;
         }
 
         public bool ConsumeStock(string key, int quantity = 1)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+            {
+                return true;
+            }
+
             int current = GetStock(key);
             if (current >= quantity)
             {
