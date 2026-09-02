@@ -48,16 +48,16 @@
         overflow: hidden;
       }
 
-      /* Both Desktop & Mobile: Maintain true 16:9 aspect ratio with object-fit: contain (prevents horizontal stretching on wide phones) */
+      /* Both Desktop & Mobile: Strict 16:9 DOM canvas bounding box (aligns touch / clickboxes with 100% precision) */
       #unity-canvas,
       #unity-container.unity-desktop #unity-canvas,
       #unity-container.unity-mobile #unity-canvas,
       .unity-mobile #unity-canvas {
-        width: 100% !important;
-        height: 100% !important;
+        width: min(100vw, calc(100vh * (16 / 9))) !important;
+        height: min(100vh, calc(100vw * (9 / 16))) !important;
         max-width: 100vw !important;
         max-height: 100vh !important;
-        object-fit: contain !important;
+        aspect-ratio: 16 / 9;
         display: block;
         margin: auto;
         background: #12141c;
