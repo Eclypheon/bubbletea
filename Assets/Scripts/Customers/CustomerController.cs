@@ -789,8 +789,8 @@ namespace BubbleTeaShop
         private string[] activeChubiLines = new string[]
         {
             "H-hey! Look at you, all proud now that you own the shop...",
-            "How about making your former landlady, Chubi, her usual drink for free? Consider it good will for being such a great landlady, hmph!",
-            "Make me my usual: Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls!"
+            "You know... you should treat me a drink for being such a good landlady to you!",
+            "Hmm how about Oolong Tea with Fresh Milk, as sweet as possible and less ice. Oh I also want Tapioca Pearls."
         };
         private int currentChubiLineIndex = 0;
 
@@ -883,11 +883,11 @@ namespace BubbleTeaShop
         {
             if (!isLandlordActive) return;
 
-            // Check favorite recipe: Oolong Tea + Fresh Milk + 100% Sugar + 50% Ice + Tapioca Pearls
+            // Check favorite recipe: Oolong Tea + Fresh Milk + 100% Sugar + (30% or 50% Ice) + Tapioca Pearls
             bool isFavorite = (cup.tea == TeaBase.OolongTea &&
                                cup.milk == MilkType.FreshMilk &&
                                cup.sweetnessPercent == 100 &&
-                               cup.icePercent == 50 &&
+                               (cup.icePercent == 50 || cup.icePercent == 30) &&
                                cup.toppings != null &&
                                cup.toppings.Contains(ToppingType.TapiocaPearls));
 
@@ -906,9 +906,9 @@ namespace BubbleTeaShop
                 {
                     if (speechBubble != null)
                     {
-                        speechBubble.ShowMessage("Hey! That's not my usual! I asked for Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls! Try again, dummy!");
+                        speechBubble.ShowMessage("Hey! That's not what I asked for! I wanted Oolong Tea with Fresh Milk, as sweet as possible, less ice, and Tapioca Pearls! Try again, dummy!");
                     }
-                    HUDController.Instance?.ShowNotification("Chubi rejected the drink! Check her usual recipe.", 3.5f);
+                    HUDController.Instance?.ShowNotification("Chubi rejected the drink! Check her recipe request.", 3.5f);
                 }
                 return;
             }
