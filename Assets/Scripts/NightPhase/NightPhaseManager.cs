@@ -757,13 +757,22 @@ namespace BubbleTeaShop
                     rt.anchoredPosition = new Vector2(0f, 260f);
                     rt.sizeDelta = new Vector2(340f, 48f);
                 }
-                buyoutShopButton.interactable = EconomyManager.Instance.CanAfford(EconomyManager.Instance.BuyoutGoal);
+
+                if (EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode)
+                {
+                    buyoutShopButton.interactable = false;
+                    if (buyoutButtonText != null) buyoutButtonText.text = "Location Owned (Endless Active)";
+                }
+                else
+                {
+                    buyoutShopButton.interactable = EconomyManager.Instance.CanAfford(EconomyManager.Instance.BuyoutGoal);
+                }
             }
 
-            // Check 4-Week Lease Victory (Day 28 completion)
-            if (completedDay >= 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
+            // Check 4-Week Milestone (Day 28 completion)
+            if (completedDay == 28 && GameManager.Instance != null && EconomyManager.Instance != null && EconomyManager.Instance.AccumulatedRentOwed <= 0)
             {
-                HUDController.Instance?.ShowNotification("Incredible! You have successfully completed the 4-week lease!", 5f);
+                HUDController.Instance?.ShowNotification("Incredible! You have successfully completed 4 weeks!", 5f);
             }
 
             // Populate visual inventory cards in Ledger Tab
