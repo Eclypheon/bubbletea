@@ -4,7 +4,28 @@ All notable changes to the Yippee Tea project are documented in this file.
 
 ---
 
-## [v1.4.0] - 2026-09-02 (In Progress)
+## [v1.5.0] - 2026-09-03
+
+### Title Screen Overhaul & Options
+* **Title Screen & Game Mode Selection**: Implemented a comprehensive Title Screen menu featuring New Game, Continue (upcoming), Options, Credits, and Changelog panels, alongside Game Mode selection (**Normal Mode** vs **Blitz Mode**).
+* **Persistent Audio Settings**: Added BGM and SFX volume sliders with real-time percentage readouts (0%–100%) and a **Test SFX** button. Audio volume settings persist reliably across sessions via PlayerPrefs.
+* **Difficulty Modes**: Introduced three calibrated difficulty settings with live economy and patience modifiers:
+  * **Easy**: +20% customer patience and +20% drink base prices.
+  * **Normal**: Standard baseline gameplay.
+  * **Hard**: -10% customer patience and -15% drink base prices.
+* **Fullscreen Support**: Added a toggleable Fullscreen button in the Options menu with simulated Editor feedback.
+* **Credits & Changelog**: Created a dedicated single-panel Credits view and an interactive, scrollable Changelog viewer displaying full version notes.
+* **Version Display**: Added a customizable version badge (`v1.5.0`) on the Title Screen with Inspector configuration.
+
+### Cash Register Inventory Upgrades Tab
+* **Interactive Tab Switcher**: Added a toggle button in the storefront Cash Register Inventory modal to seamlessly switch between ingredient stock (**Items**) and purchased shop enhancements (**Upgrades**).
+* **Week 2 / Day 8 Unlock Gating**: Implemented Day 8 gating logic matching the Night Phase. The button is greyed out and labeled `Upgrades (Day 8)` on Days 1–7, unlocking interactively on Day 8 (`Upgrades` / `Items`).
+* **2-Column Upgrades Display**: Recycled the 2-column upgrade cards from the Night Phase to clearly display active owned upgrades (`ACTIVE [OWNED]` green badge) alongside locked upgrades (`LOCKED` grey badge) with effects and descriptions.
+* **Double-Toggle & Color Fixes**: Implemented listener debouncing to prevent duplicate toggle triggers and preserved custom button color palettes.
+
+---
+
+## [v1.4.0] - 2026-09-02
 
 ### Foraging & Prep Area Audio Immersion
 * **Expedition Sound Effects**: Integrated custom sound effects for foraging interactions across Bamboo Grove (rustling grass, scurrying Yippees, Yippee catch audio), Honey Meadows (tree kicks and jelly drops hitting the soil), and Mist Mountains (rock wall impacts and Golden Dew catching in the bucket).

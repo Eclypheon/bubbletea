@@ -118,5 +118,30 @@ namespace BubbleTeaShop
             OnDayCompleted?.Invoke(currentDay, dailySalesTotal, dailyTipsTotal);
             currentDay++;
         }
+
+        // Persistence API
+        public void RestoreDay(int day, int lastCompleted, bool hadNightActivity)
+        {
+            currentDay = Mathf.Max(1, day);
+            lastCompletedDay = Mathf.Max(1, lastCompleted);
+            hadNightActivityLastNight = hadNightActivity;
+            currentCustomerIndex = 0;
+            customersServedToday = 0;
+            customersSkippedToday = 0;
+            dailySalesTotal = 0f;
+            dailyTipsTotal = 0f;
+        }
+
+        public void ResetDays()
+        {
+            currentDay = 1;
+            lastCompletedDay = 1;
+            hadNightActivityLastNight = false;
+            currentCustomerIndex = 0;
+            customersServedToday = 0;
+            customersSkippedToday = 0;
+            dailySalesTotal = 0f;
+            dailyTipsTotal = 0f;
+        }
     }
 }

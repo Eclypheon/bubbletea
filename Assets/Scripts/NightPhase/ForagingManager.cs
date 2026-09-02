@@ -82,6 +82,7 @@ namespace BubbleTeaShop
             }
 
             OnForagingResult?.Invoke(resultMessage);
+            SaveManager.Instance?.SaveGame();
             return true;
         }
     }

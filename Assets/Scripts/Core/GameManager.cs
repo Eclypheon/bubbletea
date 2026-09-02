@@ -140,9 +140,12 @@ namespace BubbleTeaShop
             isGameStarted = true;
             blitzTimeRemaining = DefaultBlitzDayDuration;
 
-            PlayerPrefs.SetInt(PREFS_HAS_SAVE, 1);
-            PlayerPrefs.SetInt(PREFS_SAVED_MODE, (int)mode);
-            PlayerPrefs.Save();
+            // Clear previous save data for a fresh run
+            SaveManager.Instance?.ClearSave();
+            DayManager.Instance?.ResetDays();
+            EconomyManager.Instance?.ResetToStartingEconomy();
+            InventoryManager.Instance?.ResetToStartingInventory();
+            UpgradeManager.Instance?.ResetUpgrades();
 
             if (mode == GameMode.Blitz)
             {
@@ -157,6 +160,9 @@ namespace BubbleTeaShop
                 Debug.Log("[GameManager] Starting NORMAL MODE: Standard progression.");
             }
 
+            StartNewDaySequence();
+            SaveManager.Instance?.SaveGame();
+
             blitzTimeRemaining = DefaultBlitzDayDuration;
             OnBlitzTimerUpdated?.Invoke(blitzTimeRemaining);
             HUDController.Instance?.UpdateBlitzTimer(blitzTimeRemaining);
@@ -165,13 +171,45 @@ namespace BubbleTeaShop
 
         public bool HasSavedProgress()
         {
-            return PlayerPrefs.GetInt(PREFS_HAS_SAVE, 0) == 1;
+            return SaveManager.Instance != null ? SaveManager.Instance.HasSave() : PlayerPrefs.GetInt(PREFS_HAS_SAVE, 0) == 1;
         }
 
         public void ContinueSavedGame()
         {
-            GameMode savedMode = (GameMode)PlayerPrefs.GetInt(PREFS_SAVED_MODE, (int)GameMode.Normal);
-            StartGame(savedMode);
+            if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
+            {
+                SaveManager.Instance.LoadGame();
+                isGameStarted = true;
+                blitzTimeRemaining = DefaultBlitzDayDuration;
+                OnBlitzTimerUpdated?.Invoke(blitzTimeRemaining);
+                HUDController.Instance?.UpdateBlitzTimer(blitzTimeRemaining);
+                SetState(GameState.MorningPrep);
+                HUDController.Instance?.SetStatusHint("Open the shutter to start the day!");
+            }
+            else
+            {
+                StartGame(currentGameMode);
+            }
+        }
+
+        public void RestoreGameSettings(GameMode mode, GameDifficulty diff)
+        {
+            currentGameMode = mode;
+            currentDifficulty = diff;
+            isGameStarted = true;
+        }
+
+        public void ReturnToTitleScreen(bool reloadScene = true)
+        {
+            isGameStarted = false;
+            if (reloadScene)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            }
+            else
+            {
+                TitleScreenController.Instance?.OpenTitleScreen();
+            }
         }
 
         public void SetState(GameState newState)
@@ -229,11 +267,13 @@ namespace BubbleTeaShop
         {
             SetState(GameState.NightPhase);
             DayManager.Instance?.CompleteDay();
+            SaveManager.Instance?.SaveGame();
         }
 
         public void EndNightAndSleep()
         {
             StartNewDaySequence();
+            SaveManager.Instance?.SaveGame();
         }
 
         public void TriggerGameOver(string reason)

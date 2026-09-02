@@ -22,6 +22,11 @@ namespace BubbleTeaShop
         [SerializeField] private Button tabLedgerButton;
         [SerializeField] private Button prepAreaButton;
         [SerializeField] private Button sleepButton;
+        [SerializeField] private Button quitToTitleButton;
+
+        public GameObject NightPanelRoot => nightPanelRoot;
+        public bool IsNightPhaseActive => nightPanelRoot != null && nightPanelRoot.activeInHierarchy;
+        public Button QuitToTitleButton => quitToTitleButton;
 
         [Header("Ledger Info")]
         [SerializeField] private TextMeshProUGUI ledgerSummaryText;
@@ -127,6 +132,7 @@ namespace BubbleTeaShop
             if (tabLedgerButton != null) tabLedgerButton.onClick.AddListener(() => SwitchTab(3));
             if (prepAreaButton != null) prepAreaButton.onClick.AddListener(OpenPrepArea);
             if (sleepButton != null) sleepButton.onClick.AddListener(OnSleepClicked);
+            if (quitToTitleButton != null) quitToTitleButton.onClick.AddListener(OnQuitToTitleClicked);
 
             if (forageBambooBtn != null) forageBambooBtn.onClick.AddListener(OnForageBambooClicked);
             if (forageHoneyBtn != null) forageHoneyBtn.onClick.AddListener(OnForageHoneyClicked);
@@ -241,6 +247,18 @@ namespace BubbleTeaShop
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             UpdateTabsState(day);
             UpdateForagingButtons(day);
+        }
+
+        public void OnQuitToTitleClicked()
+        {
+            if (HUDController.Instance != null)
+            {
+                HUDController.Instance.OnQuitButtonClicked();
+            }
+            else
+            {
+                GameManager.Instance?.ReturnToTitleScreen(reloadScene: true);
+            }
         }
 
         private void HandleStateChanged(GameState state)

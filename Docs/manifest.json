@@ -1,0 +1,19 @@
+{
+  "name": "Bubble Tea Shop",
+  "short_name": "Bubble Tea",
+  "description": "Brew teas, manage stock, and run your cozy bubble tea shop!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#12141c",
+  "theme_color": "#12141c",
+  "icons": [
+    {
+      "src": "TemplateData/favicon.ico",
+      "sizes": "192x192 512x512",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ]
+}

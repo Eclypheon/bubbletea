@@ -36,27 +36,81 @@ namespace BubbleTeaShop
             musicVolume = PlayerPrefs.GetFloat(PREFS_MUSIC_VOL, musicVolume);
             sfxVolume = PlayerPrefs.GetFloat(PREFS_SFX_VOL, sfxVolume);
 
-            // Ensure AudioSources exist
+            // Ensure AudioListener is active in scene
+            if (FindFirstObjectByType<AudioListener>() == null)
+            {
+                gameObject.AddComponent<AudioListener>();
+            }
+            AudioListener.pause = false;
+            AudioListener.volume = 1f;
+
+            // Ensure AudioSources exist and are explicitly 2D
             if (sfxSource == null)
             {
                 sfxSource = gameObject.AddComponent<AudioSource>();
-                sfxSource.playOnAwake = false;
             }
+            sfxSource.playOnAwake = false;
+            sfxSource.spatialBlend = 0f; // 100% 2D
+            sfxSource.bypassEffects = true;
+            sfxSource.bypassListenerEffects = true;
+            sfxSource.mute = false;
 
             if (bgmSource == null)
             {
                 bgmSource = gameObject.AddComponent<AudioSource>();
-                bgmSource.loop = true;
-                bgmSource.playOnAwake = false;
             }
+            bgmSource.loop = true;
+            bgmSource.playOnAwake = false;
+            bgmSource.spatialBlend = 0f; // 100% 2D
+            bgmSource.bypassEffects = true;
+            bgmSource.bypassListenerEffects = true;
+            bgmSource.mute = false;
             bgmSource.volume = musicVolume;
         }
+
+        private bool hasUnlockedMobileAudio = false;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")]
+        private static extern void ResumeWebAudioContext();
+#endif
 
         private void Start()
         {
             if (autoPlayMusicOnStart && backgroundMusic != null)
             {
                 PlayMusic(backgroundMusic, musicVolume);
+            }
+        }
+
+        private void Update()
+        {
+            if (!hasUnlockedMobileAudio && (Input.GetMouseButtonDown(0) || Input.touchCount > 0))
+            {
+                hasUnlockedMobileAudio = true;
+                UnlockMobileAudio();
+            }
+        }
+
+        public void UnlockMobileAudio()
+        {
+            AudioListener.pause = false;
+            AudioListener.volume = 1f;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            try
+            {
+                ResumeWebAudioContext();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[AudioManager] WebAudio unlock hook: {ex.Message}");
+            }
+#endif
+            if (bgmSource != null && backgroundMusic != null && !bgmSource.isPlaying)
+            {
+                bgmSource.volume = musicVolume;
+                bgmSource.Play();
             }
         }
 
@@ -68,6 +122,7 @@ namespace BubbleTeaShop
             if (volume >= 0f) musicVolume = volume;
 
             bgmSource.clip = musicClip;
+            bgmSource.spatialBlend = 0f;
             bgmSource.volume = musicVolume;
             bgmSource.loop = true;
             bgmSource.Play();
@@ -92,16 +147,22 @@ namespace BubbleTeaShop
         {
             if (clip == null) return;
 
+            if (clip.loadState != AudioDataLoadState.Loaded)
+            {
+                clip.LoadAudioData();
+            }
+
             float finalVol = Mathf.Clamp01(volume * sfxVolume);
             if (finalVol <= 0.001f) return;
 
             if (sfxSource != null)
             {
+                sfxSource.spatialBlend = 0f;
                 sfxSource.PlayOneShot(clip, finalVol);
             }
             else
             {
-                AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : Vector3.zero, finalVol);
+                AudioSource.PlayClipAtPoint(clip, Vector3.zero, finalVol);
             }
         }
     }

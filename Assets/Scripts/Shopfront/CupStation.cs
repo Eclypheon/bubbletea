@@ -49,6 +49,7 @@ namespace BubbleTeaShop
         [Header("Runtime Cup")]
         [SerializeField] private BubbleTeaCup currentCup = new BubbleTeaCup();
         public BubbleTeaCup CurrentCup => currentCup;
+        public Button ServeCupButton => serveCupButton;
 
         public event Action OnCupUpdated;
 
@@ -60,6 +61,20 @@ namespace BubbleTeaShop
                 return;
             }
             Instance = this;
+
+            if (serveCupButton == null)
+            {
+                var allButtons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                foreach (var b in allButtons)
+                {
+                    string n = b.name.ToLower().Replace(" ", "").Replace("_", "");
+                    if (n.Contains("servecup") || n.Contains("servedrink") || n.Contains("servebutton") || n.Contains("servebtn") || n == "serve")
+                    {
+                        serveCupButton = b;
+                        break;
+                    }
+                }
+            }
         }
 
         private void Start()

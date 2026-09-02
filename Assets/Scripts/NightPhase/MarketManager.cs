@@ -109,6 +109,7 @@ namespace BubbleTeaShop
             {
                 InventoryManager.Instance.AddStock(item.stockKey, item.bundleQuantity);
                 HUDController.Instance?.ShowNotification($"Purchased {item.displayName} (+{item.bundleQuantity})!", 2.5f);
+                SaveManager.Instance?.SaveGame();
                 return true;
             }
             HUDController.Instance?.ShowNotification("Not enough cash for wholesale order!", 2.5f);

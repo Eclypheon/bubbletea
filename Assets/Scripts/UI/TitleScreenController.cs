@@ -30,11 +30,17 @@ namespace BubbleTeaShop
         [SerializeField] private Button continueGameButton;
         [SerializeField] private Button optionsButton;
         [SerializeField] private Button creditsButton;
+        [SerializeField] private Button changelogButton;
 
         [Header("Game Mode Selection Buttons")]
         [SerializeField] private Button normalModeButton;
         [SerializeField] private Button blitzModeButton;
         [SerializeField] private Button backButton;
+
+        [Header("Version & Info UI")]
+        [Tooltip("Text component displaying the version number on the Title Screen.")]
+        [SerializeField] private TextMeshProUGUI versionText;
+        [SerializeField] private string gameVersion = "v1.5.0";
 
         [Header("Options / Audio Settings UI")]
         [Tooltip("Container GameObject for Options sliders & labels. Auto-created if unassigned.")]
@@ -54,6 +60,14 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject creditsContainer;
         [SerializeField] private TextMeshProUGUI creditsText;
 
+        [Header("Changelog UI")]
+        [Tooltip("Container GameObject for Changelog text. Auto-created if unassigned.")]
+        [SerializeField] private GameObject changelogContainer;
+        [SerializeField] private TextMeshProUGUI changelogContentText;
+        [Tooltip("Full text displayed in the Changelog modal. Pre-populated from CHANGELOG.md and easily editable here.")]
+        [TextArea(15, 60)]
+        [SerializeField] private string changelogText = DEFAULT_CHANGELOG_TEXT;
+
         [Header("Audio SFX (Optional)")]
         [SerializeField] private AudioClip buttonClickSound;
         [SerializeField] private AudioClip startChimeSound;
@@ -61,6 +75,9 @@ namespace BubbleTeaShop
 
         public GameObject OptionsContainer => optionsContainer;
         public GameObject CreditsContainer => creditsContainer;
+        public GameObject ChangelogContainer => changelogContainer;
+        public Button ChangelogButton => changelogButton;
+        public TextMeshProUGUI VersionText => versionText;
         public Slider MusicVolumeSlider => musicVolumeSlider;
         public Slider SFXVolumeSlider => sfxVolumeSlider;
         public Button TestSFXButton => testSFXButton;
@@ -91,12 +108,26 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.5.0]"))
+            {
+                changelogText = DEFAULT_CHANGELOG_TEXT;
+            }
+
             EnsureReferences();
             InitializeBobbingItems();
             BringToFront();
 
             // Automatically place buttons in main menu state on initialization
             ShowMainMenu(playAudio: false);
+        }
+
+        private void OnValidate()
+        {
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.5.0]"))
+            {
+                changelogText = DEFAULT_CHANGELOG_TEXT;
+            }
+            UpdateVersionDisplay();
         }
 
         private void Start()
@@ -180,10 +211,26 @@ namespace BubbleTeaShop
             if (continueGameButton == null) continueGameButton = FindButtonByName("ContinueGameButton", "ContinueBtn", "BtnContinue", "Continue");
             if (optionsButton == null) optionsButton = FindButtonByName("OptionsButton", "OptionsBtn", "BtnOptions", "Options", "SettingsButton");
             if (creditsButton == null) creditsButton = FindButtonByName("CreditsButton", "CreditsBtn", "BtnCredits", "Credits");
+            if (changelogButton == null) changelogButton = FindButtonByName("ChangelogButton", "ChangelogBtn", "BtnChangelog", "Changelog", "PatchNotesButton", "UpdatesButton", "PatchNotes");
 
             if (normalModeButton == null) normalModeButton = FindButtonByName("NormalModeButton", "NormalBtn", "BtnNormal", "Normal");
             if (blitzModeButton == null) blitzModeButton = FindButtonByName("BlitzModeButton", "BlitzBtn", "BtnBlitz", "Blitz");
             if (backButton == null) backButton = FindButtonByName("BackButton", "BackBtn", "ModeSelectBackButton", "ModeBackButton", "BackToMenuBtn");
+
+            // Auto-discover version text if unassigned
+            if (versionText == null)
+            {
+                Transform found = transform.Find("VersionText") ??
+                                  transform.Find("Version") ??
+                                  transform.Find("GameVersion") ??
+                                  transform.Find("VersionNumber") ??
+                                  transform.Find("BuildVersion");
+                if (found != null && found.TryGetComponent<TextMeshProUGUI>(out var vt))
+                {
+                    versionText = vt;
+                }
+            }
+            UpdateVersionDisplay();
 
             // Auto-discover logo if unassigned
             if (gameLogoImage == null)
@@ -268,6 +315,12 @@ namespace BubbleTeaShop
                 creditsButton.onClick.AddListener(ShowCredits);
             }
 
+            if (changelogButton != null)
+            {
+                changelogButton.onClick.RemoveListener(ShowChangelog);
+                changelogButton.onClick.AddListener(ShowChangelog);
+            }
+
             if (normalModeButton != null)
             {
                 normalModeButton.onClick.RemoveListener(StartNormalGame);
@@ -287,22 +340,43 @@ namespace BubbleTeaShop
             }
         }
 
+        public void UpdateVersionDisplay()
+        {
+            if (versionText != null)
+            {
+                versionText.text = !string.IsNullOrEmpty(gameVersion) ? gameVersion : $"v{Application.version}";
+            }
+        }
+
         public void UpdateContinueButtonState()
         {
             if (continueGameButton != null)
             {
-                // Greyed out for now (upcoming feature)
-                continueGameButton.interactable = false;
+                bool hasSave = (SaveManager.Instance != null && SaveManager.Instance.HasSave()) ||
+                               (GameManager.Instance != null && GameManager.Instance.HasSavedProgress());
+
+                continueGameButton.interactable = hasSave;
 
                 var txt = continueGameButton.GetComponentInChildren<TextMeshProUGUI>();
                 if (txt != null)
                 {
-                    txt.color = new Color(0.6f, 0.6f, 0.6f, 0.45f);
+                    if (hasSave)
+                    {
+                        var data = SaveManager.Instance != null ? SaveManager.Instance.GetCurrentSaveData() : null;
+                        int day = (data != null) ? data.currentDay : 1;
+                        txt.text = $"Continue (Day {day})";
+                        txt.color = new Color(1f, 1f, 1f, 1f);
+                    }
+                    else
+                    {
+                        txt.text = "Continue";
+                        txt.color = new Color(0.6f, 0.6f, 0.6f, 0.45f);
+                    }
                 }
 
                 if (continueGameButton.TryGetComponent<CanvasGroup>(out var cg))
                 {
-                    cg.alpha = 0.45f;
+                    cg.alpha = hasSave ? 1.0f : 0.45f;
                 }
             }
         }
@@ -785,6 +859,223 @@ namespace BubbleTeaShop
             if (creditsContainer != null) creditsContainer.SetActive(false);
         }
 
+        public void EnsureChangelogUI()
+        {
+            Transform rootTr = (titleScreenRoot != null) ? titleScreenRoot.transform : transform;
+
+            if (changelogContainer == null)
+            {
+                Transform found = rootTr.Find("ChangelogContainer") ?? rootTr.Find("ChangelogPanel") ?? rootTr.Find("PatchNotesPanel");
+                if (found != null)
+                {
+                    changelogContainer = found.gameObject;
+                    changelogContentText = changelogContainer.GetComponentInChildren<TextMeshProUGUI>();
+                }
+            }
+
+            if (changelogContainer == null)
+            {
+                changelogContainer = new GameObject("ChangelogContainer", typeof(RectTransform), typeof(Image));
+                changelogContainer.transform.SetParent(rootTr, false);
+
+                var bgImg = changelogContainer.GetComponent<Image>();
+                bgImg.color = new Color(0.12f, 0.14f, 0.20f, 0.96f);
+
+                // Header Title
+                GameObject headerGo = new GameObject("HeaderTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
+                headerGo.transform.SetParent(changelogContainer.transform, false);
+                var headerRt = headerGo.GetComponent<RectTransform>();
+                headerRt.anchorMin = new Vector2(0.5f, 1f);
+                headerRt.anchorMax = new Vector2(0.5f, 1f);
+                headerRt.pivot = new Vector2(0.5f, 1f);
+                headerRt.sizeDelta = new Vector2(800f, 40f);
+                headerRt.anchoredPosition = new Vector2(0f, -12f);
+
+                var headerTmp = headerGo.GetComponent<TextMeshProUGUI>();
+                headerTmp.text = "<b>CHANGELOG & UPDATES</b>";
+                headerTmp.fontSize = 22;
+                headerTmp.alignment = TextAlignmentOptions.Center;
+                headerTmp.color = new Color(1f, 0.85f, 0.35f, 1f);
+
+                // Scroll View
+                GameObject scrollGo = new GameObject("ScrollView", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
+                scrollGo.transform.SetParent(changelogContainer.transform, false);
+                var scrollRt = scrollGo.GetComponent<RectTransform>();
+                scrollRt.anchorMin = new Vector2(0.02f, 0.03f);
+                scrollRt.anchorMax = new Vector2(0.98f, 0.90f);
+                scrollRt.offsetMin = Vector2.zero;
+                scrollRt.offsetMax = Vector2.zero;
+
+                var scrollImg = scrollGo.GetComponent<Image>();
+                scrollImg.color = new Color(0f, 0f, 0f, 0.25f);
+                scrollImg.raycastTarget = true;
+
+                var scrollRect = scrollGo.GetComponent<ScrollRect>();
+                scrollRect.horizontal = false;
+                scrollRect.vertical = true;
+                scrollRect.scrollSensitivity = 45f;
+                scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+                // Viewport
+                GameObject viewportGo = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D), typeof(Image));
+                viewportGo.transform.SetParent(scrollGo.transform, false);
+                var viewRt = viewportGo.GetComponent<RectTransform>();
+                viewRt.anchorMin = Vector2.zero;
+                viewRt.anchorMax = Vector2.one;
+                viewRt.offsetMin = Vector2.zero;
+                viewRt.offsetMax = Vector2.zero;
+
+                var viewImg = viewportGo.GetComponent<Image>();
+                viewImg.color = Color.clear;
+                viewImg.raycastTarget = true;
+
+                // Content
+                GameObject contentGo = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+                contentGo.transform.SetParent(viewportGo.transform, false);
+                var contentRt = contentGo.GetComponent<RectTransform>();
+                contentRt.anchorMin = new Vector2(0f, 1f);
+                contentRt.anchorMax = new Vector2(1f, 1f);
+                contentRt.pivot = new Vector2(0.5f, 1f);
+                contentRt.anchoredPosition = Vector2.zero;
+                contentRt.sizeDelta = new Vector2(0f, 0f);
+
+                var vlg = contentGo.GetComponent<VerticalLayoutGroup>();
+                vlg.childControlHeight = true;
+                vlg.childControlWidth = true;
+                vlg.childForceExpandHeight = false;
+                vlg.childForceExpandWidth = true;
+                vlg.padding = new RectOffset(16, 16, 12, 16);
+
+                var csf = contentGo.GetComponent<ContentSizeFitter>();
+                csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+                csf.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+                scrollRect.viewport = viewRt;
+                scrollRect.content = contentRt;
+
+                // Text Content
+                GameObject textGo = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                textGo.transform.SetParent(contentGo.transform, false);
+                var textRt = textGo.GetComponent<RectTransform>();
+                textRt.anchorMin = new Vector2(0f, 1f);
+                textRt.anchorMax = new Vector2(1f, 1f);
+                textRt.pivot = new Vector2(0.5f, 1f);
+                textRt.anchoredPosition = Vector2.zero;
+                textRt.sizeDelta = new Vector2(0f, 0f);
+
+                changelogContentText = textGo.GetComponent<TextMeshProUGUI>();
+                changelogContentText.fontSize = 15;
+                changelogContentText.alignment = TextAlignmentOptions.TopLeft;
+                changelogContentText.color = new Color(0.92f, 0.92f, 0.95f, 1f);
+                changelogContentText.textWrappingMode = TextWrappingModes.Normal;
+                changelogContentText.lineSpacing = 4f;
+                changelogContentText.raycastTarget = false;
+            }
+
+            // Always ensure container size (+300px height -> 640px) and proper position
+            if (changelogContainer != null && changelogContainer.TryGetComponent<RectTransform>(out var containerRt))
+            {
+                containerRt.anchorMin = new Vector2(0.5f, 0.5f);
+                containerRt.anchorMax = new Vector2(0.5f, 0.5f);
+                containerRt.pivot = new Vector2(0.5f, 0.5f);
+
+                float targetX = 0f;
+                float targetY = 70f;
+                if (backButton != null && backButton.TryGetComponent<RectTransform>(out var backRt))
+                {
+                    targetX = backRt.anchoredPosition.x;
+                    targetY = backRt.anchoredPosition.y + 360f;
+                }
+                containerRt.anchoredPosition = new Vector2(targetX, targetY);
+                containerRt.sizeDelta = new Vector2(840f, 640f);
+            }
+
+            if (changelogContentText != null)
+            {
+                changelogContentText.text = GetFormattedChangelogText();
+            }
+
+            if (changelogContainer != null) changelogContainer.SetActive(false);
+        }
+
+        private const string DEFAULT_CHANGELOG_TEXT =
+            "<color=#00E5FF><b>[v1.5.0] - 2026-09-03</b></color>\n\n" +
+            "<b>Title Screen Overhaul & Options:</b>\n" +
+            "• <b>Title Screen & Mode Selection:</b> Comprehensive Title Screen featuring New Game, Options, Credits, and Changelog panels, alongside Game Mode selection (Normal vs Blitz Mode).\n" +
+            "• <b>Persistent Audio Settings:</b> Added BGM and SFX volume sliders with real-time percentage readouts (0%–100%) and a Test SFX button, persisting across sessions.\n" +
+            "• <b>Difficulty Modes:</b> Introduced three calibrated difficulty settings with live economy/patience modifiers (Easy: +20% patience & prices, Normal: 1.0x, Hard: -10% patience & -15% prices).\n" +
+            "• <b>Fullscreen Support:</b> Added a toggleable Fullscreen button in the Options menu.\n" +
+            "• <b>Credits & Changelog:</b> Dedicated single-panel Credits view and interactive scrollable Changelog viewer.\n" +
+            "• <b>Version Display:</b> Customizable version badge (v1.5.0) on Title Screen with Inspector configuration.\n\n" +
+            "<b>Cash Register Inventory Upgrades Tab:</b>\n" +
+            "• <b>Interactive Tab Switcher:</b> Toggle button in storefront Cash Register modal switching between stock (Items) and shop enhancements (Upgrades).\n" +
+            "• <b>Week 2 / Day 8 Unlock Gating:</b> Upgrades tab unlocks on Day 8, remaining cleanly greyed out as 'Upgrades (Day 8)' during Days 1–7.\n" +
+            "• <b>2-Column Upgrades Display:</b> Recycled 2-column cards displaying active owned upgrades (ACTIVE badge) alongside locked upgrades (LOCKED badge) with effects and descriptions.\n" +
+            "• <b>Double-Toggle & Color Fixes:</b> Debounced button listeners and preserved custom button color palettes.\n\n" +
+            "<color=#2ECC71><b>[v1.4.0] - 2026-09-02</b></color>\n\n" +
+            "<b>Foraging & Prep Area Audio Immersion:</b>\n" +
+            "• <b>Expedition Sound Effects:</b> Integrated custom sound effects for foraging interactions across Bamboo Grove (rustling grass, scurrying Yippees, Yippee catch audio), Honey Meadows (tree kicks and jelly drops hitting the soil), and Mist Mountains (rock wall impacts and Golden Dew catching in the bucket).\n" +
+            "• <b>Baby Yippee Looping Scurry SFX:</b> Each active Baby Yippee plays looping movement audio with randomized pitch variation while running across the screen.\n" +
+            "• <b>Staggered Spawning Cadence:</b> Flushed Baby Yippees now emerge with a natural 0.1s to 0.7s stagger delay.\n" +
+            "• <b>Kitchen Prep Audio:</b> Integrated dedicated SFX for prep equipment processing including Blender blending, Chopping Log slices, and High-Speed Centrifuge spinning.\n\n" +
+            "<b>Endless Mode & Milestone Progression:</b>\n" +
+            "• <b>Endless Mode Post-Buyout:</b> Added an interactive Endless Mode button to the Victory Modal upon buying out the shop location ($1,500). Players can seamlessly continue playing into indefinite weeks.\n" +
+            "• <b>Exponential Rent Escalation:</b> In Endless Mode, weekly rent scales exponentially (+35% compounding per week past Week 4: e.g., $405 in Week 5, $547 in Week 6, $738 in Week 7, $996 in Week 8).\n" +
+            "• <b>Landlady Chubi Friendly Morning Visit:</b> On the first morning after activating Endless Mode, Landlady Chubi pays a goodwill visit asking for her favourite drink (Oolong Tea with Fresh Milk, 100% Sugar, Less/Regular Ice, and Tapioca Pearls) for free!\n" +
+            "• <b>Multi-Line Dialogue Navigation:</b> Equipped Chubi's visit with an interactive multi-line navigation panel (Next / Got it! / Skip) jumping directly to the recipe line.\n" +
+            "• <b>Victory Fanfare & Physics Confetti:</b> Celebrated shop buyout with immediate victory audio playback and an 8-color physics-simulated confetti explosion bursting across the screen.\n\n" +
+            "<b>Simplified Star Rating & Tip System:</b>\n" +
+            "• <b>Linear 1-Star per Mistake Model:</b> Simplified drink rating to deduct exactly 1 star per mistake (wrong tea base, milk type, sweetness, ice, or missing/extra toppings), capped at 4 deductions (min 1 star).\n" +
+            "• <b>Slowness Star Deductions:</b> If patience drops below 20%, 1 star is deducted for every 5% elapsed.\n" +
+            "• <b>Calibrated Tips & 90% Patience Threshold:</b> Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30% when served above 90% patience.\n" +
+            "• <b>Real-Time Order Payout Indicator:</b> Added a centered HUD panel at the bottom of the screen displaying real-time financial payout: Min (30% unhappy payout), Current (live payout with dynamic RGB gradient), and Max (full tip & speed bonus).\n" +
+            "• <b>Floating Cash Feedback:</b> Added animated green (+$x.xx) and red (-$x.xx) cash indicators for earnings, tips, and supermarket purchases.\n" +
+            "• <b>10-Cent Financial Rounding:</b> Calibrated all prices, tips, payouts, ingredient costs, and ranges to round cleanly to the nearest $0.10.\n\n" +
+            "<color=#FFAA00><b>[v1.3.0] - 2026-09-01</b></color>\n\n" +
+            "<b>Market Conditions Badge & Event System:</b>\n" +
+            "• <b>Market Event HUD Indicator:</b> Added an interactive event badge in the HUD displaying event item icons, trend indicators, and remaining duration.\n" +
+            "• <b>Multi-Icon Badge Support:</b> Market event badges dynamically render single or dual icons (e.g. Milk & Ice for Summer Heatwave).\n" +
+            "• <b>Dynamic Day Counter Docking:</b> Positional docking where Day counter shifts left and the badge aligns seamlessly alongside it.\n" +
+            "• <b>Shutter-Synchronized Visibility:</b> Badges remain concealed behind closed shutters and cleanly appear when the shop opens.\n\n" +
+            "<b>Cup Visuals & Multi-Topping Layering:</b>\n" +
+            "• <b>Dynamic Multi-Topping Stacking:</b> Cups dynamically instantiate and stack separate visual layers with calibrated vertical spacing when multiple bottom toppings are added.\n" +
+            "• <b>Aspect Ratio Preservation:</b> Maintained circular proportions across all topping sprites without vertical squishing.\n" +
+            "• <b>Calibrated Cheese Foam Layer:</b> Added support for Cheese Foam sitting across the top rim of the cup with fine-tuned width, positioning, and thickness.\n" +
+            "• <b>Week 4 Triple-Topping Orders:</b> Customer orders in Week 4 can now request up to two bottom toppings plus Cheese Foam (3 toppings total).\n\n" +
+            "<b>Customer Dismissal Bell Safety:</b>\n" +
+            "• <b>Accidental Dismissal Confirmation:</b> Ringing the counter bell while a customer is waiting prompts for confirmation on the first ring and skips only on the second ring.\n\n" +
+            "<b>Upgrades & Economy:</b>\n" +
+            "• <b>Commercial Auto-Sealer:</b> Added a permanent shop upgrade ($20.00) that automatically seals cups when serving.\n" +
+            "• <b>Owned-Items Inventory Filter:</b> Cash Register and Nightly Ledger exclusively display unlocked/purchased items.\n" +
+            "• <b>Lowered Buyout Target:</b> Rebalanced final shop buyout goal from $5,000 to $1,500 for a balanced 4-week progression.\n\n" +
+            "<color=#3498DB><b>[v1.2.0] - 2026-08-28</b></color>\n\n" +
+            "<b>Foraging Expeditions & Kitchen Prep:</b>\n" +
+            "• <b>Foraging Locations:</b> Added playable expeditions across Bamboo Grove, Honey Meadows, and Misty Mountains.\n" +
+            "• <b>Kitchen Prep Area:</b> Added equipment stations for Blender & Sieve (Popping Boba), Chopping Board (Grass & Coconut Jellies), and High-Speed Centrifuge (Cheese Foam & Golden Honey Pearls).\n" +
+            "• <b>Shop Upgrades System:</b> Added permanent upgrades for Storefront Beautification, Advertisements, Supply Contracts, and Lucky Cat charm.\n" +
+            "• <b>Mentor Dialogue Skip:</b> Added skip buttons to accelerate through morning briefings.\n\n" +
+            "<color=#9B59B6><b>[v1.1.0] - 2026-08-20</b></color>\n\n" +
+            "<b>Wholesale Market & Inventory:</b>\n" +
+            "• <b>Wholesale Night Market:</b> Buy bulk cups, milks, and raw ingredients during the night phase.\n" +
+            "• <b>Inventory Stock Tracking:</b> Full inventory tracking with interactive Cash Register UI inspection.\n" +
+            "• <b>Dynamic Market Events:</b> Daily market conditions affecting customer demand and pricing.\n" +
+            "• <b>Order Ticket UI:</b> Physical clipped order tickets for customer drink requests.\n\n" +
+            "<color=#E67E22><b>[v1.0.0] - 2026-08-10</b></color>\n\n" +
+            "<b>Initial Release:</b>\n" +
+            "• <b>Core Tea Brewing:</b> Dispensers for tea bases, sweetness, ice sliders, milk layering, topping station, and cup sealing.\n" +
+            "• <b>Customer Archetypes:</b> Neurodivergent customer personalities (ADHD, Autism, Anxiety, Tourettes, Dyscalculia, Dyslexia) with unique quirks and patience mechanics.\n" +
+            "• <b>Daily Loop:</b> Day shift service, drink rating evaluations, tips, weekly rent cycle, and shop closing ledger.";
+
+        public string GetFormattedChangelogText()
+        {
+            if (!string.IsNullOrEmpty(changelogText))
+            {
+                return changelogText;
+            }
+
+            return DEFAULT_CHANGELOG_TEXT;
+        }
+
         public void ShowMainMenu() => ShowMainMenu(playAudio: false);
         private void ShowMainMenuWithAudio() => ShowMainMenu(playAudio: true);
 
@@ -792,15 +1083,17 @@ namespace BubbleTeaShop
         {
             if (playAudio) PlayButtonClickSound();
 
-            // Hide Options & Credits Containers
+            // Hide Containers
             if (optionsContainer != null) optionsContainer.SetActive(false);
             if (creditsContainer != null) creditsContainer.SetActive(false);
+            if (changelogContainer != null) changelogContainer.SetActive(false);
 
             // Show Main Menu buttons
             SetButtonVisible(newGameButton, true);
             SetButtonVisible(continueGameButton, true);
             SetButtonVisible(optionsButton, true);
             SetButtonVisible(creditsButton, true);
+            SetButtonVisible(changelogButton, true);
 
             // Hide Game Mode selection buttons & Back button
             SetButtonVisible(normalModeButton, false);
@@ -814,15 +1107,17 @@ namespace BubbleTeaShop
         {
             PlayButtonClickSound();
 
-            // Hide Options & Credits Containers
+            // Hide Containers
             if (optionsContainer != null) optionsContainer.SetActive(false);
             if (creditsContainer != null) creditsContainer.SetActive(false);
+            if (changelogContainer != null) changelogContainer.SetActive(false);
 
             // Hide Main Menu buttons
             SetButtonVisible(newGameButton, false);
             SetButtonVisible(continueGameButton, false);
             SetButtonVisible(optionsButton, false);
             SetButtonVisible(creditsButton, false);
+            SetButtonVisible(changelogButton, false);
 
             // Show Game Mode selection buttons & Back button
             SetButtonVisible(normalModeButton, true);
@@ -835,14 +1130,16 @@ namespace BubbleTeaShop
             PlayButtonClickSound();
             EnsureOptionsUI();
 
-            // Hide Credits Container
+            // Hide other containers
             if (creditsContainer != null) creditsContainer.SetActive(false);
+            if (changelogContainer != null) changelogContainer.SetActive(false);
 
             // Hide Main Menu buttons
             SetButtonVisible(newGameButton, false);
             SetButtonVisible(continueGameButton, false);
             SetButtonVisible(optionsButton, false);
             SetButtonVisible(creditsButton, false);
+            SetButtonVisible(changelogButton, false);
 
             // Hide Game Mode selection buttons
             SetButtonVisible(normalModeButton, false);
@@ -901,14 +1198,16 @@ namespace BubbleTeaShop
                 containerRt.anchoredPosition = new Vector2(targetX, targetY);
             }
 
-            // Hide Options Container
+            // Hide other containers
             if (optionsContainer != null) optionsContainer.SetActive(false);
+            if (changelogContainer != null) changelogContainer.SetActive(false);
 
             // Hide Main Menu buttons
             SetButtonVisible(newGameButton, false);
             SetButtonVisible(continueGameButton, false);
             SetButtonVisible(optionsButton, false);
             SetButtonVisible(creditsButton, false);
+            SetButtonVisible(changelogButton, false);
 
             // Hide Game Mode selection buttons
             SetButtonVisible(normalModeButton, false);
@@ -916,6 +1215,47 @@ namespace BubbleTeaShop
 
             // Show Credits & Back Button
             if (creditsContainer != null) creditsContainer.SetActive(true);
+            SetButtonVisible(backButton, true);
+        }
+
+        public void ShowChangelog()
+        {
+            PlayButtonClickSound();
+            EnsureChangelogUI();
+
+            if (changelogContentText != null)
+            {
+                changelogContentText.text = GetFormattedChangelogText();
+            }
+
+            // Hide other containers
+            if (optionsContainer != null) optionsContainer.SetActive(false);
+            if (creditsContainer != null) creditsContainer.SetActive(false);
+
+            // Hide Main Menu buttons
+            SetButtonVisible(newGameButton, false);
+            SetButtonVisible(continueGameButton, false);
+            SetButtonVisible(optionsButton, false);
+            SetButtonVisible(creditsButton, false);
+            SetButtonVisible(changelogButton, false);
+
+            // Hide Game Mode selection buttons
+            SetButtonVisible(normalModeButton, false);
+            SetButtonVisible(blitzModeButton, false);
+
+            // Show Changelog & Back Button
+            if (changelogContainer != null)
+            {
+                changelogContainer.transform.SetAsLastSibling();
+                changelogContainer.SetActive(true);
+
+                Canvas.ForceUpdateCanvases();
+                var sr = changelogContainer.GetComponentInChildren<ScrollRect>();
+                if (sr != null)
+                {
+                    sr.verticalNormalizedPosition = 1f;
+                }
+            }
             SetButtonVisible(backButton, true);
         }
 

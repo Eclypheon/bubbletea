@@ -178,5 +178,24 @@ namespace BubbleTeaShop
             }
             return false;
         }
+
+        // Persistence API
+        public void RestoreEconomy(float cash, float rentOwed, int skipsUsed, bool endless)
+        {
+            currentCash = (float)Math.Round(cash, 2);
+            accumulatedRentOwed = rentOwed;
+            rentSkipsUsed = skipsUsed;
+            isEndlessMode = endless;
+            OnCashChanged?.Invoke(currentCash);
+        }
+
+        public void ResetToStartingEconomy()
+        {
+            currentCash = startingCash;
+            accumulatedRentOwed = 0f;
+            rentSkipsUsed = 0;
+            isEndlessMode = false;
+            OnCashChanged?.Invoke(currentCash);
+        }
     }
 }

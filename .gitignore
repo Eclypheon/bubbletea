@@ -21,6 +21,10 @@
 /[Bb]uilds/
 /[Bb]uild*/
 build*/
+
+# Allow GitHub Pages docs directory
+!/[Dd]ocs/
+!/[Dd]ocs/**
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log

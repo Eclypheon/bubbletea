@@ -303,6 +303,40 @@ namespace BubbleTeaShop
         public int GetRawStock(RawIngredientType type) => GetStock($"Raw_{type}");
         public void AddRawStock(RawIngredientType type, int qty) => AddStock($"Raw_{type}", qty);
         public bool ConsumeRawStock(RawIngredientType type, int qty = 1) => ConsumeStock($"Raw_{type}", qty);
+
+        // Persistence API
+        public Dictionary<string, int> GetAllStock() => new Dictionary<string, int>(stock);
+        public HashSet<string> GetDiscoveredKeys() => new HashSet<string>(discoveredKeys);
+
+        public void RestoreStock(Dictionary<string, int> savedStock, IEnumerable<string> savedDiscoveredKeys, bool savedPremiumMilk)
+        {
+            hasPremiumMilkDispenser = savedPremiumMilk;
+            stock.Clear();
+            if (savedStock != null)
+            {
+                foreach (var kvp in savedStock)
+                {
+                    stock[kvp.Key] = kvp.Value;
+                }
+            }
+
+            discoveredKeys.Clear();
+            if (savedDiscoveredKeys != null)
+            {
+                foreach (var key in savedDiscoveredKeys)
+                {
+                    discoveredKeys.Add(key);
+                }
+            }
+
+            SyncDictionaryToInspector();
+            OnInventoryUpdated?.Invoke();
+        }
+
+        public void ResetToStartingInventory()
+        {
+            InitializeStock();
+        }
     }
 
     public enum RawIngredientType

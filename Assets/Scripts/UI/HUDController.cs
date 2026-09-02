@@ -95,6 +95,24 @@ namespace BubbleTeaShop
             set => blitzTimerText = value;
         }
 
+        [Header("Quit to Title UI")]
+        [Tooltip("Quit button in the shopfront or global HUD.")]
+        [SerializeField] private Button quitButton;
+        [Tooltip("Quit button in the Night Phase panel (optional if separate).")]
+        [SerializeField] private Button nightPhaseQuitButton;
+
+        public Button QuitButton
+        {
+            get => quitButton;
+            set => quitButton = value;
+        }
+
+        public Button NightPhaseQuitButton
+        {
+            get => nightPhaseQuitButton;
+            set => nightPhaseQuitButton = value;
+        }
+
         private Coroutine notificationRoutine;
         private Coroutine cashGainRoutine;
         private Vector2 cashGainOriginalPos = new Vector2(-280f, 0f);
@@ -133,6 +151,7 @@ namespace BubbleTeaShop
             EnsureMarketEventUI();
             EnsureMarketEventModal();
             EnsurePayoutIndicatorUI();
+            EnsureQuitButtonReferences();
 
             if (CustomerManager.Instance != null)
             {
@@ -703,7 +722,7 @@ namespace BubbleTeaShop
             UpdateMarketEventDisplay();
         }
 
-        private void UpdateDayDisplay(int day)
+        public void UpdateDayDisplay(int day)
         {
             if (dayText != null) dayText.text = $"Day {day}";
             
@@ -1266,12 +1285,258 @@ namespace BubbleTeaShop
         }
 
         private DrinkOrder activeDisplayedOrder = null;
+        private bool isAwaitingQuitConfirmation = false;
+        private float quitConfirmationTimer = 0f;
+        private string defaultQuitText = "";
+        private string defaultNightQuitText = "";
 
         private void Update()
         {
             if (activeDisplayedOrder != null)
             {
                 UpdateOrderPayoutDisplay();
+            }
+
+            if (isAwaitingQuitConfirmation)
+            {
+                quitConfirmationTimer -= Time.unscaledDeltaTime;
+                if (quitConfirmationTimer <= 0f)
+                {
+                    isAwaitingQuitConfirmation = false;
+                    ResetQuitButtonLabels();
+                }
+            }
+
+            UpdateQuitButtonsVisibility();
+        }
+
+        public void EnsureQuitButtonReferences()
+        {
+            // Auto-discover quit button in shopfront/HUD if unassigned
+            if (quitButton == null)
+            {
+                quitButton = FindButtonInHierarchy("QuitButton", "QuitBtn", "BtnQuit", "QuitToTitleButton", "QuitToTitleBtn", "ExitButton", "ExitBtn", "Quit", "Quit Button", "Exit Button");
+            }
+
+            // Auto-discover night quit button if unassigned
+            if (nightPhaseQuitButton == null && NightPhaseManager.Instance != null && NightPhaseManager.Instance.NightPanelRoot != null)
+            {
+                nightPhaseQuitButton = NightPhaseManager.Instance.QuitToTitleButton ??
+                                       FindButtonInRoot(NightPhaseManager.Instance.NightPanelRoot.transform, "QuitButton", "QuitBtn", "BtnQuit", "NightQuitBtn", "QuitToTitleButton", "ExitButton", "ExitBtn", "Quit", "Quit Button");
+            }
+
+            if (quitButton != null)
+            {
+                quitButton.onClick.RemoveListener(OnQuitButtonClicked);
+                quitButton.onClick.AddListener(OnQuitButtonClicked);
+
+                var tmp = quitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null && string.IsNullOrEmpty(defaultQuitText))
+                {
+                    defaultQuitText = tmp.text;
+                }
+            }
+
+            if (nightPhaseQuitButton != null)
+            {
+                nightPhaseQuitButton.onClick.RemoveListener(OnQuitButtonClicked);
+                nightPhaseQuitButton.onClick.AddListener(OnQuitButtonClicked);
+
+                var tmp = nightPhaseQuitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null && string.IsNullOrEmpty(defaultNightQuitText))
+                {
+                    defaultNightQuitText = tmp.text;
+                }
+            }
+        }
+
+        private bool IsTitleScreenElement(Component c)
+        {
+            if (c == null) return false;
+            if (TitleScreenController.Instance != null && c.transform.IsChildOf(TitleScreenController.Instance.transform)) return true;
+            if (c.name.StartsWith("TitleScreen_", StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        private Button FindButtonInHierarchy(params string[] names)
+        {
+            var allButtons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            // 1. Exact match on provided names
+            foreach (var b in allButtons)
+            {
+                if (IsTitleScreenElement(b)) continue;
+
+                foreach (var name in names)
+                {
+                    if (b.name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return b;
+                    }
+                }
+            }
+
+            // 2. Fuzzy match on button GameObject name
+            foreach (var b in allButtons)
+            {
+                if (IsTitleScreenElement(b)) continue;
+
+                string cleaned = b.name.ToLower().Replace(" ", "").Replace("_", "").Replace("-", "");
+                if (cleaned.Contains("quit") || cleaned.Contains("quittotitle") || cleaned.Contains("exittotitle"))
+                {
+                    return b;
+                }
+            }
+
+            // 3. Match on child TextMeshProUGUI text label
+            foreach (var b in allButtons)
+            {
+                if (IsTitleScreenElement(b)) continue;
+
+                var tmp = b.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (tmp != null && !string.IsNullOrEmpty(tmp.text))
+                {
+                    string t = tmp.text.Trim().ToLower();
+                    if (t == "quit" || t == "exit" || t == "quit game" || t == "quit to title" || t == "back to title")
+                    {
+                        return b;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private Button FindButtonInRoot(Transform root, params string[] names)
+        {
+            if (root == null) return null;
+            var buttons = root.GetComponentsInChildren<Button>(true);
+            foreach (var b in buttons)
+            {
+                foreach (var name in names)
+                {
+                    if (b.name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return b;
+                    }
+                }
+            }
+
+            // Fuzzy fallback in root
+            foreach (var b in buttons)
+            {
+                string cleaned = b.name.ToLower().Replace(" ", "").Replace("_", "").Replace("-", "");
+                if (cleaned.Contains("quit") || cleaned.Contains("exit"))
+                {
+                    return b;
+                }
+            }
+            return null;
+        }
+
+        public void OnQuitButtonClicked()
+        {
+            if (isAwaitingQuitConfirmation && quitConfirmationTimer > 0f)
+            {
+                // 2nd click: Confirm quit and return to title screen
+                isAwaitingQuitConfirmation = false;
+                quitConfirmationTimer = 0f;
+                ResetQuitButtonLabels();
+                GameManager.Instance?.ReturnToTitleScreen(reloadScene: true);
+            }
+            else
+            {
+                // 1st click: Prompt confirmation message
+                isAwaitingQuitConfirmation = true;
+                quitConfirmationTimer = 4.0f;
+
+                SetStatusHint("Are you sure you want to quit? Click Quit again to return to Title Screen.");
+                ShowNotification("Are you sure you want to quit? Click Quit again to return to Title Screen.", 3.5f);
+
+                SetQuitButtonLabel("Confirm Quit?");
+            }
+        }
+
+        private void SetQuitButtonLabel(string label)
+        {
+            if (quitButton != null)
+            {
+                var tmp = quitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    if (string.IsNullOrEmpty(defaultQuitText)) defaultQuitText = tmp.text;
+                    tmp.text = $"<color=#FF6B6B><b>{label}</b></color>";
+                }
+            }
+            if (nightPhaseQuitButton != null)
+            {
+                var tmp = nightPhaseQuitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    if (string.IsNullOrEmpty(defaultNightQuitText)) defaultNightQuitText = tmp.text;
+                    tmp.text = $"<color=#FF6B6B><b>{label}</b></color>";
+                }
+            }
+        }
+
+        private void ResetQuitButtonLabels()
+        {
+            if (quitButton != null && !string.IsNullOrEmpty(defaultQuitText))
+            {
+                var tmp = quitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null) tmp.text = defaultQuitText;
+            }
+            if (nightPhaseQuitButton != null && !string.IsNullOrEmpty(defaultNightQuitText))
+            {
+                var tmp = nightPhaseQuitButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null) tmp.text = defaultNightQuitText;
+            }
+        }
+
+        public void UpdateQuitButtonsVisibility()
+        {
+            if (quitButton == null)
+            {
+                EnsureQuitButtonReferences();
+            }
+
+            bool isTitleActive = (TitleScreenController.Instance != null && TitleScreenController.Instance.IsTitleScreenActive);
+
+            bool isServeButtonActive = false;
+            if (CupStation.Instance != null && CupStation.Instance.ServeCupButton != null)
+            {
+                isServeButtonActive = CupStation.Instance.ServeCupButton.gameObject.activeInHierarchy;
+            }
+            else
+            {
+                // If serve button reference isn't hooked yet, check if storefront is running during the day
+                isServeButtonActive = (GameManager.Instance != null && GameManager.Instance.IsGameStarted &&
+                                       GameManager.Instance.CurrentState != GameState.NightPhase &&
+                                       GameManager.Instance.CurrentState != GameState.GameOver &&
+                                       GameManager.Instance.CurrentState != GameState.GameWon);
+            }
+
+            bool isNightActive = (NightPhaseManager.Instance != null &&
+                                  NightPhaseManager.Instance.NightPanelRoot != null &&
+                                  NightPhaseManager.Instance.NightPanelRoot.activeInHierarchy) ||
+                                 (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.NightPhase);
+
+            if (quitButton != null)
+            {
+                bool shouldShow = !isTitleActive && (isServeButtonActive || isNightActive);
+                if (quitButton.gameObject.activeSelf != shouldShow)
+                {
+                    quitButton.gameObject.SetActive(shouldShow);
+                }
+            }
+
+            if (nightPhaseQuitButton != null && nightPhaseQuitButton != quitButton)
+            {
+                bool shouldShow = !isTitleActive && isNightActive;
+                if (nightPhaseQuitButton.gameObject.activeSelf != shouldShow)
+                {
+                    nightPhaseQuitButton.gameObject.SetActive(shouldShow);
+                }
             }
         }
 

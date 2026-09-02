@@ -181,10 +181,41 @@ namespace BubbleTeaShop
                 u.isPurchased = true;
                 u.currentLevel = 1;
                 OnUpgradePurchased?.Invoke(type);
+                SaveManager.Instance?.SaveGame();
                 return true;
             }
 
             return false;
+        }
+
+        // Persistence API
+        public List<UpgradeType> GetPurchasedUpgrades()
+        {
+            var list = new List<UpgradeType>();
+            foreach (var u in availableUpgrades)
+            {
+                if (u.isPurchased) list.Add(u.type);
+            }
+            return list;
+        }
+
+        public void RestorePurchasedUpgrades(IEnumerable<UpgradeType> purchased)
+        {
+            var set = new HashSet<UpgradeType>(purchased);
+            foreach (var u in availableUpgrades)
+            {
+                u.isPurchased = set.Contains(u.type);
+                u.currentLevel = u.isPurchased ? 1 : 0;
+            }
+        }
+
+        public void ResetUpgrades()
+        {
+            foreach (var u in availableUpgrades)
+            {
+                u.isPurchased = false;
+                u.currentLevel = 0;
+            }
         }
     }
 }
