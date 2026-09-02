@@ -299,7 +299,10 @@
       var canvasWrapper = document.querySelector("#unity-canvas-wrapper");
       var container = document.querySelector("#unity-container");
 
-      // Intercept requestFullscreen so browser fullscreens the container (with black bars), NOT the raw canvas!
+      function isBrowserFullscreenActive() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+      }
+
       function requestContainerFullscreen() {
         var el = container || document.documentElement;
         if (el.requestFullscreen) el.requestFullscreen();
@@ -307,6 +310,24 @@
         else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
         else if (el.msRequestFullscreen) el.msRequestFullscreen();
       }
+
+      var origExitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+
+      function smartExitFullscreen() {
+        if (!isBrowserFullscreenActive()) {
+          // Unity was out of sync on 1st click (thought it was fullscreen and tried to exit) -> enter fullscreen!
+          requestContainerFullscreen();
+          return Promise.resolve();
+        }
+        if (origExitFullscreen) return origExitFullscreen.call(document);
+        return Promise.resolve();
+      }
+
+      document.exitFullscreen = smartExitFullscreen;
+      if (document.webkitExitFullscreen) document.webkitExitFullscreen = smartExitFullscreen;
+      if (document.mozCancelFullScreen) document.mozCancelFullScreen = smartExitFullscreen;
+      if (document.msExitFullscreen) document.msExitFullscreen = smartExitFullscreen;
+
       if (canvas) {
         canvas.requestFullscreen = requestContainerFullscreen;
         canvas.webkitRequestFullscreen = requestContainerFullscreen;

@@ -132,8 +132,12 @@ namespace BubbleTeaShop
 
         private void Start()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            Screen.fullScreen = false;
+#endif
             WireButtonListeners();
             UpdateContinueButtonState();
+            UpdateFullscreenButtonVisuals();
             BringToFront();
             ShowMainMenu(playAudio: false);
         }
