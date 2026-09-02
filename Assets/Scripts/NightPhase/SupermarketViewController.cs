@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,8 +18,19 @@ namespace BubbleTeaShop
 
         [Header("Header & Navigation")]
         [SerializeField] private TextMeshProUGUI cashBalanceText;
+        [SerializeField] private TextMeshProUGUI cashDeductionDeltaText;
         [SerializeField] private TextMeshProUGUI marketAisleTitleText;
         [SerializeField] private Button returnToNightHubButton;
+
+        public TextMeshProUGUI CashDeductionDeltaText
+        {
+            get => cashDeductionDeltaText;
+            set => cashDeductionDeltaText = value;
+        }
+
+        private Coroutine cashDeductionRoutine;
+        private Vector2 cashDeductionOriginalPos;
+        private bool hasCapturedCashDeductionPos = false;
 
         [Header("Catalog Container")]
         [SerializeField] private Transform marketCatalogContainer;
@@ -123,6 +135,9 @@ namespace BubbleTeaShop
             {
                 cashBalanceText.raycastTarget = false;
             }
+
+            // 4b. Resolve Cash Deduction Delta Text
+            EnsureCashDeductionUI();
 
             // 5. Resolve Return / Exit Button
             if (returnToNightHubButton == null)
@@ -359,10 +374,134 @@ namespace BubbleTeaShop
                         {
                             AudioManager.Instance?.PlaySFX(purchaseChimeSound);
                         }
+                        ShowFloatingCashDeduction(item.price);
                         UpdateSupermarketDisplay(dayNumber);
                     }
                 });
             }
+        }
+
+        public void EnsureCashDeductionUI()
+        {
+            if (cashDeductionDeltaText != null)
+            {
+                if (!hasCapturedCashDeductionPos)
+                {
+                    cashDeductionOriginalPos = cashDeductionDeltaText.rectTransform.anchoredPosition;
+                    hasCapturedCashDeductionPos = true;
+                }
+                return;
+            }
+
+            Transform targetParent = (cashBalanceText != null) ? cashBalanceText.transform.parent : transform;
+            Transform existing = targetParent.Find("CashDeductionDeltaText");
+            if (existing != null)
+            {
+                cashDeductionDeltaText = existing.GetComponent<TextMeshProUGUI>();
+                if (cashDeductionDeltaText != null)
+                {
+                    cashDeductionOriginalPos = cashDeductionDeltaText.rectTransform.anchoredPosition;
+                    hasCapturedCashDeductionPos = true;
+                    return;
+                }
+            }
+
+            GameObject deltaObj = new GameObject("CashDeductionDeltaText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            deltaObj.transform.SetParent(targetParent, false);
+
+            var rt = deltaObj.GetComponent<RectTransform>();
+            if (cashBalanceText != null)
+            {
+                rt.anchorMin = cashBalanceText.rectTransform.anchorMin;
+                rt.anchorMax = cashBalanceText.rectTransform.anchorMax;
+                rt.pivot = cashBalanceText.rectTransform.pivot;
+                Vector2 basePos = cashBalanceText.rectTransform.anchoredPosition + new Vector2(170f, 0f);
+                rt.anchoredPosition = basePos;
+                cashDeductionOriginalPos = basePos;
+            }
+            else
+            {
+                rt.anchorMin = new Vector2(0.5f, 1f);
+                rt.anchorMax = new Vector2(0.5f, 1f);
+                rt.pivot = new Vector2(0.5f, 1f);
+                Vector2 basePos = new Vector2(100f, -40f);
+                rt.anchoredPosition = basePos;
+                cashDeductionOriginalPos = basePos;
+            }
+
+            rt.sizeDelta = new Vector2(160f, 40f);
+            hasCapturedCashDeductionPos = true;
+
+            cashDeductionDeltaText = deltaObj.GetComponent<TextMeshProUGUI>();
+            cashDeductionDeltaText.fontSize = 24;
+            cashDeductionDeltaText.fontStyle = FontStyles.Bold;
+            cashDeductionDeltaText.color = new Color(1f, 0.35f, 0.35f, 1f); // #FF5555 Red
+            cashDeductionDeltaText.alignment = TextAlignmentOptions.Left;
+            cashDeductionDeltaText.raycastTarget = false;
+
+            deltaObj.SetActive(false);
+        }
+
+        public void ShowFloatingCashDeduction(float amount)
+        {
+            if (amount <= 0) return;
+
+            EnsureCashDeductionUI();
+            if (cashDeductionDeltaText == null) return;
+
+            if (cashDeductionRoutine != null)
+            {
+                StopCoroutine(cashDeductionRoutine);
+            }
+            cashDeductionRoutine = StartCoroutine(CashDeductionFloatRoutine(amount));
+        }
+
+        private IEnumerator CashDeductionFloatRoutine(float amount)
+        {
+            cashDeductionDeltaText.gameObject.SetActive(true);
+            cashDeductionDeltaText.text = $"-${amount:F2}";
+            cashDeductionDeltaText.color = new Color(1f, 0.35f, 0.35f, 1f);
+
+            RectTransform rt = cashDeductionDeltaText.rectTransform;
+            Vector2 startPos = cashDeductionOriginalPos;
+            Vector2 targetPos = startPos + new Vector2(0f, -18f);
+
+            float duration = 1.5f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                // Smooth downward drift
+                rt.anchoredPosition = Vector2.Lerp(startPos, targetPos, t);
+
+                // Pop scale in first 0.15s
+                if (t < 0.15f)
+                {
+                    float pop = Mathf.Lerp(1.35f, 1.0f, t / 0.15f);
+                    rt.localScale = new Vector3(pop, pop, 1f);
+                }
+                else
+                {
+                    rt.localScale = Vector3.one;
+                }
+
+                // Smooth fade out in last 0.5s
+                if (t > 0.65f)
+                {
+                    float alpha = Mathf.Lerp(1f, 0f, (t - 0.65f) / 0.35f);
+                    cashDeductionDeltaText.color = new Color(1f, 0.35f, 0.35f, alpha);
+                }
+
+                yield return null;
+            }
+
+            rt.anchoredPosition = startPos;
+            rt.localScale = Vector3.one;
+            cashDeductionDeltaText.gameObject.SetActive(false);
+            cashDeductionRoutine = null;
         }
     }
 }

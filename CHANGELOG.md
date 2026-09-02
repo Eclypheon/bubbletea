@@ -27,6 +27,7 @@ All notable changes to the Yippee Tea project are documented in this file.
 * **Calibrated Tips & 90% Patience Threshold**: Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30%. Serving when the patience bar is at or above 90% guarantees the maximum speed bonus (+30%), scaling down linearly only when patience drops below 90%.
 * **Real-Time Order Payout Indicator & Dynamic Gradient**: Added a centered HUD panel at the bottom of the screen displaying the financial payout in real-time with 2x larger 36pt typography: **Min** (30% unhappy partial payout in coral red `#FF6B6B`), **Current** (exact earnings + tip if served right at that moment, dynamically colored with a smooth RGB gradient from Red $\rightarrow$ Gold $\rightarrow$ Vibrant Green `#2ECC71` based on its proximity to Max and Min), and **Max** (Base Price + full 40% Tip with speed bonus & Lucky Cat upgrade in vibrant green).
 * **Floating Cash Gain Feedback**: Added an animated green `+$x.xx` delta indicator next to the HUD Cash display that pops and floats smoothly whenever drink earnings and tips are collected.
+* **Supermarket Floating Cash Deduction**: Added an animated red `-$x.xx` delta indicator next to the Supermarket wallet balance that pops and drifts downward whenever an ingredient or supply pack is purchased.
 * **10-Cent Financial Rounding**: Calibrated all drink selling prices, customer tips, unhappy partial payouts, wholesale ingredient pack costs, and payout indicator ranges to round cleanly to the nearest $0.10.
 
 ---

@@ -822,10 +822,12 @@ namespace BubbleTeaShop.Editor
                 var bg = findGo("SupermarketBg")?.GetComponent<Image>();
                 var ret = findGo("ReturnShopButton")?.GetComponent<Button>();
                 var cash = findGo("CashBalanceText (1)")?.GetComponent<TextMeshProUGUI>();
+                var cashDelta = findGo("CashDeductionDeltaText")?.GetComponent<TextMeshProUGUI>();
                 var cat = findGo("MarketCatalogContainer")?.transform;
                 if (bg != null) SetSerializedProperty(svc, "supermarketBackgroundImage", bg);
                 if (ret != null) SetSerializedProperty(svc, "returnToNightHubButton", ret);
                 if (cash != null) SetSerializedProperty(svc, "cashBalanceText", cash);
+                if (cashDelta != null) SetSerializedProperty(svc, "cashDeductionDeltaText", cashDelta);
                 if (cat != null) SetSerializedProperty(svc, "marketCatalogContainer", cat);
                 EditorUtility.SetDirty(svc);
             }
