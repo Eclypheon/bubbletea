@@ -48,12 +48,15 @@
         overflow: hidden;
       }
 
-      /* Desktop: Maintain 16:9 aspect ratio and contain in Firefox/Chrome/Safari */
-      #unity-container.unity-desktop #unity-canvas {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: calc(100vh * 16 / 9) !important;
-        max-height: calc(100vw * 9 / 16) !important;
+      /* Desktop & Fullscreen: Maintain exact 16:9 aspect ratio contained within screen */
+      #unity-container.unity-desktop #unity-canvas,
+      :fullscreen #unity-canvas,
+      :-webkit-full-screen #unity-canvas,
+      :-moz-full-screen #unity-canvas {
+        width: min(100vw, calc(100vh * 16 / 9)) !important;
+        height: min(100vh, calc(100vw * 9 / 16)) !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
         aspect-ratio: 16 / 9;
         object-fit: contain;
         display: block;
