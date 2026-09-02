@@ -536,7 +536,7 @@ namespace BubbleTeaShop
 
                 if (i < countToSpawn - 1)
                 {
-                    float staggerDelay = UnityEngine.Random.Range(0.05f, 0.10f);
+                    float staggerDelay = UnityEngine.Random.Range(0.1f, 0.7f);
                     yield return new WaitForSeconds(staggerDelay);
                 }
             }

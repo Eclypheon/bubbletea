@@ -5600,10 +5600,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 394}
   - {fileID: 1345631770}
   - {fileID: 1506914415}
   - {fileID: 453}
+  - {fileID: 394}
   m_Father: {fileID: 470}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0, y: 0}
@@ -11968,7 +11968,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -12216,7 +12216,7 @@ MonoBehaviour:
   minJellyBlocks: 3
   maxJellyBlocks: 5
   soilAbsorptionSeconds: 4
-  treeKickSound: {fileID: 0}
+  treeKickSound: {fileID: 8300000, guid: daed90e62a5d849a1b5450dad462bd4a, type: 3}
   harvestCollectSound: {fileID: 0}
   completeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
 --- !u!114 &616
@@ -14302,6 +14302,7 @@ MonoBehaviour:
   grassRustleSound: {fileID: 0}
   catchCritterSound: {fileID: 0}
   completeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
+  yippeeScurryLoopSound: {fileID: 8300000, guid: 15862d1cad7e749189addeca7a8d2a61, type: 3}
 --- !u!114 &688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15664,8 +15665,8 @@ MonoBehaviour:
   bucketImage: {fileID: 607}
   minDewDrops: 4
   maxDewDrops: 7
-  rockKickSound: {fileID: 0}
-  dewCatchSound: {fileID: 0}
+  rockKickSound: {fileID: 8300000, guid: a87621bc369f34ba4ad3b9723ea40eb5, type: 3}
+  dewCatchSound: {fileID: 8300000, guid: 9718d9fb0a05b4c3a81c825e01f5e63b, type: 3}
   completeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
 --- !u!114 &732
 MonoBehaviour:
@@ -17459,9 +17460,9 @@ MonoBehaviour:
   bucketLoadedSprite: {fileID: -7389932857204570107, guid: d39a9c148958f46d5a502f4378cf48f2, type: 3}
   centrifugeRefinedSprite: {fileID: -1531343106169951327, guid: d39a9c148958f46d5a502f4378cf48f2, type: 3}
   loadIngredientSound: {fileID: 0}
-  blendSound: {fileID: 0}
-  chopSound: {fileID: 0}
-  centrifugeSound: {fileID: 0}
+  blendSound: {fileID: 8300000, guid: f07c5b3a4938245c6acd730c3c17e745, type: 3}
+  chopSound: {fileID: 8300000, guid: 15143544cf8fb46c39de95c969dafe1a, type: 3}
+  centrifugeSound: {fileID: 8300000, guid: 7b9bf8ad675a245a497c7b8e35b1309c, type: 3}
   collectRewardSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
   blenderState: 0
   blenderLoadedCount: 0
