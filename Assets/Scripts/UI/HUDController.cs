@@ -967,7 +967,8 @@ namespace BubbleTeaShop
 
             if (payoutIndicatorText != null)
             {
-                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#FFD700>Current: ${currentPayout:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
+                string currentColorHex = GetPayoutColorHex(currentPayout, minPrice, maxPrice);
+                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#{currentColorHex}>Current: ${currentPayout:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
             }
 
             if (payoutIndicatorPanel != null && !payoutIndicatorPanel.activeSelf)
@@ -975,6 +976,23 @@ namespace BubbleTeaShop
                 payoutIndicatorPanel.SetActive(true);
                 payoutIndicatorPanel.transform.SetAsLastSibling();
             }
+        }
+
+        private string GetPayoutColorHex(float current, float min, float max)
+        {
+            if (max <= min) return "2ECC71";
+            float t = Mathf.Clamp01((current - min) / (max - min));
+
+            // Multi-stop smooth gradient: Red (#FF6B6B) -> Amber/Gold (#FFD700) -> Vibrant Green (#2ECC71)
+            Color minCol = new Color(1.0f, 0.42f, 0.42f);     // #FF6B6B
+            Color midCol = new Color(1.0f, 0.84f, 0.0f);      // #FFD700
+            Color maxCol = new Color(0.18f, 0.80f, 0.44f);    // #2ECC71
+
+            Color result = (t < 0.5f) 
+                ? Color.Lerp(minCol, midCol, t * 2f) 
+                : Color.Lerp(midCol, maxCol, (t - 0.5f) * 2f);
+
+            return ColorUtility.ToHtmlStringRGB(result);
         }
 
         public void HideOrderPayout()
