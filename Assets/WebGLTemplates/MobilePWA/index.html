@@ -130,6 +130,9 @@
       </div>
     </div>
 
+    <!-- Hidden HTML5 Audio Element to force iOS Safari into Playback Category (Bypassing Silent Switch) -->
+    <audio id="ios-media-audio" src="TemplateData/silence.wav" preload="auto" loop playsinline webkit-playsinline style="display:none; position:fixed; pointer-events:none;"></audio>
+
     <script src="unmute.js"></script>
     <script>
       // Automatically bind unmute.js to all created AudioContext instances
@@ -159,7 +162,20 @@
       }
 
       // 2. iOS Silent Mode Switch Bypass & Web Audio Unlocker
+      var hasActivatedIOSAudio = false;
+      function activateIOSPlaybackCategory() {
+        if (hasActivatedIOSAudio) return;
+        var audioEl = document.getElementById('ios-media-audio');
+        if (audioEl) {
+          audioEl.play().then(function() {
+            hasActivatedIOSAudio = true;
+          }).catch(function() {});
+        }
+      }
+
       function unlockAudioAndBypassSilentSwitch() {
+        activateIOSPlaybackCategory();
+
         if (typeof WEBAudio !== 'undefined' && WEBAudio.audioContext) {
           if (WEBAudio.audioContext.state === 'suspended') {
             WEBAudio.audioContext.resume();
