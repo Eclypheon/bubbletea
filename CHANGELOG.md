@@ -12,6 +12,11 @@ All notable changes to the Yippee Tea project are documented in this file.
 * **Staggered Spawning Cadence**: Flushed Baby Yippees now emerge with a natural 0.1s to 0.7s stagger delay.
 * **Kitchen Prep Audio**: Integrated dedicated SFX for prep equipment processing including Blender blending, Chopping Log slices, and High-Speed Centrifuge spinning.
 
+### Endless Mode & Milestone Progression
+* **Endless Mode Post-Buyout**: Added an interactive **Endless Mode** button to the Victory Modal upon buying out the shop location ($1,500). Players can seamlessly continue playing into indefinite weeks.
+* **Exponential Rent Escalation**: In Endless Mode, weekly rent scales exponentially (compounding +35% per week past Week 4: e.g., $405 in Week 5, $547 in Week 6, $738 in Week 7, $996 in Week 8) for an escalating endgame challenge.
+* **4-Week Completion Milestone**: Updated the Day 28 milestone notification to *"Incredible! You have successfully completed 4 weeks!"*, continuing normal gameplay.
+
 ---
 
 ## [v1.3.0] - 2026-09-01
