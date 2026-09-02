@@ -138,8 +138,12 @@
         });
       }
 
-      // 2. Web Audio Unlocker for iOS Safari & Android Mobile
-      function unlockAudio() {
+      // 2. iOS Silent Mode Switch Bypass & Web Audio Unlocker
+      // On iOS, WebAudio defaults to "Ambient" (muted by hardware silent switch).
+      // Playing a background HTML5 <audio> stream promotes iOS Safari to the "Playback" category (like YouTube),
+      // allowing game audio to bypass the silent switch and play through the speakers!
+      var silentHtmlAudio = null;
+      function unlockAudioAndBypassSilentSwitch() {
         if (typeof WEBAudio !== 'undefined' && WEBAudio.audioContext) {
           if (WEBAudio.audioContext.state === 'suspended') {
             WEBAudio.audioContext.resume();
@@ -152,12 +156,27 @@
             temp.close();
           });
         }
+
+        if (!silentHtmlAudio) {
+          try {
+            silentHtmlAudio = document.createElement('audio');
+            silentHtmlAudio.setAttribute('x-webkit-airplay', 'deny');
+            silentHtmlAudio.preload = 'auto';
+            silentHtmlAudio.loop = true;
+            // 0.1s silent MP3 data URI
+            silentHtmlAudio.src = 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=';
+            var p = silentHtmlAudio.play();
+            if (p !== undefined) {
+              p.catch(function() {});
+            }
+          } catch(e) {}
+        }
       }
 
-      window.addEventListener('touchstart', unlockAudio, { passive: true });
-      window.addEventListener('touchend', unlockAudio, { passive: true });
-      window.addEventListener('pointerdown', unlockAudio, { passive: true });
-      window.addEventListener('click', unlockAudio, { passive: true });
+      window.addEventListener('touchstart', unlockAudioAndBypassSilentSwitch, { passive: true });
+      window.addEventListener('touchend', unlockAudioAndBypassSilentSwitch, { passive: true });
+      window.addEventListener('pointerdown', unlockAudioAndBypassSilentSwitch, { passive: true });
+      window.addEventListener('click', unlockAudioAndBypassSilentSwitch, { passive: true });
 
       // 3. Screen Orientation Lock Attempt
       function attemptLandscapeLock() {
