@@ -224,6 +224,12 @@ namespace BubbleTeaShop
             if (leaveRoutine != null) StopCoroutine(leaveRoutine);
 
             EvaluationResult evaluation = cup.Evaluate(activeOrder, PatiencePercent);
+            float totalEarned = (float)(Math.Round((evaluation.earnedMoney + evaluation.tip) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+            if (totalEarned > 0)
+            {
+                HUDController.Instance?.ShowFloatingCashGain(totalEarned);
+            }
+
             EconomyManager.Instance?.AddCash(evaluation.earnedMoney, $"Drink Sale ({activeOrder.archetype})");
             
             if (evaluation.tip > 0)

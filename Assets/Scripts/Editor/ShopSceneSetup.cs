@@ -300,6 +300,8 @@ namespace BubbleTeaShop.Editor
 
             var hudDay = CreateText("DayText", hudObj.transform, "Day 1", new Vector2(-700, 0), 24);
             var hudCash = CreateText("CashText", hudObj.transform, "$50.00", new Vector2(-400, 0), 26, Color.yellow);
+            var hudCashDelta = CreateText("CashGainDeltaText", hudObj.transform, "+$0.00", new Vector2(-280, 0), 24, new Color(0.18f, 0.90f, 0.44f, 1f));
+            hudCashDelta.gameObject.SetActive(false);
             var hudRent = CreateText("RentText", hudObj.transform, "Rent in: 7d", new Vector2(0, 0), 22);
             var hudCust = CreateText("CustCountText", hudObj.transform, "Customers: 0/5", new Vector2(400, 0), 22);
             var hudHint = CreateText("HintText", hudObj.transform, "Open the shutter to start the day!", new Vector2(700, 0), 18, Color.cyan);
@@ -311,7 +313,7 @@ namespace BubbleTeaShop.Editor
             payoutRt.anchorMax = new Vector2(0.5f, 0f);
             payoutRt.pivot = new Vector2(0.5f, 0f);
             payoutRt.anchoredPosition = new Vector2(0f, 15f);
-            payoutRt.sizeDelta = new Vector2(560f, 36f);
+            payoutRt.sizeDelta = new Vector2(820f, 56f);
             var payoutImg = payoutPanel.AddComponent<Image>();
             payoutImg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
             payoutPanel.SetActive(false);
@@ -319,6 +321,7 @@ namespace BubbleTeaShop.Editor
             var hudCtrl = hudObj.AddComponent<HUDController>();
             SetSerializedProperty(hudCtrl, "dayText", hudDay);
             SetSerializedProperty(hudCtrl, "cashText", hudCash);
+            SetSerializedProperty(hudCtrl, "cashGainDeltaText", hudCashDelta);
             SetSerializedProperty(hudCtrl, "rentTimerText", hudRent);
             SetSerializedProperty(hudCtrl, "customerCountText", hudCust);
             SetSerializedProperty(hudCtrl, "statusHintText", hudHint);

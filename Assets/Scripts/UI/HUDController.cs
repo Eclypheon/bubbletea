@@ -40,6 +40,9 @@ namespace BubbleTeaShop
         [SerializeField] private GameObject payoutIndicatorPanel;
         [SerializeField] private TextMeshProUGUI payoutIndicatorText;
 
+        [Header("Floating Cash Gain Delta")]
+        [SerializeField] private TextMeshProUGUI cashGainDeltaText;
+
         public GameObject PayoutIndicatorPanel
         {
             get => payoutIndicatorPanel;
@@ -52,7 +55,16 @@ namespace BubbleTeaShop
             set => payoutIndicatorText = value;
         }
 
+        public TextMeshProUGUI CashGainDeltaText
+        {
+            get => cashGainDeltaText;
+            set => cashGainDeltaText = value;
+        }
+
         private Coroutine notificationRoutine;
+        private Coroutine cashGainRoutine;
+        private Vector2 cashGainOriginalPos = new Vector2(-280f, 0f);
+        private bool hasCapturedCashGainPos = false;
         private Vector2 dayTextOriginalAnchoredPos = new Vector2(-700f, 0f);
         private bool hasCapturedDayTextPos = false;
 
@@ -818,16 +830,20 @@ namespace BubbleTeaShop
                         var textRt = textObj.GetComponent<RectTransform>();
                         textRt.anchorMin = Vector2.zero;
                         textRt.anchorMax = Vector2.one;
-                        textRt.offsetMin = new Vector2(10f, 0f);
-                        textRt.offsetMax = new Vector2(-10f, 0f);
+                        textRt.offsetMin = new Vector2(16f, 0f);
+                        textRt.offsetMax = new Vector2(-16f, 0f);
 
                         payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
-                        payoutIndicatorText.fontSize = 18;
+                        payoutIndicatorText.fontSize = 36;
                         payoutIndicatorText.fontStyle = FontStyles.Bold;
                         payoutIndicatorText.alignment = TextAlignmentOptions.Center;
                         payoutIndicatorText.enableWordWrapping = false;
                         payoutIndicatorText.raycastTarget = false;
                     }
+                }
+                else
+                {
+                    payoutIndicatorText.fontSize = 36;
                 }
                 return;
             }
@@ -855,15 +871,19 @@ namespace BubbleTeaShop
                     var textRt = textObj.GetComponent<RectTransform>();
                     textRt.anchorMin = Vector2.zero;
                     textRt.anchorMax = Vector2.one;
-                    textRt.offsetMin = new Vector2(10f, 0f);
-                    textRt.offsetMax = new Vector2(-10f, 0f);
+                    textRt.offsetMin = new Vector2(16f, 0f);
+                    textRt.offsetMax = new Vector2(-16f, 0f);
 
                     payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
-                    payoutIndicatorText.fontSize = 18;
+                    payoutIndicatorText.fontSize = 36;
                     payoutIndicatorText.fontStyle = FontStyles.Bold;
                     payoutIndicatorText.alignment = TextAlignmentOptions.Center;
                     payoutIndicatorText.enableWordWrapping = false;
                     payoutIndicatorText.raycastTarget = false;
+                }
+                else
+                {
+                    payoutIndicatorText.fontSize = 36;
                 }
                 return;
             }
@@ -880,7 +900,7 @@ namespace BubbleTeaShop
             rt.anchorMax = new Vector2(0.5f, 0f);
             rt.pivot = new Vector2(0.5f, 0f);
             rt.anchoredPosition = new Vector2(0f, 15f);
-            rt.sizeDelta = new Vector2(560f, 36f);
+            rt.sizeDelta = new Vector2(820f, 56f);
 
             var img = payoutIndicatorPanel.GetComponent<Image>();
             img.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
@@ -892,17 +912,128 @@ namespace BubbleTeaShop
             var fallbackTextRt = fallbackTextObj.GetComponent<RectTransform>();
             fallbackTextRt.anchorMin = Vector2.zero;
             fallbackTextRt.anchorMax = Vector2.one;
-            fallbackTextRt.offsetMin = new Vector2(10f, 0f);
-            fallbackTextRt.offsetMax = new Vector2(-10f, 0f);
+            fallbackTextRt.offsetMin = new Vector2(16f, 0f);
+            fallbackTextRt.offsetMax = new Vector2(-16f, 0f);
 
             payoutIndicatorText = fallbackTextObj.GetComponent<TextMeshProUGUI>();
-            payoutIndicatorText.fontSize = 18;
+            payoutIndicatorText.fontSize = 36;
             payoutIndicatorText.fontStyle = FontStyles.Bold;
             payoutIndicatorText.alignment = TextAlignmentOptions.Center;
             payoutIndicatorText.enableWordWrapping = false;
             payoutIndicatorText.raycastTarget = false;
 
             payoutIndicatorPanel.SetActive(false);
+        }
+
+        public void EnsureCashGainUI()
+        {
+            if (cashGainDeltaText != null)
+            {
+                if (!hasCapturedCashGainPos)
+                {
+                    cashGainOriginalPos = cashGainDeltaText.rectTransform.anchoredPosition;
+                    hasCapturedCashGainPos = true;
+                }
+                return;
+            }
+
+            Transform targetParent = (cashText != null) ? cashText.transform.parent : transform;
+            Transform existing = targetParent.Find("CashGainDeltaText");
+            if (existing != null)
+            {
+                cashGainDeltaText = existing.GetComponent<TextMeshProUGUI>();
+                if (cashGainDeltaText != null)
+                {
+                    cashGainOriginalPos = cashGainDeltaText.rectTransform.anchoredPosition;
+                    hasCapturedCashGainPos = true;
+                    return;
+                }
+            }
+
+            GameObject deltaObj = new GameObject("CashGainDeltaText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            deltaObj.transform.SetParent(targetParent, false);
+
+            var rt = deltaObj.GetComponent<RectTransform>();
+            rt.anchorMin = (cashText != null) ? cashText.rectTransform.anchorMin : new Vector2(0.5f, 0.5f);
+            rt.anchorMax = (cashText != null) ? cashText.rectTransform.anchorMax : new Vector2(0.5f, 0.5f);
+            rt.pivot = (cashText != null) ? cashText.rectTransform.pivot : new Vector2(0.5f, 0.5f);
+
+            Vector2 basePos = (cashText != null) ? cashText.rectTransform.anchoredPosition + new Vector2(110f, 0f) : new Vector2(-280f, 0f);
+            rt.anchoredPosition = basePos;
+            rt.sizeDelta = new Vector2(160f, 40f);
+            cashGainOriginalPos = basePos;
+            hasCapturedCashGainPos = true;
+
+            cashGainDeltaText = deltaObj.GetComponent<TextMeshProUGUI>();
+            cashGainDeltaText.fontSize = 24;
+            cashGainDeltaText.fontStyle = FontStyles.Bold;
+            cashGainDeltaText.color = new Color(0.18f, 0.90f, 0.44f, 1f); // #2ECC71
+            cashGainDeltaText.alignment = TextAlignmentOptions.Left;
+            cashGainDeltaText.raycastTarget = false;
+
+            deltaObj.SetActive(false);
+        }
+
+        public void ShowFloatingCashGain(float amount)
+        {
+            if (amount <= 0) return;
+
+            EnsureCashGainUI();
+            if (cashGainDeltaText == null) return;
+
+            if (cashGainRoutine != null)
+            {
+                StopCoroutine(cashGainRoutine);
+            }
+            cashGainRoutine = StartCoroutine(CashGainFloatRoutine(amount));
+        }
+
+        private IEnumerator CashGainFloatRoutine(float amount)
+        {
+            cashGainDeltaText.gameObject.SetActive(true);
+            cashGainDeltaText.text = $"+${amount:F2}";
+            cashGainDeltaText.color = new Color(0.18f, 0.90f, 0.44f, 1f);
+
+            RectTransform rt = cashGainDeltaText.rectTransform;
+            Vector2 startPos = cashGainOriginalPos;
+            Vector2 targetPos = startPos + new Vector2(0f, 20f);
+
+            float duration = 1.5f;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                // Gentle upward float
+                rt.anchoredPosition = Vector2.Lerp(startPos, targetPos, t);
+
+                // Pop scale in first 0.15s
+                if (t < 0.15f)
+                {
+                    float pop = Mathf.Lerp(1.35f, 1.0f, t / 0.15f);
+                    rt.localScale = new Vector3(pop, pop, 1f);
+                }
+                else
+                {
+                    rt.localScale = Vector3.one;
+                }
+
+                // Smooth fade out in last 0.5s
+                if (t > 0.65f)
+                {
+                    float alpha = Mathf.Lerp(1f, 0f, (t - 0.65f) / 0.35f);
+                    cashGainDeltaText.color = new Color(0.18f, 0.90f, 0.44f, alpha);
+                }
+
+                yield return null;
+            }
+
+            rt.anchoredPosition = startPos;
+            rt.localScale = Vector3.one;
+            cashGainDeltaText.gameObject.SetActive(false);
+            cashGainRoutine = null;
         }
 
         private DrinkOrder activeDisplayedOrder = null;
