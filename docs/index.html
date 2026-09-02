@@ -48,7 +48,8 @@
         overflow: hidden;
       }
 
-      #unity-canvas {
+      /* Desktop: Maintain 16:9 aspect ratio and letterbox on 16:10 / other desktop screens */
+      #unity-container.unity-desktop #unity-canvas {
         width: 100% !important;
         height: 100% !important;
         max-width: 100vw !important;
@@ -59,11 +60,12 @@
         background: #12141c;
       }
 
-      /* Mobile: full-bleed edge to edge */
-      .unity-mobile #unity-canvas {
+      /* Mobile: Full-bleed edge-to-edge landscape (Commit 5296712) */
+      #unity-container.unity-mobile #unity-canvas {
         width: 100% !important;
         height: 100% !important;
-        object-fit: cover !important;
+        display: block;
+        background: #12141c;
       }
 
       /* Portrait Orientation Notice */
