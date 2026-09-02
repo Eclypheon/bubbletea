@@ -213,7 +213,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "cream_shortage",
                     title = "Gourmet Cream Shortage",
-                    description = "Egg Custard and Cheese Foam wholesale prices rise (+30%), but customers are tipping generously (+25% tips) on rich drinks!",
+                    description = "Egg Pudding and Cheese Foam wholesale prices rise (+30%), but customers are tipping generously (+25% tips) on rich drinks!",
                     affectedKey = "Topping_CheeseFoam",
                     priceMultiplier = 1.30f,
                     demandMultiplier = 1.25f,
@@ -268,7 +268,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "golden_harvest",
                     title = "Bountiful Foraging Season",
-                    description = "Wild groves and honey meadows are flourishing! Foraging expeditions yield double harvests for the next 3 days!",
+                    description = "Bamboo groves and honey meadows are flourishing! Foraging expeditions yield double harvests for the next 3 days!",
                     affectedKey = "Foraging",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 2.0f,

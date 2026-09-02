@@ -1158,9 +1158,9 @@ namespace BubbleTeaShop
             PlaySound(collectRewardSound);
 
             List<string> parts = new List<string>();
-            if (puddingYield > 0) parts.Add($"<color=#2ECC71>+{puddingYield} Egg Custard</color>");
+            if (puddingYield > 0) parts.Add($"<color=#2ECC71>+{puddingYield} Egg Pudding</color>");
             if (foamYield > 0) parts.Add($"<color=#2ECC71>+{foamYield} Cheese Foam</color>");
-            if (honeyPearlsYield > 0) parts.Add($"<color=#2ECC71>+{honeyPearlsYield} Honey Pearls</color>");
+            if (honeyPearlsYield > 0) parts.Add($"<color=#2ECC71>+{honeyPearlsYield} Golden Honey Pearls</color>");
             string summary = string.Join(", ", parts);
 
             HUDController.Instance?.ShowNotification($"Collected {summary}!", 4.5f);

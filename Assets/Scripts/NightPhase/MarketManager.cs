@@ -95,7 +95,7 @@ namespace BubbleTeaShop
             // Week 2 (Days 8-14)
             allMarketItems.Add(new MarketItem { stockKey = "Milk_CoconutMilk", displayName = "Organic Coconut Milk", price = 10.80f, bundleQuantity = 8 });
             allMarketItems.Add(new MarketItem { stockKey = "Topping_CoconutJelly", displayName = "Sweet Coconut Jelly", price = 11.50f, bundleQuantity = 8 });
-            allMarketItems.Add(new MarketItem { stockKey = "Topping_EggPudding", displayName = "Silky Egg Custard", price = 14.50f, bundleQuantity = 8 });
+            allMarketItems.Add(new MarketItem { stockKey = "Topping_EggPudding", displayName = "Silky Egg Pudding", price = 14.50f, bundleQuantity = 8 });
 
             // Week 3 (Days 15-21)
             allMarketItems.Add(new MarketItem { stockKey = "Milk_CondensedMilk", displayName = "Sweet Condensed Milk", price = 12.00f, bundleQuantity = 8 });

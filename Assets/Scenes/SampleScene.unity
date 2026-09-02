@@ -6432,7 +6432,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -137}
+  m_AnchoredPosition: {x: 0, y: -34}
   m_SizeDelta: {x: 700, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &469
@@ -6933,8 +6933,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -480.72058, y: -305}
-  m_SizeDelta: {x: 596.5588, y: 50}
+  m_AnchoredPosition: {x: -599.78394, y: -305}
+  m_SizeDelta: {x: 358.4321, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &502
 RectTransform:
@@ -10742,8 +10742,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -17144,6 +17144,7 @@ MonoBehaviour:
   supermarketBackgroundImage: {fileID: 616}
   supermarketInteriorSprite: {fileID: 2609851761605400732, guid: fbb9c97f32e0a4b638f25ae03d4c722d, type: 3}
   cashBalanceText: {fileID: 581}
+  cashDeductionDeltaText: {fileID: 0}
   marketAisleTitleText: {fileID: 0}
   returnToNightHubButton: {fileID: 1795197340}
   marketCatalogContainer: {fileID: 443}

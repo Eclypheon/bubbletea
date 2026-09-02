@@ -191,7 +191,7 @@ namespace BubbleTeaShop
                 ("Topping_TapiocaPearls", "Raw Tapioca Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.TapiocaPearls)),
                 ("Topping_PoppingBoba", "Mango Popping Boba", InventoryManager.Instance.GetToppingStock(ToppingType.PoppingBoba)),
                 ("Topping_GrassJelly", "Herbal Grass Jelly", InventoryManager.Instance.GetToppingStock(ToppingType.GrassJelly)),
-                ("Topping_EggPudding", "Silky Egg Custard", InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding)),
+                ("Topping_EggPudding", "Silky Egg Pudding", InventoryManager.Instance.GetToppingStock(ToppingType.EggPudding)),
                 ("Topping_CoconutJelly", "Sweet Coconut Jelly", InventoryManager.Instance.GetToppingStock(ToppingType.CoconutJelly)),
                 ("Topping_CheeseFoam", "Salted Cheese Foam", InventoryManager.Instance.GetToppingStock(ToppingType.CheeseFoam)),
                 ("Topping_GoldenHoneyPearls", "Golden Honey Pearls", InventoryManager.Instance.GetToppingStock(ToppingType.GoldenHoneyPearls))

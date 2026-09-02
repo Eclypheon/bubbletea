@@ -18,7 +18,7 @@ namespace BubbleTeaShop
     {
         public static ChangelogManager Instance { get; private set; }
 
-        public const string CurrentVersion = "v1.3.0";
+        public const string CurrentVersion = "v1.4.0";
 
         [Header("Version History")]
         [SerializeField] private List<VersionEntry> history = new List<VersionEntry>();
@@ -37,6 +37,19 @@ namespace BubbleTeaShop
         private void InitializeHistoryIfEmpty()
         {
             if (history.Count > 0) return;
+
+            history.Add(new VersionEntry
+            {
+                version = "v1.4.0",
+                releaseDate = "2026-09-02",
+                summaryTitle = "Simplified Ratings, Real-Time Payout HUD & Supermarket Feedback",
+                notes = "<b>• Simplified 1-Star Deductions:</b> Deducts exactly 1 star per mistake (minimum 1 star floor).\n" +
+                        "<b>• Slowness Star Deductions:</b> Deducts 1 star per 5% below 20% patience.\n" +
+                        "<b>• 90% Speed Bonus:</b> Full +30% tip speed bonus when patience >= 90%.\n" +
+                        "<b>• Real-Time Payout Display:</b> Min, Current (dynamic gradient), and Max payout HUD indicator.\n" +
+                        "<b>• Animated Cash Feedback:</b> Floating green (+$X.XX) cash gain on drink service and red (-$X.XX) deduction on market purchases.\n" +
+                        "<b>• Terminology & Lore Alignment:</b> Unified Egg Pudding, Bamboo Grove, Honey Meadows, and Misty Mountains naming."
+            });
 
             history.Add(new VersionEntry
             {
