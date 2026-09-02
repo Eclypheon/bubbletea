@@ -116,7 +116,7 @@ namespace BubbleTeaShop
                 {
                     if (CustomerManager.Instance.CustomerController.IsLandlordActive)
                     {
-                        HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlord is waiting for rent!");
+                        HUDController.Instance?.ShowNotification("You cannot close the shop while the Landlady is waiting!");
                         return;
                     }
                     if (CustomerManager.Instance.CustomerController.IsMentorActive)
@@ -145,7 +145,7 @@ namespace BubbleTeaShop
                 // 3. Block closing if it is a rent day and the rent encounter hasn't settled yet
                 if (currentDay % 7 == 0 && CustomerManager.Instance != null && !CustomerManager.Instance.RentEncounterTriggeredToday)
                 {
-                    HUDController.Instance?.ShowNotification("The Landlord is on his way! You must settle rent before closing.");
+                    HUDController.Instance?.ShowNotification("The Landlady is on her way! You must deal with her before closing.");
                     Debug.Log("Cannot close shutters: Rent collection pending!");
                     return;
                 }

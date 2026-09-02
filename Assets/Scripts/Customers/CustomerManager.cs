@@ -157,7 +157,7 @@ namespace BubbleTeaShop
                 }
                 else
                 {
-                    HUDController.Instance?.ShowNotification("Chubi is waiting! Settle your rent first.");
+                    HUDController.Instance?.ShowNotification("The Landlady is waiting! Deal with her first!");
                 }
                 return false;
             }

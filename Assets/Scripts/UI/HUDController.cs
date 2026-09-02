@@ -747,7 +747,7 @@ namespace BubbleTeaShop
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
-                statusHintText.text = "The Landlord has arrived to collect weekly rent!";
+                statusHintText.text = "The Landlady has arrived!";
             }
             else if (GameManager.Instance != null)
             {
@@ -798,7 +798,7 @@ namespace BubbleTeaShop
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
-                statusHintText.text = "The Landlord has arrived to collect weekly rent!";
+                statusHintText.text = "The Landlady has arrived!";
                 return;
             }
 

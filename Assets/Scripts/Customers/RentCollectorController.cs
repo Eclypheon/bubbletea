@@ -217,7 +217,7 @@ namespace BubbleTeaShop
                 canvasGroup.blocksRaycasts = true;
             }
 
-            HUDController.Instance?.ShowNotification("The Landlord has arrived to collect weekly rent!", 3.5f);
+            HUDController.Instance?.ShowNotification("The Landlady has arrived!", 3.5f);
             if (arriveSound != null) AudioManager.Instance?.PlaySFX(arriveSound);
 
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
@@ -292,7 +292,7 @@ namespace BubbleTeaShop
         private IEnumerator TriggerEvictionGameOver(float delay)
         {
             yield return new WaitForSeconds(delay);
-            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the landlord.");
+            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the Landlady.");
         }
 
         private IEnumerator FadeCanvasGroup(float start, float target, float duration)

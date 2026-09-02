@@ -780,7 +780,7 @@ namespace BubbleTeaShop
                 }
             }
 
-            HUDController.Instance?.SetStatusHint("The Landlord has arrived to collect weekly rent!");
+            HUDController.Instance?.SetStatusHint("The Landlady has arrived!");
         }
 
         private bool isEndlessGreetingActive = false;
@@ -831,7 +831,7 @@ namespace BubbleTeaShop
             EnsureMentorNavUI();
             DisplayCurrentChubiLine();
 
-            HUDController.Instance?.SetStatusHint("Chubi has arrived for a friendly visit! Prepare her usual drink for free out of goodwill.");
+            HUDController.Instance?.SetStatusHint("Chubi is waiting! Prepare her order for free out of goodwill.");
             HUDController.Instance?.ShowNotification("Chubi is visiting! Serve her usual drink for free.", 4.5f);
         }
 
@@ -876,7 +876,7 @@ namespace BubbleTeaShop
                 speechBubble.ShowMessage(activeChubiLines[activeChubiLines.Length - 1]);
             }
 
-            HUDController.Instance?.SetStatusHint("Chubi is waiting! Prepare her usual drink for free out of goodwill.");
+            HUDController.Instance?.SetStatusHint("Chubi is waiting! Prepare her order for free out of goodwill.");
         }
 
         public void ReceiveLandlordDrink(BubbleTeaCup cup)
@@ -1044,7 +1044,7 @@ namespace BubbleTeaShop
         private IEnumerator TriggerEvictionGameOver(float delay)
         {
             yield return new WaitForSeconds(delay);
-            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the landlord.");
+            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the Landlady.");
         }
     }
 }
