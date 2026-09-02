@@ -304,12 +304,25 @@ namespace BubbleTeaShop.Editor
             var hudCust = CreateText("CustCountText", hudObj.transform, "Customers: 0/5", new Vector2(400, 0), 22);
             var hudHint = CreateText("HintText", hudObj.transform, "Open the shutter to start the day!", new Vector2(700, 0), 18, Color.cyan);
 
+            // Payout Indicator Panel (parked under HUD / Canvas for clear hierarchy control)
+            GameObject payoutPanel = CreateUIElement("PayoutIndicatorPanel", canvasObj.transform);
+            RectTransform payoutRt = payoutPanel.GetComponent<RectTransform>();
+            payoutRt.anchorMin = new Vector2(0.5f, 0f);
+            payoutRt.anchorMax = new Vector2(0.5f, 0f);
+            payoutRt.pivot = new Vector2(0.5f, 0f);
+            payoutRt.anchoredPosition = new Vector2(0f, 15f);
+            payoutRt.sizeDelta = new Vector2(560f, 36f);
+            var payoutImg = payoutPanel.AddComponent<Image>();
+            payoutImg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+            payoutPanel.SetActive(false);
+
             var hudCtrl = hudObj.AddComponent<HUDController>();
             SetSerializedProperty(hudCtrl, "dayText", hudDay);
             SetSerializedProperty(hudCtrl, "cashText", hudCash);
             SetSerializedProperty(hudCtrl, "rentTimerText", hudRent);
             SetSerializedProperty(hudCtrl, "customerCountText", hudCust);
             SetSerializedProperty(hudCtrl, "statusHintText", hudHint);
+            SetSerializedProperty(hudCtrl, "payoutIndicatorPanel", payoutPanel);
 
             // 7. Night Phase Panel
             GameObject nightRoot = CreateUIElement("NightPhaseCanvas", canvasObj.transform);

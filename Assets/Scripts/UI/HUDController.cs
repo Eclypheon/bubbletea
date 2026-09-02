@@ -36,8 +36,21 @@ namespace BubbleTeaShop
         [SerializeField] private Button modalCloseButton;
 
         [Header("Drink Payout Indicator")]
-        [SerializeField] private GameObject payoutIndicatorObj;
+        [Tooltip("Assign a Panel UI GameObject in the hierarchy (e.g. under HUD / Canvas) to control its position and visual style. The text will be auto-generated inside it if not present.")]
+        [SerializeField] private GameObject payoutIndicatorPanel;
         [SerializeField] private TextMeshProUGUI payoutIndicatorText;
+
+        public GameObject PayoutIndicatorPanel
+        {
+            get => payoutIndicatorPanel;
+            set => payoutIndicatorPanel = value;
+        }
+
+        public TextMeshProUGUI PayoutIndicatorText
+        {
+            get => payoutIndicatorText;
+            set => payoutIndicatorText = value;
+        }
 
         private Coroutine notificationRoutine;
         private Vector2 dayTextOriginalAnchoredPos = new Vector2(-700f, 0f);
@@ -791,50 +804,105 @@ namespace BubbleTeaShop
 
         public void EnsurePayoutIndicatorUI()
         {
-            if (payoutIndicatorObj != null && payoutIndicatorText != null) return;
-
-            Canvas rootCanvas = GetComponentInParent<Canvas>();
-            Transform targetParent = (rootCanvas != null) ? rootCanvas.transform : transform.root;
-
-            Transform existing = targetParent.Find("PayoutIndicatorPanel");
-            if (existing != null)
+            // 1. If user assigned a Panel in the inspector, use it directly
+            if (payoutIndicatorPanel != null)
             {
-                payoutIndicatorObj = existing.gameObject;
-                payoutIndicatorText = payoutIndicatorObj.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (payoutIndicatorText == null)
+                {
+                    payoutIndicatorText = payoutIndicatorPanel.GetComponentInChildren<TextMeshProUGUI>(true);
+                    if (payoutIndicatorText == null)
+                    {
+                        GameObject textObj = new GameObject("PayoutText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                        textObj.transform.SetParent(payoutIndicatorPanel.transform, false);
+
+                        var textRt = textObj.GetComponent<RectTransform>();
+                        textRt.anchorMin = Vector2.zero;
+                        textRt.anchorMax = Vector2.one;
+                        textRt.offsetMin = new Vector2(10f, 0f);
+                        textRt.offsetMax = new Vector2(-10f, 0f);
+
+                        payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
+                        payoutIndicatorText.fontSize = 18;
+                        payoutIndicatorText.fontStyle = FontStyles.Bold;
+                        payoutIndicatorText.alignment = TextAlignmentOptions.Center;
+                        payoutIndicatorText.enableWordWrapping = false;
+                        payoutIndicatorText.raycastTarget = false;
+                    }
+                }
                 return;
             }
 
-            payoutIndicatorObj = new GameObject("PayoutIndicatorPanel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
-            payoutIndicatorObj.transform.SetParent(targetParent, false);
+            // 2. Auto-discovery: Look for a child panel in HUD or on the Canvas root
+            Transform existing = transform.Find("PayoutIndicatorPanel") ?? transform.Find("PayoutPanel");
+            if (existing == null)
+            {
+                Canvas rootCanvas = GetComponentInParent<Canvas>();
+                if (rootCanvas != null)
+                {
+                    existing = rootCanvas.transform.Find("PayoutIndicatorPanel") ?? rootCanvas.transform.Find("PayoutPanel");
+                }
+            }
 
-            var rt = payoutIndicatorObj.GetComponent<RectTransform>();
+            if (existing != null)
+            {
+                payoutIndicatorPanel = existing.gameObject;
+                payoutIndicatorText = payoutIndicatorPanel.GetComponentInChildren<TextMeshProUGUI>(true);
+                if (payoutIndicatorText == null)
+                {
+                    GameObject textObj = new GameObject("PayoutText", typeof(RectTransform), typeof(TextMeshProUGUI));
+                    textObj.transform.SetParent(payoutIndicatorPanel.transform, false);
+
+                    var textRt = textObj.GetComponent<RectTransform>();
+                    textRt.anchorMin = Vector2.zero;
+                    textRt.anchorMax = Vector2.one;
+                    textRt.offsetMin = new Vector2(10f, 0f);
+                    textRt.offsetMax = new Vector2(-10f, 0f);
+
+                    payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
+                    payoutIndicatorText.fontSize = 18;
+                    payoutIndicatorText.fontStyle = FontStyles.Bold;
+                    payoutIndicatorText.alignment = TextAlignmentOptions.Center;
+                    payoutIndicatorText.enableWordWrapping = false;
+                    payoutIndicatorText.raycastTarget = false;
+                }
+                return;
+            }
+
+            // 3. Fallback: Automatically generate a default panel under canvas
+            Canvas canvas = GetComponentInParent<Canvas>();
+            Transform targetParent = (canvas != null) ? canvas.transform : transform;
+
+            payoutIndicatorPanel = new GameObject("PayoutIndicatorPanel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
+            payoutIndicatorPanel.transform.SetParent(targetParent, false);
+
+            var rt = payoutIndicatorPanel.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0.5f, 0f);
             rt.anchorMax = new Vector2(0.5f, 0f);
             rt.pivot = new Vector2(0.5f, 0f);
             rt.anchoredPosition = new Vector2(0f, 15f);
             rt.sizeDelta = new Vector2(560f, 36f);
 
-            var img = payoutIndicatorObj.GetComponent<Image>();
+            var img = payoutIndicatorPanel.GetComponent<Image>();
             img.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
             img.raycastTarget = false;
 
-            GameObject textObj = new GameObject("PayoutText", typeof(RectTransform), typeof(TextMeshProUGUI));
-            textObj.transform.SetParent(payoutIndicatorObj.transform, false);
+            GameObject fallbackTextObj = new GameObject("PayoutText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            fallbackTextObj.transform.SetParent(payoutIndicatorPanel.transform, false);
 
-            var textRt = textObj.GetComponent<RectTransform>();
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = new Vector2(10f, 0f);
-            textRt.offsetMax = new Vector2(-10f, 0f);
+            var fallbackTextRt = fallbackTextObj.GetComponent<RectTransform>();
+            fallbackTextRt.anchorMin = Vector2.zero;
+            fallbackTextRt.anchorMax = Vector2.one;
+            fallbackTextRt.offsetMin = new Vector2(10f, 0f);
+            fallbackTextRt.offsetMax = new Vector2(-10f, 0f);
 
-            payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
+            payoutIndicatorText = fallbackTextObj.GetComponent<TextMeshProUGUI>();
             payoutIndicatorText.fontSize = 18;
             payoutIndicatorText.fontStyle = FontStyles.Bold;
             payoutIndicatorText.alignment = TextAlignmentOptions.Center;
             payoutIndicatorText.enableWordWrapping = false;
             payoutIndicatorText.raycastTarget = false;
 
-            payoutIndicatorObj.SetActive(false);
+            payoutIndicatorPanel.SetActive(false);
         }
 
         public void ShowOrderPayout(DrinkOrder order)
@@ -860,18 +928,18 @@ namespace BubbleTeaShop
                 payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#FFD700>Base: ${basePrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
             }
 
-            if (payoutIndicatorObj != null)
+            if (payoutIndicatorPanel != null)
             {
-                payoutIndicatorObj.SetActive(true);
-                payoutIndicatorObj.transform.SetAsLastSibling();
+                payoutIndicatorPanel.SetActive(true);
+                payoutIndicatorPanel.transform.SetAsLastSibling();
             }
         }
 
         public void HideOrderPayout()
         {
-            if (payoutIndicatorObj != null)
+            if (payoutIndicatorPanel != null)
             {
-                payoutIndicatorObj.SetActive(false);
+                payoutIndicatorPanel.SetActive(false);
             }
         }
 
