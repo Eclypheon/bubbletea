@@ -755,6 +755,51 @@ namespace BubbleTeaShop
             HUDController.Instance?.SetStatusHint("The Landlord has arrived to collect weekly rent!");
         }
 
+        private bool isEndlessGreetingActive = false;
+        public bool IsEndlessGreetingActive => isEndlessGreetingActive;
+
+        public void SpawnLandlordEndlessGreeting(Action onFinished)
+        {
+            if (leaveRoutine != null)
+            {
+                StopCoroutine(leaveRoutine);
+                leaveRoutine = null;
+            }
+
+            isLandlordActive = true;
+            isEndlessGreetingActive = true;
+            isWaiting = false;
+            activeOrder = null;
+            onLandlordFinished = onFinished;
+            rentDiscountedByDrink = false;
+            discountedRentAmount = 0f;
+
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(false);
+
+            if (customerImage != null)
+            {
+                customerImage.gameObject.SetActive(true);
+                customerImage.color = Color.white;
+                Sprite s = landlordSprite != null ? landlordSprite : anxietySprite;
+                if (s != null) customerImage.sprite = s;
+            }
+            if (customerRoot != null) customerRoot.gameObject.SetActive(true);
+
+            gameObject.SetActive(true);
+
+            if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
+            if (payRentButton != null) payRentButton.gameObject.SetActive(false);
+            if (skipRentButton != null) skipRentButton.gameObject.SetActive(false);
+
+            if (speechBubble != null)
+            {
+                speechBubble.ShowMessage("H-hey! Look at you, all proud now that you own the shop... How about making your former landlady, Chubi, her usual drink for free? You know: Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls! Consider it good will for being such a great landlady, hmph!");
+            }
+
+            HUDController.Instance?.SetStatusHint("Chubi has arrived for a friendly visit! Prepare her usual drink for free out of goodwill.");
+            HUDController.Instance?.ShowNotification("Chubi is visiting! Serve her usual drink for free.", 4.5f);
+        }
+
         public void ReceiveLandlordDrink(BubbleTeaCup cup)
         {
             if (!isLandlordActive) return;
@@ -766,6 +811,28 @@ namespace BubbleTeaShop
                                cup.icePercent == 50 &&
                                cup.toppings != null &&
                                cup.toppings.Contains(ToppingType.TapiocaPearls));
+
+            if (isEndlessGreetingActive)
+            {
+                if (isFavorite)
+                {
+                    if (speechBubble != null)
+                    {
+                        speechBubble.ShowMessage("Mmm...! W-wait, this is actually amazing... Hmph, if only you gave me that drink earlier, I may have reduced your rent!");
+                    }
+                    HUDController.Instance?.ShowNotification("Chubi loved her drink! (Provided for free out of goodwill)", 4.5f);
+                    StartCoroutine(DismissEndlessLandlordAfterDelay(4.0f));
+                }
+                else
+                {
+                    if (speechBubble != null)
+                    {
+                        speechBubble.ShowMessage("Hey! That's not my usual! I asked for Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls! Try again, dummy!");
+                    }
+                    HUDController.Instance?.ShowNotification("Chubi rejected the drink! Check her usual recipe.", 3.5f);
+                }
+                return;
+            }
 
             if (isFavorite)
             {
@@ -795,7 +862,7 @@ namespace BubbleTeaShop
                     {
                         speechBubble.ShowMessage("W-wait... Is this Oolong Milk Tea with tapioca pearls, 100% sugar and 50% ice?! ...O-okay, fine! Just for this once, I'll lower your rent by 10%! But don't get the wrong idea, baka!");
                     }
-                    HUDController.Instance?.ShowNotification("Landlord loved her favorite drink! Rent reduced by 10%!", 4f);
+                    HUDController.Instance?.ShowNotification("Chubi loved her favorite drink! Rent reduced by 10%!", 4f);
                 }
             }
             else
@@ -804,7 +871,21 @@ namespace BubbleTeaShop
                 {
                     speechBubble.ShowMessage("D-DON'T TRY TO BRIBE ME WITH A DRINK >:(! Hand over the rent already!");
                 }
-                HUDController.Instance?.ShowNotification("The Landlord rejected the bribe!", 3f);
+                HUDController.Instance?.ShowNotification("Chubi rejected the bribe!", 3f);
+            }
+        }
+
+        private IEnumerator DismissEndlessLandlordAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            isLandlordActive = false;
+            isEndlessGreetingActive = false;
+            if (patienceFillImage != null) patienceFillImage.gameObject.SetActive(true);
+            DismissCustomer();
+            onLandlordFinished?.Invoke();
+            if (GameManager.Instance != null)
+            {
+                HUDController.Instance?.UpdateStateHint(GameManager.Instance.CurrentState);
             }
         }
 

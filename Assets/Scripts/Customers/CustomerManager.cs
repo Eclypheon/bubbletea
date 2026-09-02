@@ -94,13 +94,28 @@ namespace BubbleTeaShop
         }
 
         private bool hasTriggeredDay4EventBriefing = false;
+        [SerializeField] private bool hasTriggeredEndlessLandlordGreeting = false;
+        public bool HasTriggeredEndlessLandlordGreeting => hasTriggeredEndlessLandlordGreeting;
 
         private void HandleStateChanged(GameState state)
         {
             if (state == GameState.ShopOpen)
             {
                 int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
-                if (day == 1 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay1Briefing)
+                bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+
+                if (isEndless && !hasTriggeredEndlessLandlordGreeting && customerController != null)
+                {
+                    hasTriggeredEndlessLandlordGreeting = true;
+                    customerController.SpawnLandlordEndlessGreeting(() =>
+                    {
+                        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.ShopOpen)
+                        {
+                            HUDController.Instance?.SetStatusHint("Ring the bell to call the next customer.");
+                        }
+                    });
+                }
+                else if (day == 1 && MentorController.Instance != null && !MentorController.Instance.HasCompletedDay1Briefing)
                 {
                     MentorController.Instance.TriggerDay1MorningBriefing(customerController);
                 }
@@ -123,7 +138,7 @@ namespace BubbleTeaShop
             awaitingDismissalConfirmation = false;
             rentEncounterTriggeredToday = false;
             hasTriggeredDay4EventBriefing = false;
-            int count = DayManager.Instance.TotalCustomersToday;
+            int count = DayManager.Instance != null ? DayManager.Instance.TotalCustomersToday : 5;
 
             for (int i = 0; i < count; i++)
             {
@@ -136,7 +151,14 @@ namespace BubbleTeaShop
         {
             if (customerController != null && customerController.IsLandlordActive)
             {
-                HUDController.Instance?.ShowNotification("The Landlord is waiting! Settle your rent first.");
+                if (customerController.IsEndlessGreetingActive)
+                {
+                    HUDController.Instance?.ShowNotification("Chubi is waiting for her drink! Serve her first.");
+                }
+                else
+                {
+                    HUDController.Instance?.ShowNotification("Chubi is waiting! Settle your rent first.");
+                }
                 return false;
             }
 

@@ -160,7 +160,7 @@ namespace BubbleTeaShop
             if (collectorNameText != null)
             {
                 collectorNameText.gameObject.SetActive(true);
-                collectorNameText.text = "Landlord Sterling";
+                collectorNameText.text = "Landlady Chubi";
             }
 
             float totalRent = EconomyManager.Instance.GetTotalRentDue(dayNumber);
