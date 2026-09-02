@@ -1,6 +1,6 @@
 {
-  "name": "Bubble Tea Shop",
-  "short_name": "Bubble Tea",
+  "name": "Yippee Bubble Tea Shop Simulator",
+  "short_name": "Yippee Tea",
   "description": "Brew teas, manage stock, and run your cozy bubble tea shop!",
   "start_url": "./index.html",
   "scope": "./",
