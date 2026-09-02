@@ -227,8 +227,6 @@
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
 
-        // Mobile performance optimization: Cap devicePixelRatio to prevent rendering at 3K/4K resolution
-        config.devicePixelRatio = Math.min(window.devicePixelRatio, 1.25);
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
