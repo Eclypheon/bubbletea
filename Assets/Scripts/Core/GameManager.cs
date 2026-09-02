@@ -67,6 +67,9 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
+            Application.targetFrameRate = 60;
+            QualitySettings.vSyncCount = 0;
+
             currentDifficulty = (GameDifficulty)PlayerPrefs.GetInt(PREFS_DIFFICULTY, (int)GameDifficulty.Normal);
         }
 
