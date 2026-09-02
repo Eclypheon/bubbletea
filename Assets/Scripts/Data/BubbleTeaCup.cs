@@ -126,8 +126,10 @@ namespace BubbleTeaShop
             {
                 result.earnedMoney = order.basePrice;
 
-                // Base tip is 10% of drink price, speed bonus is up to +30% based on remaining patience
-                float speedBonus = Mathf.Clamp01(patienceRemainingPercent) * 0.30f;
+                // Base tip is 10% of drink price.
+                // Speed bonus is up to +30%: Full +30% tip when patience >= 90%, scaling down linearly below 90%
+                float speedFactor = (patienceRemainingPercent >= 0.90f) ? 1.0f : Mathf.Clamp01(patienceRemainingPercent / 0.90f);
+                float speedBonus = speedFactor * 0.30f;
 
                 // Tips rewarded on well-made drinks (4 or 5 stars)
                 if (result.stars >= 4)

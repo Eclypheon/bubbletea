@@ -193,6 +193,7 @@ namespace BubbleTeaShop
             }
 
             OrderTicketUI.Instance?.ShowTicket(order);
+            HUDController.Instance?.ShowOrderPayout(order);
         }
 
         private void UpdateCustomerSprite(CustomerArchetype archetype)
@@ -218,6 +219,7 @@ namespace BubbleTeaShop
             if (!isWaiting) return;
             isWaiting = false;
             OrderTicketUI.Instance?.HideTicket();
+            HUDController.Instance?.HideOrderPayout();
 
             if (leaveRoutine != null) StopCoroutine(leaveRoutine);
 
@@ -252,6 +254,7 @@ namespace BubbleTeaShop
             {
                 isWaiting = false;
                 OrderTicketUI.Instance?.HideTicket();
+                HUDController.Instance?.HideOrderPayout();
                 DayManager.Instance?.RecordCustomerSkipped();
                 string angryLine = GetAngrySkipLine(activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
                 if (speechBubble != null)
@@ -335,6 +338,7 @@ namespace BubbleTeaShop
         {
             isWaiting = false;
             OrderTicketUI.Instance?.HideTicket();
+            HUDController.Instance?.HideOrderPayout();
             DayManager.Instance?.RecordCustomerSkipped();
             if (speechBubble != null)
             {
@@ -372,6 +376,7 @@ namespace BubbleTeaShop
             isMentorTalking = false;
             if (mentorNavPanel != null) mentorNavPanel.SetActive(false);
             OrderTicketUI.Instance?.HideTicket();
+            HUDController.Instance?.HideOrderPayout();
             if (speechBubble != null) speechBubble.HideBubbleInstant();
             if (rentChoicePanel != null) rentChoicePanel.SetActive(false);
             if (payRentButton != null) payRentButton.gameObject.SetActive(false);

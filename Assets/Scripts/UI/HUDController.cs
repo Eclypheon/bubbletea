@@ -35,6 +35,10 @@ namespace BubbleTeaShop
         [SerializeField] private TextMeshProUGUI modalImpactText;
         [SerializeField] private Button modalCloseButton;
 
+        [Header("Drink Payout Indicator")]
+        [SerializeField] private GameObject payoutIndicatorObj;
+        [SerializeField] private TextMeshProUGUI payoutIndicatorText;
+
         private Coroutine notificationRoutine;
         private Vector2 dayTextOriginalAnchoredPos = new Vector2(-700f, 0f);
         private bool hasCapturedDayTextPos = false;
@@ -69,6 +73,13 @@ namespace BubbleTeaShop
 
             EnsureMarketEventUI();
             EnsureMarketEventModal();
+            EnsurePayoutIndicatorUI();
+
+            if (CustomerManager.Instance != null)
+            {
+                CustomerManager.Instance.OnCustomerArrived -= ShowOrderPayout;
+                CustomerManager.Instance.OnCustomerArrived += ShowOrderPayout;
+            }
 
             if (EconomyManager.Instance != null)
             {
@@ -770,20 +781,116 @@ namespace BubbleTeaShop
                                          GameManager.Instance.CurrentState == GameState.ShopClosing);
                 marketEventBadgeObj.SetActive(visible && hasActiveEvent && isStorefrontOpen && !isSubscreenActive);
             }
+            if (!visible)
+            {
+                HideOrderPayout();
+            }
         }
 
         public void SetStorefrontHUDVisible(bool visible) => SetHUDDetailsVisible(visible);
+
+        public void EnsurePayoutIndicatorUI()
+        {
+            if (payoutIndicatorObj != null && payoutIndicatorText != null) return;
+
+            Canvas rootCanvas = GetComponentInParent<Canvas>();
+            Transform targetParent = (rootCanvas != null) ? rootCanvas.transform : transform.root;
+
+            Transform existing = targetParent.Find("PayoutIndicatorPanel");
+            if (existing != null)
+            {
+                payoutIndicatorObj = existing.gameObject;
+                payoutIndicatorText = payoutIndicatorObj.GetComponentInChildren<TextMeshProUGUI>(true);
+                return;
+            }
+
+            payoutIndicatorObj = new GameObject("PayoutIndicatorPanel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
+            payoutIndicatorObj.transform.SetParent(targetParent, false);
+
+            var rt = payoutIndicatorObj.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0f);
+            rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 15f);
+            rt.sizeDelta = new Vector2(560f, 36f);
+
+            var img = payoutIndicatorObj.GetComponent<Image>();
+            img.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+            img.raycastTarget = false;
+
+            GameObject textObj = new GameObject("PayoutText", typeof(RectTransform), typeof(TextMeshProUGUI));
+            textObj.transform.SetParent(payoutIndicatorObj.transform, false);
+
+            var textRt = textObj.GetComponent<RectTransform>();
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(10f, 0f);
+            textRt.offsetMax = new Vector2(-10f, 0f);
+
+            payoutIndicatorText = textObj.GetComponent<TextMeshProUGUI>();
+            payoutIndicatorText.fontSize = 18;
+            payoutIndicatorText.fontStyle = FontStyles.Bold;
+            payoutIndicatorText.alignment = TextAlignmentOptions.Center;
+            payoutIndicatorText.enableWordWrapping = false;
+            payoutIndicatorText.raycastTarget = false;
+
+            payoutIndicatorObj.SetActive(false);
+        }
+
+        public void ShowOrderPayout(DrinkOrder order)
+        {
+            if (order == null || isSubscreenActive)
+            {
+                HideOrderPayout();
+                return;
+            }
+
+            EnsurePayoutIndicatorUI();
+
+            float basePrice = order.basePrice;
+            float minPrice = (float)Math.Round(basePrice * 0.30f, 2);
+
+            bool hasLuckyCat = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat);
+            // Base tip 10% + Max speed tip 30% = 40% tip (multiplied by 1.30 if Lucky Cat upgrade is active)
+            float maxTipMultiplier = 0.40f * (hasLuckyCat ? 1.30f : 1.0f);
+            float maxPrice = (float)Math.Round(basePrice * (1.0f + maxTipMultiplier), 2);
+
+            if (payoutIndicatorText != null)
+            {
+                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#FFD700>Base: ${basePrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
+            }
+
+            if (payoutIndicatorObj != null)
+            {
+                payoutIndicatorObj.SetActive(true);
+                payoutIndicatorObj.transform.SetAsLastSibling();
+            }
+        }
+
+        public void HideOrderPayout()
+        {
+            if (payoutIndicatorObj != null)
+            {
+                payoutIndicatorObj.SetActive(false);
+            }
+        }
 
         public void UpdateStateHint(GameState state)
         {
             if (isSubscreenActive)
             {
                 SetHUDDetailsVisible(false);
+                HideOrderPayout();
                 if (statusHintText != null && !string.IsNullOrEmpty(defaultSubscreenHint) && notificationRoutine == null)
                 {
                     statusHintText.text = defaultSubscreenHint;
                 }
                 return;
+            }
+
+            if (state != GameState.CustomerWaiting)
+            {
+                HideOrderPayout();
             }
 
             // HUD details are visible in storefront gameplay and night bedroom hub

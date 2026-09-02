@@ -24,7 +24,8 @@ All notable changes to the Yippee Tea project are documented in this file.
 ### Simplified Star Rating & Tip System
 * **Linear 1-Star per Mistake Model**: Simplified drink rating to deduct exactly 1 star per mistake (wrong tea base, wrong milk type, mismatched sweetness, mismatched ice, or missing/extra toppings), capped at 4 deductions (minimum 1 star).
 * **Slowness Star Deductions**: If the customer's patience meter drops below 20%, 1 star is deducted for every 5% elapsed (15% patience = 4 stars, 10% = 3 stars, 5% = 2 stars, 0% = 1 star for a perfect order). This slowness deduction stacks cumulatively with recipe mistakes (capped at a 1-star floor).
-* **Calibrated Tips**: Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30% based on remaining patience. Sealing check was removed from the evaluation since serving unsealed cups is strictly prevented by gameplay controls.
+* **Calibrated Tips & 90% Patience Threshold**: Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30%. Serving when the patience bar is at or above 90% guarantees the maximum speed bonus (+30%), scaling down linearly only when patience drops below 90%.
+* **Storefront Payout Range Indicator**: Added a centered HUD indicator at the bottom of the screen displaying the current order's financial payout range: Lowest Possible Payout (30% partial payout), Base Menu Price, and Maximum Payout (Base Price + 40% Tip, factoring in the +30% Lucky Cat upgrade if active).
 
 ---
 
