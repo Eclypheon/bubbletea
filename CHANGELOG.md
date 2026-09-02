@@ -14,9 +14,12 @@ All notable changes to the Yippee Tea project are documented in this file.
 
 ### Endless Mode & Milestone Progression
 * **Endless Mode Post-Buyout**: Added an interactive **Endless Mode** button to the Victory Modal upon buying out the shop location ($1,500). Players can seamlessly continue playing into indefinite weeks.
-* **Exponential Rent Escalation**: In Endless Mode, weekly rent scales exponentially (compounding +35% per week past Week 4: e.g., $405 in Week 5, $547 in Week 6, $738 in Week 7, $996 in Week 8) for an escalating endgame challenge.
-* **Landlady Chubi Friendly Morning Visit**: On the very first morning after activating Endless Mode, Landlady Chubi pays a one-time goodwill visit to the storefront before the normal customer queue begins. She asks for her favourite drink (*Oolong Tea with Fresh Milk, 100% Sugar, 50% Ice, and Tapioca Pearls*) for free, reacting with fond commentary reminiscing that she might have lowered rent prices if only you brewed it for her sooner!
-* **Victory Fanfare & Physics Confetti**: Celebrated shop buyout with immediate victory SFX and an 8-color physics-simulated confetti explosion bursting across the screen.
+* **Exponential Rent Escalation**: In Endless Mode, weekly rent scales exponentially (compounding +35% per week past Week 4: e.g., $405 in Week 5, $547 in Week 6, $738 in Week 7, $996 in Week 8), rounded cleanly to the nearest whole dollar.
+* **Landlady Chubi Friendly Morning Visit**: On the very first morning after activating Endless Mode, Landlady Chubi pays a one-time goodwill visit to the storefront before the normal customer queue begins. She asks for her favourite drink (*Oolong Tea with Fresh Milk, 100% Sugar, Less/Regular Ice, and Tapioca Pearls*) for free, reacting with fond commentary reminiscing that she might have lowered rent prices if only you brewed it for her sooner!
+* **Multi-Line Dialogue Navigation**: Equipped Chubi's visit with an interactive multi-line navigation panel (`Next >` / `Got it! >` / `Skip >>`), where skipping jumps directly to the recipe line so you always know what to prepare.
+* **Synchronized HUD Day Display**: Fixed Day Counter display synchronization when transitioning into Endless Mode and across night phases.
+* **Victory Fanfare & Physics Confetti**: Celebrated shop buyout with immediate victory audio playback and an 8-color physics-simulated confetti explosion bursting across the screen with gravitational acceleration, 3D paper tumbling, and aerodynamic flutter.
+* **Updated Landlady Status & Notification Messages**: Refreshed all HUD status bar hints, shutter lever block messages, desk bell alerts, and eviction notices to consistently and clearly reference the Landlady.
 
 ---
 
