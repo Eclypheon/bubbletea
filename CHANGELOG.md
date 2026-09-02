@@ -21,6 +21,11 @@ All notable changes to the Yippee Tea project are documented in this file.
 * **Victory Fanfare & Physics Confetti**: Celebrated shop buyout with immediate victory audio playback and an 8-color physics-simulated confetti explosion bursting across the screen with gravitational acceleration, 3D paper tumbling, and aerodynamic flutter.
 * **Updated Landlady Status & Notification Messages**: Refreshed all HUD status bar hints, shutter lever block messages, desk bell alerts, and eviction notices to consistently and clearly reference the Landlady.
 
+### Simplified Star Rating & Tip System
+* **Linear 1-Star per Mistake Model**: Simplified drink rating to deduct exactly 1 star per mistake (wrong tea base, wrong milk type, mismatched sweetness, mismatched ice, or missing/extra toppings), capped at 4 deductions (minimum 1 star).
+* **Slowness Star Deductions**: If the customer's patience meter drops below 20%, 1 star is deducted for every 5% elapsed (15% patience = 4 stars, 10% = 3 stars, 5% = 2 stars, 0% = 1 star for a perfect order). This slowness deduction stacks cumulatively with recipe mistakes (capped at a 1-star floor).
+* **Calibrated Tips**: Rebalanced tipping to a 10% base tip on 4-star and 5-star drinks, with an intuitive speed bonus of up to +30% based on remaining patience. Sealing check was removed from the evaluation since serving unsealed cups is strictly prevented by gameplay controls.
+
 ---
 
 ## [v1.3.0] - 2026-09-01
