@@ -171,6 +171,8 @@
             }
           } catch(e) {}
         }
+      function unlockAudio() {
+        unlockAudioAndBypassSilentSwitch();
       }
 
       window.addEventListener('touchstart', unlockAudioAndBypassSilentSwitch, { passive: true });
