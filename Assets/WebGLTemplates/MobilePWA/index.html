@@ -48,26 +48,22 @@
         overflow: hidden;
       }
 
-      #unity-canvas-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: auto;
-      }
-
       #unity-canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        object-fit: contain !important;
         display: block;
+        margin: auto;
         background: #12141c;
       }
 
       /* Mobile: full-bleed edge to edge */
-      .unity-mobile #unity-canvas-wrapper {
-        width: 100vw !important;
-        height: 100vh !important;
-      }
       .unity-mobile #unity-canvas {
         width: 100% !important;
         height: 100% !important;
+        object-fit: cover !important;
       }
 
       /* Portrait Orientation Notice */
@@ -178,16 +174,14 @@
     </div>
 
     <div id="unity-container" class="unity-desktop">
-      <div id="unity-canvas-wrapper">
-        <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
-        <div id="unity-loading-bar">
-          <div id="unity-logo"></div>
-          <div id="unity-progress-bar-empty">
-            <div id="unity-progress-bar-full"></div>
-          </div>
+      <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
-        <div id="unity-warning"> </div>
       </div>
+      <div id="unity-warning"> </div>
       <div id="unity-footer" style="display:none;">
         <div id="unity-logo-title-footer"></div>
         <div id="unity-fullscreen-button"></div>
@@ -319,53 +313,6 @@
         canvas.mozRequestFullScreen = requestContainerFullscreen;
         canvas.msRequestFullscreen = requestContainerFullscreen;
       }
-
-      function enforce169Letterbox() {
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-          if (canvas) {
-            canvas.style.width = "100%";
-            canvas.style.height = "100%";
-          }
-          return;
-        }
-
-        var winW = window.innerWidth;
-        var winH = window.innerHeight;
-        var targetRatio = 16 / 9; // 1.777778
-        var currentRatio = winW / winH;
-
-        var w, h;
-        if (currentRatio < targetRatio) {
-          // 16:10 or narrower: Constrain strictly by width to force top/bottom black bars
-          w = winW;
-          h = Math.floor(w / targetRatio);
-        } else {
-          // 16:9 or wider: Constrain by height
-          h = winH;
-          w = Math.floor(h * targetRatio);
-        }
-
-        if (canvas) {
-          canvas.style.setProperty("width", w + "px", "important");
-          canvas.style.setProperty("height", h + "px", "important");
-          canvas.style.setProperty("margin", "auto", "important");
-        }
-        if (canvasWrapper) {
-          canvasWrapper.style.setProperty("width", w + "px", "important");
-          canvasWrapper.style.setProperty("height", h + "px", "important");
-          canvasWrapper.style.setProperty("margin", "auto", "important");
-        }
-      }
-
-      window.addEventListener('resize', enforce169Letterbox);
-      window.addEventListener('orientationchange', enforce169Letterbox);
-      document.addEventListener('fullscreenchange', enforce169Letterbox);
-      document.addEventListener('webkitfullscreenchange', enforce169Letterbox);
-      document.addEventListener('mozfullscreenchange', enforce169Letterbox);
-      document.addEventListener('MSFullscreenChange', enforce169Letterbox);
-
-      setInterval(enforce169Letterbox, 100);
-      enforce169Letterbox();
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
