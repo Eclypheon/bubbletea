@@ -130,7 +130,27 @@
       </div>
     </div>
 
+    <script src="unmute.js"></script>
     <script>
+      // Automatically bind unmute.js to all created AudioContext instances
+      var origAudioContext = window.AudioContext || window.webkitAudioContext;
+      if (origAudioContext) {
+        var wrappedAudioContext = function() {
+          var ctx = new origAudioContext();
+          try {
+            if (typeof unmute === 'function') {
+              unmute(ctx, false, true);
+            }
+          } catch(e) {
+            console.log('[unmute] error:', e);
+          }
+          return ctx;
+        };
+        wrappedAudioContext.prototype = origAudioContext.prototype;
+        window.AudioContext = wrappedAudioContext;
+        if (window.webkitAudioContext) window.webkitAudioContext = wrappedAudioContext;
+      }
+
       // 1. Register PWA Service Worker
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(function(err) {
@@ -139,15 +159,16 @@
       }
 
       // 2. iOS Silent Mode Switch Bypass & Web Audio Unlocker
-      // On iOS, WebAudio defaults to "Ambient" (muted by hardware silent switch).
-      // Playing a background HTML5 <audio> stream promotes iOS Safari to the "Playback" category (like YouTube),
-      // allowing game audio to bypass the silent switch and play through the speakers!
-      var silentHtmlAudio = null;
       function unlockAudioAndBypassSilentSwitch() {
         if (typeof WEBAudio !== 'undefined' && WEBAudio.audioContext) {
           if (WEBAudio.audioContext.state === 'suspended') {
             WEBAudio.audioContext.resume();
           }
+          try {
+            if (typeof unmute === 'function') {
+              unmute(WEBAudio.audioContext, false, true);
+            }
+          } catch(e) {}
         }
         var AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (AudioCtx) {
@@ -156,21 +177,8 @@
             temp.close();
           });
         }
+      }
 
-        if (!silentHtmlAudio) {
-          try {
-            silentHtmlAudio = document.createElement('audio');
-            silentHtmlAudio.setAttribute('x-webkit-airplay', 'deny');
-            silentHtmlAudio.preload = 'auto';
-            silentHtmlAudio.loop = true;
-            // 0.1s silent MP3 data URI
-            silentHtmlAudio.src = 'data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=';
-            var p = silentHtmlAudio.play();
-            if (p !== undefined) {
-              p.catch(function() {});
-            }
-          } catch(e) {}
-        }
       function unlockAudio() {
         unlockAudioAndBypassSilentSwitch();
       }
