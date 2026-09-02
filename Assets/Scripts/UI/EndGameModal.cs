@@ -145,7 +145,7 @@ namespace BubbleTeaShop
                 {
                     restartButton.gameObject.SetActive(true);
                     var rt = restartButton.GetComponent<RectTransform>();
-                    if (rt != null) rt.anchoredPosition = new Vector2(-120f, -130f);
+                    if (rt != null) rt.anchoredPosition = new Vector2(-250f, -250f);
                     var txt = restartButton.GetComponentInChildren<TextMeshProUGUI>();
                     if (txt != null) txt.text = "Play Again";
                 }
@@ -154,7 +154,7 @@ namespace BubbleTeaShop
                 {
                     endlessModeButton.gameObject.SetActive(true);
                     var rt = endlessModeButton.GetComponent<RectTransform>();
-                    if (rt != null) rt.anchoredPosition = new Vector2(120f, -130f);
+                    if (rt != null) rt.anchoredPosition = new Vector2(200f, -250f);
                     var txt = endlessModeButton.GetComponentInChildren<TextMeshProUGUI>();
                     if (txt != null) txt.text = "Endless Mode";
                 }
