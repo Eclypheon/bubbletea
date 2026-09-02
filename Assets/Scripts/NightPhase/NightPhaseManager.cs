@@ -364,7 +364,7 @@ namespace BubbleTeaShop
                 bool u = ForagingManager.Instance.IsZoneUnlocked("HoneyMeadow", day);
                 forageHoneyBtn.interactable = u && canForageTonight;
                 var t = forageHoneyBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = u ? (canForageTonight ? "Honey Meadow" : "Honey Meadow (Exhausted)") : "Honey Meadow (Day 11)";
+                if (t != null) t.text = u ? (canForageTonight ? "Honey Meadows" : "Honey Meadows (Exhausted)") : "Honey Meadows (Day 11)";
             }
 
             if (forageMountainBtn != null)
@@ -372,7 +372,7 @@ namespace BubbleTeaShop
                 bool u = ForagingManager.Instance.IsZoneUnlocked("MistMountain", day);
                 forageMountainBtn.interactable = u && canForageTonight;
                 var t = forageMountainBtn.GetComponentInChildren<TextMeshProUGUI>();
-                if (t != null) t.text = u ? (canForageTonight ? "Mist Peak Mountain" : "Mist Mountain (Exhausted)") : "Mist Mountain (Day 18)";
+                if (t != null) t.text = u ? (canForageTonight ? "Misty Mountains" : "Misty Mountains (Exhausted)") : "Misty Mountains (Day 18)";
             }
 
             if (foragingLogText != null)

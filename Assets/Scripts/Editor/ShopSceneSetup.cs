@@ -349,9 +349,9 @@ namespace BubbleTeaShop.Editor
             GameObject ledPanel = CreatePanel("LedgerPanel", nightRoot.transform);
 
             // Foraging buttons inside Foraging Panel
-            GameObject bmbBtn = CreateButton("ForageBambooBtn", forPanel.transform, "Whispering Bamboo Grove", new Vector2(-300, 60), new Vector2(260, 60));
-            GameObject hnyBtn = CreateButton("ForageHoneyBtn", forPanel.transform, "Golden Honey Meadow", new Vector2(0, 60), new Vector2(260, 60));
-            GameObject mntBtn = CreateButton("ForageMntBtn", forPanel.transform, "Mist Peak Mountain", new Vector2(300, 60), new Vector2(260, 60));
+            GameObject bmbBtn = CreateButton("ForageBambooBtn", forPanel.transform, "Bamboo Grove", new Vector2(-300, 60), new Vector2(260, 60));
+            GameObject hnyBtn = CreateButton("ForageHoneyBtn", forPanel.transform, "Honey Meadows", new Vector2(0, 60), new Vector2(260, 60));
+            GameObject mntBtn = CreateButton("ForageMntBtn", forPanel.transform, "Misty Mountains", new Vector2(300, 60), new Vector2(260, 60));
             var forLog = CreateText("ForageLogText", forPanel.transform, "Select a location to forage wild tea leaves & toppings.", new Vector2(0, -100), 20);
 
             // Ledger content

@@ -637,7 +637,7 @@ namespace BubbleTeaShop
             // 15% rare bonus loot roll (Wild Meadow Cash Discovery)
             if (UnityEngine.Random.value < 0.15f)
             {
-                EconomyManager.Instance?.AddCash(50.00f, "Wild Honey Meadow Discovery");
+                EconomyManager.Instance?.AddCash(50.00f, "Wild Honey Meadows Discovery");
                 SpawnCollectPopText(blockObj.transform.position + new Vector3(0, 30f, 0), "<color=#F1C40F>+Wild Discovery (+$50.00)</color>");
             }
 

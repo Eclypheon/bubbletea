@@ -73,12 +73,12 @@ namespace BubbleTeaShop
             {
                 InventoryManager.Instance.AddToppingStock(ToppingType.GoldenHoneyPearls, 6);
                 EconomyManager.Instance.AddCash(15f, "Foraged Wild Honey Sale");
-                resultMessage = "Honey Meadow: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
+                resultMessage = "Honey Meadows: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
             }
             else if (zone == "MistMountain")
             {
                 InventoryManager.Instance.AddRawStock(RawIngredientType.GoldenDew, 5);
-                resultMessage = "Mist Mountain: Scaled the peak and collected 5x Raw Golden Dew!";
+                resultMessage = "Misty Mountains: Scaled the peak and collected 5x Raw Golden Dew!";
             }
 
             OnForagingResult?.Invoke(resultMessage);
