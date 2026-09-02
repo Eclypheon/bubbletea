@@ -61,13 +61,13 @@ namespace BubbleTeaShop
                 if (weekNumber <= 4)
                 {
                     float baseVal = baseRentAmount + (weekNumber - 1) * rentIncreasePerWeek;
-                    return (float)Math.Round(baseVal * Mathf.Pow(1.20f, weekNumber - 1), 2);
+                    return Mathf.Round(baseVal * Mathf.Pow(1.20f, weekNumber - 1));
                 }
                 else
                 {
                     int extraWeeks = weekNumber - 4;
-                    // Exponential compounding at 35% per week past Week 4
-                    return (float)Math.Round(300.00f * Mathf.Pow(1.35f, extraWeeks), 2);
+                    // Exponential compounding at 35% per week past Week 4, rounded to nearest whole dollar
+                    return Mathf.Round(300.00f * Mathf.Pow(1.35f, extraWeeks));
                 }
             }
             else
