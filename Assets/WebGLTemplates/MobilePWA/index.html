@@ -130,23 +130,18 @@
       </div>
     </div>
 
-    <!-- Hidden HTML5 Audio Element to force iOS Safari into Playback Category (Bypassing Silent Switch) -->
-    <audio id="ios-media-audio" src="TemplateData/silence.wav" preload="auto" loop playsinline webkit-playsinline style="display:none; position:fixed; pointer-events:none;"></audio>
-
     <script src="unmute.js"></script>
     <script>
-      // Automatically bind unmute.js to all created AudioContext instances
+      // Automatically bind unmute.js to AudioContext instances for iOS silent mode support
       var origAudioContext = window.AudioContext || window.webkitAudioContext;
       if (origAudioContext) {
         var wrappedAudioContext = function() {
           var ctx = new origAudioContext();
           try {
             if (typeof unmute === 'function') {
-              unmute(ctx, false, true);
+              unmute(ctx, false, false);
             }
-          } catch(e) {
-            console.log('[unmute] error:', e);
-          }
+          } catch(e) {}
           return ctx;
         };
         wrappedAudioContext.prototype = origAudioContext.prototype;
@@ -156,53 +151,26 @@
 
       // 1. Register PWA Service Worker
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(function(err) {
-          console.log('[PWA] ServiceWorker registration:', err);
-        });
+        navigator.serviceWorker.register('sw.js').catch(function(err) {});
       }
 
-      // 2. iOS Silent Mode Switch Bypass & Web Audio Unlocker
-      var hasActivatedIOSAudio = false;
-      function activateIOSPlaybackCategory() {
-        if (hasActivatedIOSAudio) return;
-        var audioEl = document.getElementById('ios-media-audio');
-        if (audioEl) {
-          audioEl.play().then(function() {
-            hasActivatedIOSAudio = true;
-          }).catch(function() {});
-        }
-      }
-
-      function unlockAudioAndBypassSilentSwitch() {
-        activateIOSPlaybackCategory();
-
+      // 2. Web Audio Unlocker
+      function unlockAudio() {
         if (typeof WEBAudio !== 'undefined' && WEBAudio.audioContext) {
           if (WEBAudio.audioContext.state === 'suspended') {
             WEBAudio.audioContext.resume();
           }
           try {
             if (typeof unmute === 'function') {
-              unmute(WEBAudio.audioContext, false, true);
+              unmute(WEBAudio.audioContext, false, false);
             }
           } catch(e) {}
         }
-        var AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          var temp = new AudioCtx();
-          temp.resume().then(function() {
-            temp.close();
-          });
-        }
       }
 
-      function unlockAudio() {
-        unlockAudioAndBypassSilentSwitch();
-      }
-
-      window.addEventListener('touchstart', unlockAudioAndBypassSilentSwitch, { passive: true });
-      window.addEventListener('touchend', unlockAudioAndBypassSilentSwitch, { passive: true });
-      window.addEventListener('pointerdown', unlockAudioAndBypassSilentSwitch, { passive: true });
-      window.addEventListener('click', unlockAudioAndBypassSilentSwitch, { passive: true });
+      window.addEventListener('touchstart', unlockAudio, { passive: true, once: true });
+      window.addEventListener('pointerdown', unlockAudio, { passive: true, once: true });
+      window.addEventListener('click', unlockAudio, { passive: true, once: true });
 
       // 3. Screen Orientation Lock Attempt
       function attemptLandscapeLock() {
