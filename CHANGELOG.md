@@ -4,6 +4,16 @@ All notable changes to the Yippee Tea project are documented in this file.
 
 ---
 
+## [v1.4.0] - 2026-09-02 (In Progress)
+
+### Foraging & Prep Area Audio Immersion
+* **Expedition Sound Effects**: Integrated custom sound effects for foraging interactions across Bamboo Grove (rustling grass, scurrying Yippees, Yippee catch audio), Honey Meadows (tree kicks and jelly drops hitting the soil), and Mist Mountains (rock wall impacts and Golden Dew catching in the bucket).
+* **Baby Yippee Looping Scurry SFX**: Each active Baby Yippee plays looping movement audio with randomized pitch variation while running across the screen.
+* **Staggered Spawning Cadence**: Flushed Baby Yippees now emerge with a natural 0.1s to 0.7s stagger delay.
+* **Kitchen Prep Audio**: Integrated dedicated SFX for prep equipment processing including Blender blending, Chopping Log slices, and High-Speed Centrifuge spinning.
+
+---
+
 ## [v1.3.0] - 2026-09-01
 
 ### Market Conditions Badge & Event System
