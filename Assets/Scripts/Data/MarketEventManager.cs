@@ -154,8 +154,8 @@ namespace BubbleTeaShop
             // Roll for a new 3-day event if no event is active
             if (activeEvent == null)
             {
-                // Day 4 is guaranteed 100% probability. Subsequently, 55% chance with at least 1-day breather.
-                bool shouldTrigger = (dayNumber == 4) || (dayNumber > lastEventEndDay && UnityEngine.Random.value < 0.55f);
+                // Day 4 is guaranteed 100% probability. Subsequently, 75% chance with at least 1-day breather.
+                bool shouldTrigger = (dayNumber == 4) || (dayNumber > lastEventEndDay && UnityEngine.Random.value < 0.75f);
 
                 if (shouldTrigger)
                 {
@@ -191,10 +191,10 @@ namespace BubbleTeaShop
                 {
                     eventId = "dairy_surplus",
                     title = "Local Dairy Surplus",
-                    description = "Local pastures produced an abundance of milk! Fresh Milk & Oat Milk wholesale packs are discounted by 30%!",
+                    description = "Local pastures produced a massive surplus of milk! Fresh Milk & Oat Milk wholesale packs are discounted by 30%, but market saturation leads to lower customer milk demand (-35% milk orders)!",
                     affectedKey = "Milk_FreshMilk",
                     priceMultiplier = 0.70f,
-                    demandMultiplier = 1.30f,
+                    demandMultiplier = 0.65f,
                     totalDurationDays = 3,
                     daysRemaining = 3
                 },
@@ -202,10 +202,10 @@ namespace BubbleTeaShop
                 {
                     eventId = "tropical_coconut",
                     title = "Tropical Coconut Harvest",
-                    description = "A massive harvest of tropical coconuts has arrived! Coconut Milk & Coconut Jelly wholesale prices drop by 35%!",
+                    description = "A massive harvest flooded the markets! Coconut Milk & Coconut Jelly wholesale prices drop by 35%, but market saturation causes lower customer coconut demand (-40% coconut orders)!",
                     affectedKey = "Milk_CoconutMilk",
                     priceMultiplier = 0.65f,
-                    demandMultiplier = 1.40f,
+                    demandMultiplier = 0.60f,
                     totalDurationDays = 3,
                     daysRemaining = 3
                 },

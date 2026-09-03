@@ -451,25 +451,25 @@ namespace BubbleTeaShop
 
         private int GetMarketEventMilkWeight(MilkType milk)
         {
-            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 1;
+            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 10;
             string evId = MarketEventManager.Instance.ActiveEvent.eventId;
-            if (evId == "dairy_surplus" && (milk == MilkType.FreshMilk || milk == MilkType.OatMilk)) return 3;
-            if (evId == "tropical_coconut" && milk == MilkType.CoconutMilk) return 4;
-            if (evId == "plant_based_craze" && (milk == MilkType.OatMilk || milk == MilkType.CoconutMilk)) return 4;
-            if (evId == "chilly_rain" && milk == MilkType.CondensedMilk) return 4;
-            return 1;
+            if (evId == "dairy_surplus" && (milk == MilkType.FreshMilk || milk == MilkType.OatMilk)) return 3; // Surplus saturation reduces milk demand
+            if (evId == "tropical_coconut" && milk == MilkType.CoconutMilk) return 3; // Harvest saturation reduces coconut demand
+            if (evId == "plant_based_craze" && (milk == MilkType.OatMilk || milk == MilkType.CoconutMilk)) return 30;
+            if (evId == "chilly_rain" && milk == MilkType.CondensedMilk) return 30;
+            return 10;
         }
 
         private int GetMarketEventToppingWeight(ToppingType topping)
         {
-            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 1;
+            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 10;
             string evId = MarketEventManager.Instance.ActiveEvent.eventId;
-            if (evId == "tapioca_delay" && topping == ToppingType.TapiocaPearls) return 4;
-            if (evId == "wellness_trend" && topping == ToppingType.GrassJelly) return 4;
-            if (evId == "summer_heatwave" && topping == ToppingType.PoppingBoba) return 4;
-            if (evId == "tropical_coconut" && topping == ToppingType.CoconutJelly) return 4;
-            if (evId == "cream_shortage" && (topping == ToppingType.CheeseFoam || topping == ToppingType.EggPudding)) return 3;
-            return 1;
+            if (evId == "tropical_coconut" && topping == ToppingType.CoconutJelly) return 3; // Harvest saturation reduces coconut jelly demand
+            if (evId == "tapioca_delay" && topping == ToppingType.TapiocaPearls) return 30;
+            if (evId == "wellness_trend" && topping == ToppingType.GrassJelly) return 30;
+            if (evId == "summer_heatwave" && topping == ToppingType.PoppingBoba) return 30;
+            if (evId == "cream_shortage" && (topping == ToppingType.CheeseFoam || topping == ToppingType.EggPudding)) return 25;
+            return 10;
         }
 
         private int RollSweetnessWithMarketEvents(List<int> availableSweetness)
@@ -578,6 +578,10 @@ namespace BubbleTeaShop
 
                 // Milk Selection (Artisanal Menu & Market Events influence weights)
                 float milkChance = hasArtisanalMenu ? 0.85f : 0.65f;
+                if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent?.eventId == "dairy_surplus")
+                {
+                    milkChance = hasArtisanalMenu ? 0.50f : 0.35f; // Customers prefer clear teas during dairy surplus
+                }
                 if (UnityEngine.Random.value < milkChance)
                 {
                     List<MilkType> milkPool = new List<MilkType>(availableMilks);

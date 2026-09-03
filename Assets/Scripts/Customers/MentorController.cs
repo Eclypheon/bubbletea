@@ -288,17 +288,17 @@ namespace BubbleTeaShop
         {
             return eventId switch
             {
-                "stock_clearance" => "I hear the wholesale market is running a massive clearance sale right now! All ingredients and milks are 70% cheaper, so you should definitely stock up while prices are low!",
-                "summer_heatwave" => "Phew, the weather is scorching hot today! Here's a pro tip: in this intense heatwave, I bet customers would love 100% Full Ice to cool off, even if they didn't ask for it!",
-                "chilly_rain" => "Brrr, this freezing rainy cold front is brutal! I bet shivering customers would really appreciate 0% No Ice to stay warm today, even if they forgot to ask for no ice!",
-                "golden_harvest" => "The wilderness is flourishing right now! If you go foraging tonight, you'll bag 2.0x double harvests across all expedition zones!",
-                "tapioca_delay" => "Harbor shipping delays mean tapioca wholesale prices are up, but customer boba cravings are surging! Make sure you have enough pearls ready!",
-                "dairy_surplus" => "Local pastures produced an abundance of fresh milk! Fresh Milk and Oat Milk are discounted by 30% at the wholesale market, and milk teas will be in high demand!",
-                "tropical_coconut" => "A massive tropical coconut shipment arrived! Coconut Milk and Coconut Jelly are 35% off at the market — a great time to serve refreshing tropical combos!",
-                "cream_shortage" => "Gourmet cream costs are up, but wealthy customers are tipping an extra +25% on rich drinks with Cheese Foam and Egg Pudding! Take advantage of those generous tips!",
-                "plant_based_craze" => "A viral wellness article is sweeping town! Expect a huge surge of customers asking for Barista Oat Milk and Organic Coconut Milk today!",
-                "wellness_trend" => "Health and wellness are trending! Customers are favoring refreshing Herbal Grass Jelly and low or zero sweetness levels today!",
-                _ => "Keep a close eye on the market badge on your counter to stay ahead of customer trends!"
+                "stock_clearance" => "I hear the wholesale market is running a massive clearance sale right now! All ingredients and milks are 70% cheaper, so you should definitely stock up while prices are low this period!",
+                "summer_heatwave" => "Phew, the weather is scorching hot right now! Here's a pro tip: in this intense heatwave, I bet customers would love 100% Full Ice to cool off, even if they didn't ask for it this period!",
+                "chilly_rain" => "Brrr, this freezing rainy cold front is brutal! I bet shivering customers would really appreciate 0% No Ice to stay warm this period, even if they forgot to ask for no ice!",
+                "golden_harvest" => "The wilderness is flourishing right now! If you go foraging during this period, you'll bag 2.0x double harvests across all expedition zones!",
+                "tapioca_delay" => "Harbor shipping delays mean tapioca wholesale prices are up, but customer boba cravings are surging this period! Make sure you have enough pearls ready!",
+                "dairy_surplus" => "Local pastures produced a massive surplus of milk! Fresh Milk and Oat Milk are discounted by 30% at the wholesale market, but customers are somewhat saturated and ordering less milk tea this period!",
+                "tropical_coconut" => "A massive tropical coconut harvest flooded the market! Coconut Milk and Coconut Jelly are 35% off, but customer coconut orders will be lower this period!",
+                "cream_shortage" => "Gourmet cream costs are up, but wealthy customers are tipping an extra +25% on rich drinks with Cheese Foam and Egg Pudding! Take advantage of those generous tips this period!",
+                "plant_based_craze" => "A viral wellness article is sweeping town! Expect a huge surge of customers asking for Barista Oat Milk and Organic Coconut Milk this period!",
+                "wellness_trend" => "Health and wellness are trending! Customers are favoring refreshing Herbal Grass Jelly and low or zero sweetness levels this period!",
+                _ => "Keep a close eye on the market badge on your counter to stay ahead of customer trends this period!"
             };
         }
 

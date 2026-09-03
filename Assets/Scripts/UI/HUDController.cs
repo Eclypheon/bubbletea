@@ -679,8 +679,8 @@ namespace BubbleTeaShop
                 modalImpactText.text = ev.eventId switch
                 {
                     "tapioca_delay" => "<color=#FF6666>• Wholesale Tapioca Cost: +40%</color>\n<color=#3498DB>• Customer Boba Orders: +50%</color>",
-                    "dairy_surplus" => "<color=#2ECC71>• Fresh & Oat Milk Wholesale: -30% (Discount!)</color>\n<color=#3498DB>• Customer Milk Drink Orders: +30%</color>",
-                    "tropical_coconut" => "<color=#2ECC71>• Coconut Milk & Jelly Wholesale: -35% (Discount!)</color>\n<color=#3498DB>• Customer Coconut Orders: +40%</color>",
+                    "dairy_surplus" => "<color=#2ECC71>• Fresh & Oat Milk Wholesale: -30% (Discount!)</color>\n<color=#FF6666>• Customer Milk Drink Demand: -35% (Surplus Saturation)</color>",
+                    "tropical_coconut" => "<color=#2ECC71>• Coconut Milk & Jelly Wholesale: -35% (Discount!)</color>\n<color=#FF6666>• Customer Coconut Demand: -40% (Harvest Saturation)</color>",
                     "cream_shortage" => "<color=#FF6666>• Cheese Foam & Egg Pudding Wholesale: +30%</color>\n<color=#F1C40F>• Customer Tips on Cream Drinks: +25%</color>",
                     "plant_based_craze" => "<color=#3498DB>• Customer Oat & Plant Milk Orders: +60%</color>",
                     "wellness_trend" => "<color=#2ECC71>• Grass Jelly Wholesale: -15% (Discount!)</color>\n<color=#3498DB>• Grass Jelly Orders: +50% (Low Sugar Preference)</color>",
