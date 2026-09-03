@@ -67,3 +67,30 @@ This document details the exact mathematical probability distributions governing
 | **Dyscalculia** | **60s** | Enthusiastic coin-counting dialogue (*"I counted my coins!..."*) |
 
 *(Note: Purchasing the **Improve Store Ambience** upgrade for $30 removes patience timers completely, allowing all archetypes to wait indefinitely).*
+
+---
+
+## 5. Market Event Trigger Probability & Progressive Event Pool
+
+Market events last for **3 full days** and alter ingredient wholesale prices, customer order preferences, and foraging yields. Events only trigger from pools containing ingredients and mechanics currently unlocked by the player.
+
+### Event Occurrence Rates
+* **Days 1–3**: **0.0%** (Tutorial and basic shop operations).
+* **Day 4**: **100.0%** (Guaranteed first random event to introduce market dynamics).
+* **Day 5+**: **55.0%** daily chance to roll a new 3-day event whenever no event is currently active (with a minimum 1-day cooldown after an event concludes).
+
+### Event Selection Probabilities (When an Event Triggers)
+
+| Market Event | Affected Mechanics & Ingredients | Day 4 (Week 1 Intro) | Days 5–7 (Foraging Unlocked) | Week 2 (Days 8–14) | Weeks 3–4 & Endless (Days 15+) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Tapioca Pearl Shortage** | Tapioca Pearls wholesale +40%, Pearl customer demand +50% | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Local Dairy Surplus** | Fresh Milk & Oat Milk wholesale -30%, Milk demand +30% | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Summer Heatwave** | 100% Full Ice demand +70%, Fruity Popping Boba preference | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Herbal Wellness Trend** | Grass Jelly wholesale -15%, Grass Jelly demand +50%, Low/Zero sugar | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Bountiful Foraging Season** | Foraging expeditions yield 2x harvests across all regions | — | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Tropical Coconut Harvest** | Coconut Milk & Coconut Jelly wholesale -35%, Coconut demand +40% | — | — | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Plant-Based Milk Craze** | Barista Oat Milk & Organic Coconut Milk demand +60% | — | — | **14.29%** (1/7) | **11.11%** (1/9) |
+| **Chilly Monsoon Rain** | 0% Ice preference, Condensed Milk creamy drinks demand +40% | — | — | — | **11.11%** (1/9) |
+| **Gourmet Cream Shortage** | Egg Pudding & Cheese Foam wholesale +30%, Customer tips +25% | — | — | — | **11.11%** (1/9) |
+| **Total Active Pool Size** | | **4 Events** | **5 Events** | **7 Events** | **9 Events** |
+

@@ -281,21 +281,33 @@ namespace BubbleTeaShop
 
         private MarketEvent GenerateRandomEvent(int dayNumber)
         {
+            // Week 1 Pool (Basic ingredients available on Days 1–4: Pearls, Fresh/Oat Milk, Popping Boba, Grass Jelly, Ice)
             List<MarketEventType> pool = new List<MarketEventType>
             {
                 MarketEventType.TapiocaPearlShortage,
                 MarketEventType.LocalDairySurplus,
-                MarketEventType.TropicalCoconutHarvest,
-                MarketEventType.GourmetCreamShortage,
-                MarketEventType.PlantBasedMilkCraze,
-                MarketEventType.HerbalWellnessTrend,
                 MarketEventType.SummerHeatwave,
-                MarketEventType.ChillyMonsoonRain
+                MarketEventType.HerbalWellnessTrend
             };
 
+            // Days 5–7: Foraging is unlocked on Day 5
             if (dayNumber >= 5)
             {
                 pool.Add(MarketEventType.BountifulForagingSeason);
+            }
+
+            // Week 2+ (Day 8+): Coconut Milk & Coconut Jelly unlocked at Wholesale Market
+            if (dayNumber >= 8)
+            {
+                pool.Add(MarketEventType.TropicalCoconutHarvest);
+                pool.Add(MarketEventType.PlantBasedMilkCraze);
+            }
+
+            // Week 3+ (Day 15+): Condensed Milk, Cheese Foam & Egg Pudding unlocked at Wholesale Market
+            if (dayNumber >= 15)
+            {
+                pool.Add(MarketEventType.ChillyMonsoonRain);
+                pool.Add(MarketEventType.GourmetCreamShortage);
             }
 
             MarketEventType selected = pool[UnityEngine.Random.Range(0, pool.Count)];
