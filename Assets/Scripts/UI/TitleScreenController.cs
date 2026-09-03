@@ -1012,22 +1012,15 @@ namespace BubbleTeaShop
         private const string DEFAULT_CHANGELOG_TEXT =
             "<color=#FF66CC><b>[v1.6.0] - 2026-09-03</b></color>\n\n" +
             "<b>Market Events Overhaul & Impactful Economics:</b>\n" +
-            "• <b>Progressive 10-Event System:</b> Gated 3-day market events across progression weeks (Week 1: 7 events, Week 2: 9 events, Week 3+: 10 events) so events only feature ingredients and mechanics the player has unlocked.\n" +
-            "• <b>Wholesale Stock Clearance:</b> Introduced a massive flash clearance sale where ALL ingredients, milks, and toppings in the wholesale supermarket are 70% cheaper (-70% off) for 3 days.\n" +
-            "• <b>Secret Weather Ice Preferences:</b>\n" +
-            "  - <i>Summer Heatwave:</i> Customers secretly crave 100% Full Ice to beat the heat. Serving 100% ice unlocks 5-star ratings and full tips, while less ice incurs a 1-star deduction, 50% tip penalty, and archetype-tailored feedback.\n" +
-            "  - <i>Chilly Monsoon Rain:</i> Customers secretly crave 0% No Ice to stay warm. Serving 0% ice unlocks full tips, while adding ice incurs a 1-star deduction, 50% tip penalty, and shivering archetype reactions.\n" +
-            "• <b>Calibrated Supply & Demand Economics:</b> Surplus events (Local Dairy Surplus & Tropical Coconut Harvest) feature 30–35% wholesale discounts with reduced customer demand (-35% to -40%) due to market saturation, while high-demand events (Plant-Based Milk Craze & Herbal Wellness Trend) increase wholesale prices (+30%) alongside surging demand.\n" +
-            "• <b>Bountiful Foraging Synergy:</b> Foraging expeditions yield 2.0x double harvests during Bountiful Foraging Season, active starting Day 4 to synergize with Day 5 foraging unlock.\n" +
-            "• <b>Strategic Mentor Briefings:</b> The mentor visits each morning a new event starts, delivering bite-sized tactical advice and secret weather hints tailored for all 10 market events.\n" +
-            "• <b>Tiered Tipping Model:</b> Perfect 5-star drinks earn 100% full tips, 4-star drinks (1 mistake or missed weather craving) receive a 50% partial tip, and 3-star drinks receive $0 tip.\n" +
-            "• <b>Increased Event Frequency:</b> Raised daily event occurrence probability from 55% to 75% on Day 5+.\n\n" +
+            "• <b>Impactful Market Events:</b> Made market events more impactful to players with dynamic supply & demand economics, 75% trigger rate, and realistic price swings.\n" +
+            "• <b>Progressive 10-Event Pool:</b> Events unlock progressively across weeks (7 in W1, 9 in W2, 10 in W3+) matching available ingredients.\n" +
+            "• <b>Wholesale Clearance Sale:</b> Added a 3-day flash clearance offering -70% off all stock at the wholesale market.\n" +
+            "• <b>Weather Ice Demands:</b> Summer Heatwave secretly craves 100% Full Ice, while Chilly Monsoon craves 0% No Ice for full tips.\n" +
+            "• <b>Tiered Tipping Rebalance:</b> 5-star drinks earn 100% full tips, 4-star drinks (1 mistake or missed weather ice) earn a 50% partial tip, and 3 stars or lower earn $0 tip.\n\n" +
             "<b>Chairwoman Chubi & Sabbatical Vacation Royalties:</b>\n" +
-            "• <b>Honorary Chairwoman Lore Transition:</b> After buying out the shop deed and unlocking Endless Mode, Landlady Chubi officially declares herself your 'Honorary Chairwoman & Global Brand Godmother' before embarking on world luxury travels.\n" +
-            "• <b>Vacation Royalty Collection:</b> Weekly payments in Endless Mode are transformed from rent into 'Weekly Vacation Royalties' funding Chubi's international vacations.\n" +
-            "• <b>In-Person Tsundere Dialogues:</b> Chubi visits in person between luxury trips (Paris, Kyoto, Hawaii, Switzerland, Monaco) with customized comical tsundere greetings.\n" +
-            "• <b>Repossession Stakes:</b> Missing royalty payments prompts tsundere warnings and a customized 'Shop Repossessed' game over sequence.\n" +
-            "• <b>Dynamic HUD & Menu Strings:</b> HUD countdown timers, status hints, and buttons dynamically switch between 'Rent' (pre-buyout) and 'Royalty' (post-buyout).\n\n" +
+            "• <b>Honorary Chairwoman Lore:</b> Buying out the shop deed ($1,500) transitions weekly Endless Mode payments from rent into Chubi's 'Vacation Royalties'.\n" +
+            "• <b>Tsundere Travel Visits:</b> Chubi visits in person between luxury world trips (Paris, Kyoto, Hawaii, Monaco) with comical tsundere dialogues.\n" +
+            "• <b>Dynamic HUD Labels:</b> Timers and buttons dynamically switch between 'Rent' (pre-buyout) and 'Royalty' (post-buyout).\n\n" +
             "<color=#00E5FF><b>[v1.5.0] - 2026-09-03</b></color>\n\n" +
             "<b>Title Screen Overhaul & Options:</b>\n" +
             "• <b>Title Screen & Mode Selection:</b> Comprehensive Title Screen featuring New Game, Options, Credits, and Changelog panels, alongside Game Mode selection (Normal vs Blitz Mode).\n" +
