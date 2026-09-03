@@ -121,6 +121,7 @@ namespace BubbleTeaShop
         HerbalWellnessTrend,
         SummerHeatwave,
         ChillyMonsoonRain,
-        BountifulForagingSeason
+        BountifulForagingSeason,
+        WholesaleStockClearance
     }
 }

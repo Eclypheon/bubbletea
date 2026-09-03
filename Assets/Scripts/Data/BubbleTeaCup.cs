@@ -13,6 +13,12 @@ namespace BubbleTeaShop
         public float tip;
         public List<string> feedbackNotes = new List<string>();
         public bool isPerfect => accuracy >= 0.95f;
+
+        // Market Weather Ice Outcomes
+        public bool isHeatwaveIceSecretSatisfied = false;
+        public bool isHeatwaveIcePenaltyIncurred = false;
+        public bool isChillyRainIceSecretSatisfied = false;
+        public bool isChillyRainIcePenaltyIncurred = false;
     }
 
     [System.Serializable]
@@ -65,11 +71,45 @@ namespace BubbleTeaShop
                 result.feedbackNotes.Add($"Sweetness level was wrong ({sweetnessPercent}% vs {order.targetSweetnessPercent}%).");
             }
 
-            // 4. Ice Check (1 mistake if wrong)
-            if (icePercent != order.targetIcePercent)
+            // 4. Ice Check (with Market Event secret weather preferences)
+            var activeMarketEv = MarketEventManager.Instance != null ? MarketEventManager.Instance.ActiveEvent : null;
+            if (activeMarketEv != null && activeMarketEv.eventId == "summer_heatwave")
             {
-                mistakeCount++;
-                result.feedbackNotes.Add($"Ice level was wrong ({icePercent}% vs {order.targetIcePercent}%).");
+                // Summer Heatwave secret: Customers secretly crave 100% Full Ice regardless of ticket
+                if (icePercent == 100)
+                {
+                    result.isHeatwaveIceSecretSatisfied = true;
+                    result.feedbackNotes.Add("Satisfied Summer Heatwave craving with 100% Full Ice!");
+                }
+                else
+                {
+                    mistakeCount++;
+                    result.isHeatwaveIcePenaltyIncurred = true;
+                    result.feedbackNotes.Add("Customer secretly craved 100% Full Ice due to the scorching Summer Heatwave!");
+                }
+            }
+            else if (activeMarketEv != null && activeMarketEv.eventId == "chilly_rain")
+            {
+                // Chilly Monsoon Rain secret: Customers secretly crave 0% No Ice to stay warm regardless of ticket
+                if (icePercent == 0)
+                {
+                    result.isChillyRainIceSecretSatisfied = true;
+                    result.feedbackNotes.Add("Satisfied Chilly Monsoon craving with 0% No Ice!");
+                }
+                else
+                {
+                    mistakeCount++;
+                    result.isChillyRainIcePenaltyIncurred = true;
+                    result.feedbackNotes.Add("Customer secretly craved 0% No Ice due to the freezing Chilly Monsoon Rain!");
+                }
+            }
+            else
+            {
+                if (icePercent != order.targetIcePercent)
+                {
+                    mistakeCount++;
+                    result.feedbackNotes.Add($"Ice level was wrong ({icePercent}% vs {order.targetIcePercent}%).");
+                }
             }
 
             // 5. Toppings Check (1 mistake per missing or extra topping)
@@ -138,6 +178,10 @@ namespace BubbleTeaShop
                     if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat))
                     {
                         result.tip *= 1.30f;
+                    }
+                    if (activeMarketEv != null && activeMarketEv.eventId == "cream_shortage")
+                    {
+                        result.tip *= 1.25f;
                     }
                     result.tip = (float)(Math.Round(result.tip * 10.0, MidpointRounding.AwayFromZero) / 10.0);
                 }

@@ -275,26 +275,33 @@ namespace BubbleTeaShop
                     totalDurationDays = 3,
                     daysRemaining = 3
                 },
+                MarketEventType.WholesaleStockClearance => new MarketEvent
+                {
+                    eventId = "stock_clearance",
+                    title = "Wholesale Stock Clearance",
+                    description = "The central wholesale market is running a massive flash clearance sale! ALL ingredients, milks, and toppings are 70% cheaper for the next 3 days!",
+                    affectedKey = "All_Stock",
+                    priceMultiplier = 0.30f,
+                    demandMultiplier = 1.0f,
+                    totalDurationDays = 3,
+                    daysRemaining = 3
+                },
                 _ => null
             };
         }
 
         private MarketEvent GenerateRandomEvent(int dayNumber)
         {
-            // Week 1 Pool (Basic ingredients available on Days 1–4: Pearls, Fresh/Oat Milk, Popping Boba, Grass Jelly, Ice)
+            // Week 1 Pool (Basic ingredients available on Days 1–4, Day 4 3-day duration reaches Day 5/6 foraging, plus Wholesale clearance)
             List<MarketEventType> pool = new List<MarketEventType>
             {
                 MarketEventType.TapiocaPearlShortage,
                 MarketEventType.LocalDairySurplus,
                 MarketEventType.SummerHeatwave,
-                MarketEventType.HerbalWellnessTrend
+                MarketEventType.HerbalWellnessTrend,
+                MarketEventType.BountifulForagingSeason,
+                MarketEventType.WholesaleStockClearance
             };
-
-            // Days 5–7: Foraging is unlocked on Day 5
-            if (dayNumber >= 5)
-            {
-                pool.Add(MarketEventType.BountifulForagingSeason);
-            }
 
             // Week 2+ (Day 8+): Coconut Milk & Coconut Jelly unlocked at Wholesale Market
             if (dayNumber >= 8)
@@ -317,6 +324,12 @@ namespace BubbleTeaShop
         public float GetPriceMultiplier(string stockKey)
         {
             if (activeEvent == null) return 1.0f;
+
+            // Global stock clearance discount (70% off everything)
+            if (activeEvent.eventId == "stock_clearance" || activeEvent.affectedKey == "All_Stock")
+            {
+                return 0.30f;
+            }
 
             if (activeEvent.affectedKey == stockKey)
             {

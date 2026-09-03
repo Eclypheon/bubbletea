@@ -301,7 +301,14 @@ namespace BubbleTeaShop
 
         // Raw Foraged Ingredients API
         public int GetRawStock(RawIngredientType type) => GetStock($"Raw_{type}");
-        public void AddRawStock(RawIngredientType type, int qty) => AddStock($"Raw_{type}", qty);
+        public void AddRawStock(RawIngredientType type, int qty)
+        {
+            if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent?.eventId == "golden_harvest")
+            {
+                qty = Mathf.RoundToInt(qty * 2.0f);
+            }
+            AddStock($"Raw_{type}", qty);
+        }
         public bool ConsumeRawStock(RawIngredientType type, int qty = 1) => ConsumeStock($"Raw_{type}", qty);
 
         // Persistence API

@@ -76,21 +76,44 @@ Market events last for **3 full days** and alter ingredient wholesale prices, cu
 
 ### Event Occurrence Rates
 * **Days 1–3**: **0.0%** (Tutorial and basic shop operations).
-* **Day 4**: **100.0%** (Guaranteed first random event to introduce market dynamics).
+* **Day 4**: **100.0%** (Guaranteed first random event to introduce market dynamics; 3-day duration extends into Days 5 & 6 when Foraging unlocks on Day 5).
 * **Day 5+**: **55.0%** daily chance to roll a new 3-day event whenever no event is currently active (with a minimum 1-day cooldown after an event concludes).
 
 ### Event Selection Probabilities (When an Event Triggers)
 
-| Market Event | Affected Mechanics & Ingredients | Day 4 (Week 1 Intro) | Days 5–7 (Foraging Unlocked) | Week 2 (Days 8–14) | Weeks 3–4 & Endless (Days 15+) |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **Tapioca Pearl Shortage** | Tapioca Pearls wholesale +40%, Pearl customer demand +50% | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Local Dairy Surplus** | Fresh Milk & Oat Milk wholesale -30%, Milk demand +30% | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Summer Heatwave** | 100% Full Ice demand +70%, Fruity Popping Boba preference | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Herbal Wellness Trend** | Grass Jelly wholesale -15%, Grass Jelly demand +50%, Low/Zero sugar | **25.0%** (1/4) | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Bountiful Foraging Season** | Foraging expeditions yield 2x harvests across all regions | — | **20.0%** (1/5) | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Tropical Coconut Harvest** | Coconut Milk & Coconut Jelly wholesale -35%, Coconut demand +40% | — | — | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Plant-Based Milk Craze** | Barista Oat Milk & Organic Coconut Milk demand +60% | — | — | **14.29%** (1/7) | **11.11%** (1/9) |
-| **Chilly Monsoon Rain** | 0% Ice preference, Condensed Milk creamy drinks demand +40% | — | — | — | **11.11%** (1/9) |
-| **Gourmet Cream Shortage** | Egg Pudding & Cheese Foam wholesale +30%, Customer tips +25% | — | — | — | **11.11%** (1/9) |
-| **Total Active Pool Size** | | **4 Events** | **5 Events** | **7 Events** | **9 Events** |
+| Market Event | Affected Mechanics & Ingredients | Week 1 (Days 4–7) | Week 2 (Days 8–14) | Weeks 3–4 & Endless (Days 15+) |
+| :--- | :--- | :---: | :---: | :---: |
+| **Tapioca Pearl Shortage** | Tapioca Pearls wholesale +40%, Pearl customer demand +50% | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Local Dairy Surplus** | Fresh Milk & Oat Milk wholesale -30%, Milk demand +30% | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Summer Heatwave** | 100% Full Ice demand +70%, Fruity Popping Boba demand; **Weather Secret:** Must give 100% Ice for full tips | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Herbal Wellness Trend** | Grass Jelly wholesale -15%, Grass Jelly demand +50%, Low/Zero sugar preference | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Bountiful Foraging Season** | Foraging expeditions yield 2.0x double harvests across all unlocked zones | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Wholesale Stock Clearance** | **ALL** Wholesale Market goods, milks & toppings are **70% cheaper (-70% flash sale)** | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Tropical Coconut Harvest** | Coconut Milk & Coconut Jelly wholesale -35%, Coconut demand +40% | — | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Plant-Based Milk Craze** | Barista Oat Milk & Organic Coconut Milk demand +60% | — | **12.50%** (1/8) | **10.00%** (1/10) |
+| **Chilly Monsoon Rain** | 0% Ice preference, Condensed Milk demand +40%; **Weather Secret:** Must give 0% Ice (No Ice) for full tips | — | — | **10.00%** (1/10) |
+| **Gourmet Cream Shortage** | Egg Pudding & Cheese Foam wholesale +30%, Customer tips on cream drinks **+25%** | — | — | **10.00%** (1/10) |
+| **Total Active Pool Size** | | **6 Events** | **8 Events** | **10 Events** |
+
+---
+
+### Weather Secret Ice Mechanics
+1. **Summer Heatwave (Scorching Weather)**:
+   - Regardless of what ice level the customer specified on their order ticket (e.g. 0% or 50%), customers secretly crave **100% Full Ice** to cool down.
+   - If the player prepares **100% Full Ice**:
+     - Ice is evaluated as 100% correct (0 mistakes), unlocking 5-star rating and full tip bonus.
+     - Customer delivers archetype-specific praise (*"Ah, I really needed a cool drink!"*).
+   - If the player provides **less than 100% Ice** (e.g. following 0% or 50% on the ticket):
+     - Incurs a 1-mistake penalty, reducing max star rating and tip.
+     - Customer delivers archetype-specific penalty dialogue (*"Actually, it's so hot now... I would have preferred more ice!"*).
+
+2. **Chilly Monsoon Rain (Freezing Cold Front)**:
+   - Regardless of what ice level the customer specified on their order ticket (e.g. 50% or 100%), customers secretly crave **0% No Ice** to stay warm.
+   - If the player prepares **0% No Ice**:
+     - Ice is evaluated as 100% correct (0 mistakes), unlocking 5-star rating and full tip bonus.
+     - Customer delivers archetype-specific warm praise (*"Ah, no ice is so comforting in this chilly weather!"*).
+   - If the player provides **more than 0% Ice** (e.g. following 50% or 100% on the ticket):
+     - Incurs a 1-mistake penalty, reducing max star rating and tip.
+     - Customer delivers archetype-specific penalty dialogue (*"Actually, I'm pretty cold... I should have ordered less ice!"*).
+
 

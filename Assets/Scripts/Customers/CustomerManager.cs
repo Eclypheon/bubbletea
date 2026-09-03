@@ -449,6 +449,63 @@ namespace BubbleTeaShop
             };
         }
 
+        private int GetMarketEventMilkWeight(MilkType milk)
+        {
+            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 1;
+            string evId = MarketEventManager.Instance.ActiveEvent.eventId;
+            if (evId == "dairy_surplus" && (milk == MilkType.FreshMilk || milk == MilkType.OatMilk)) return 3;
+            if (evId == "tropical_coconut" && milk == MilkType.CoconutMilk) return 4;
+            if (evId == "plant_based_craze" && (milk == MilkType.OatMilk || milk == MilkType.CoconutMilk)) return 4;
+            if (evId == "chilly_rain" && milk == MilkType.CondensedMilk) return 4;
+            return 1;
+        }
+
+        private int GetMarketEventToppingWeight(ToppingType topping)
+        {
+            if (MarketEventManager.Instance == null || MarketEventManager.Instance.ActiveEvent == null) return 1;
+            string evId = MarketEventManager.Instance.ActiveEvent.eventId;
+            if (evId == "tapioca_delay" && topping == ToppingType.TapiocaPearls) return 4;
+            if (evId == "wellness_trend" && topping == ToppingType.GrassJelly) return 4;
+            if (evId == "summer_heatwave" && topping == ToppingType.PoppingBoba) return 4;
+            if (evId == "tropical_coconut" && topping == ToppingType.CoconutJelly) return 4;
+            if (evId == "cream_shortage" && (topping == ToppingType.CheeseFoam || topping == ToppingType.EggPudding)) return 3;
+            return 1;
+        }
+
+        private int RollSweetnessWithMarketEvents(List<int> availableSweetness)
+        {
+            if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null)
+            {
+                if (MarketEventManager.Instance.ActiveEvent.eventId == "wellness_trend")
+                {
+                    // 70% chance for 0% or 25% low sweetness
+                    if (UnityEngine.Random.value < 0.70f)
+                    {
+                        return UnityEngine.Random.value < 0.5f ? 0 : 25;
+                    }
+                }
+            }
+            return availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
+        }
+
+        private int RollIceWithMarketEvents(List<int> availableIce)
+        {
+            if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent != null)
+            {
+                if (MarketEventManager.Instance.ActiveEvent.eventId == "summer_heatwave")
+                {
+                    // 75% chance for 100% Full Ice
+                    if (UnityEngine.Random.value < 0.75f) return 100;
+                }
+                else if (MarketEventManager.Instance.ActiveEvent.eventId == "chilly_rain")
+                {
+                    // 75% chance for 0% No Ice
+                    if (UnityEngine.Random.value < 0.75f) return 0;
+                }
+            }
+            return availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
+        }
+
         private DrinkOrder GenerateRandomOrder()
         {
             var order = new DrinkOrder();
@@ -519,31 +576,27 @@ namespace BubbleTeaShop
                 // Randomly construct the drink from available ingredients
                 order.targetTea = availableTeas[UnityEngine.Random.Range(0, availableTeas.Count)];
 
-                // Milk Selection (Artisanal Menu gives higher weighting to premium milks)
+                // Milk Selection (Artisanal Menu & Market Events influence weights)
                 float milkChance = hasArtisanalMenu ? 0.85f : 0.65f;
                 if (UnityEngine.Random.value < milkChance)
                 {
                     List<MilkType> milkPool = new List<MilkType>(availableMilks);
                     milkPool.Remove(MilkType.None);
-                    if (hasArtisanalMenu)
+                    List<MilkType> weightedMilks = new List<MilkType>();
+                    foreach (var m in milkPool)
                     {
-                        List<MilkType> weightedMilks = new List<MilkType>();
-                        foreach (var m in milkPool)
-                        {
-                            int w = GetArtisanalMilkWeight(m);
-                            for (int k = 0; k < w; k++) weightedMilks.Add(m);
-                        }
-                        milkPool = weightedMilks;
+                        int w = (hasArtisanalMenu ? GetArtisanalMilkWeight(m) : 1) * GetMarketEventMilkWeight(m);
+                        for (int k = 0; k < w; k++) weightedMilks.Add(m);
                     }
-                    order.targetMilk = milkPool[UnityEngine.Random.Range(0, milkPool.Count)];
+                    order.targetMilk = weightedMilks[UnityEngine.Random.Range(0, weightedMilks.Count)];
                 }
                 else
                 {
                     order.targetMilk = MilkType.None;
                 }
 
-                order.targetSweetnessPercent = availableSweetness[UnityEngine.Random.Range(0, availableSweetness.Count)];
-                order.targetIcePercent = availableIce[UnityEngine.Random.Range(0, availableIce.Count)];
+                order.targetSweetnessPercent = RollSweetnessWithMarketEvents(availableSweetness);
+                order.targetIcePercent = RollIceWithMarketEvents(availableIce);
 
                 // Toppings: Base chance scales with week (65% in W1/W2, 70% in W3, 80% in W4; 85-90% with Artisanal Menu)
                 float toppingChance = hasArtisanalMenu ? (currentDay >= 22 ? 0.90f : 0.85f) : (currentDay >= 22 ? 0.80f : (currentDay >= 15 ? 0.70f : 0.65f));
@@ -564,7 +617,7 @@ namespace BubbleTeaShop
                         List<ToppingType> weightedBottomPool = new List<ToppingType>();
                         foreach (var t in bottomPool)
                         {
-                            int w = hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1;
+                            int w = (hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1) * GetMarketEventToppingWeight(t);
                             for (int k = 0; k < w; k++) weightedBottomPool.Add(t);
                         }
 
@@ -576,8 +629,12 @@ namespace BubbleTeaShop
                             weightedBottomPool.RemoveAll(x => x == selected);
                         }
 
-                        // Dedicated roll for Cheese Foam on top (50% base, 70% with Artisanal Menu)
+                        // Dedicated roll for Cheese Foam on top (50% base, 70% with Artisanal Menu, boosted in cream shortage)
                         float cheeseFoamChance = hasArtisanalMenu ? 0.70f : 0.50f;
+                        if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent?.eventId == "cream_shortage")
+                        {
+                            cheeseFoamChance = Mathf.Min(0.85f, cheeseFoamChance + 0.15f);
+                        }
                         if (UnityEngine.Random.value < cheeseFoamChance)
                         {
                             order.targetToppings.Add(ToppingType.CheeseFoam);
@@ -596,7 +653,7 @@ namespace BubbleTeaShop
                         List<ToppingType> weightedPool = new List<ToppingType>();
                         foreach (var t in availableToppings)
                         {
-                            int w = hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1;
+                            int w = (hasArtisanalMenu ? GetArtisanalToppingWeight(t) : 1) * GetMarketEventToppingWeight(t);
                             for (int k = 0; k < w; k++) weightedPool.Add(t);
                         }
 

@@ -63,22 +63,31 @@ namespace BubbleTeaShop
             NightPhaseManager.Instance?.RecordActivity(NightPhaseManager.NightActivityType.Foraging, zone);
             string resultMessage = "";
 
+            bool isGoldenHarvest = MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent?.eventId == "golden_harvest";
+            int mult = isGoldenHarvest ? 2 : 1;
+
             if (zone == "BambooGrove")
             {
-                InventoryManager.Instance.AddTeaStock(TeaBase.GreenTea, 6);
-                InventoryManager.Instance.AddToppingStock(ToppingType.GrassJelly, 4);
-                resultMessage = "Bamboo Grove: Foraged 6x Fresh Jasmine Green Leaves and 4x Herbal Grass Jelly herbs!";
+                InventoryManager.Instance.AddTeaStock(TeaBase.GreenTea, 6 * mult);
+                InventoryManager.Instance.AddToppingStock(ToppingType.GrassJelly, 4 * mult);
+                resultMessage = isGoldenHarvest
+                    ? "Bamboo Grove (2x Harvest): Foraged 12x Fresh Jasmine Green Leaves and 8x Herbal Grass Jelly herbs!"
+                    : "Bamboo Grove: Foraged 6x Fresh Jasmine Green Leaves and 4x Herbal Grass Jelly herbs!";
             }
             else if (zone == "HoneyMeadow")
             {
-                InventoryManager.Instance.AddToppingStock(ToppingType.GoldenHoneyPearls, 6);
-                EconomyManager.Instance.AddCash(15f, "Foraged Wild Honey Sale");
-                resultMessage = "Honey Meadows: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
+                InventoryManager.Instance.AddToppingStock(ToppingType.GoldenHoneyPearls, 6 * mult);
+                EconomyManager.Instance.AddCash(15f * mult, "Foraged Wild Honey Sale");
+                resultMessage = isGoldenHarvest
+                    ? "Honey Meadows (2x Harvest): Discovered 12x Rare Golden Honey Pearls and sold extra wild honeycomb for +$30.00!"
+                    : "Honey Meadows: Discovered 6x Rare Golden Honey Pearls and sold extra wild honeycomb for +$15.00!";
             }
             else if (zone == "MistMountain")
             {
-                InventoryManager.Instance.AddRawStock(RawIngredientType.GoldenDew, 5);
-                resultMessage = "Misty Mountains: Scaled the peak and collected 5x Raw Golden Dew!";
+                InventoryManager.Instance.AddRawStock(RawIngredientType.GoldenDew, 5); // AddRawStock will multiply by 2x automatically
+                resultMessage = isGoldenHarvest
+                    ? "Misty Mountains (2x Harvest): Scaled the peak and collected 10x Raw Golden Dew!"
+                    : "Misty Mountains: Scaled the peak and collected 5x Raw Golden Dew!";
             }
 
             OnForagingResult?.Invoke(resultMessage);

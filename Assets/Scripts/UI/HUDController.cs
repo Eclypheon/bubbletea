@@ -596,6 +596,11 @@ namespace BubbleTeaShop
                     primary = GetBabyYippeeSprite();
                     if (primary == null) primary = GetIngredientSprite("Topping_GoldenHoneyPearls");
                     break;
+
+                case "stock_clearance":
+                    primary = GetIngredientSprite("Tea_BlackTea");
+                    secondary = GetIngredientSprite("Topping_TapiocaPearls");
+                    break;
             }
 
             if (primary == null && !string.IsNullOrEmpty(ev.affectedKey))
@@ -642,7 +647,8 @@ namespace BubbleTeaShop
             {
                 case "dairy_surplus":
                 case "tropical_coconut":
-                    marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
+                case "stock_clearance":
+                    marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
                     break;
 
                 case "tapioca_delay":
@@ -678,9 +684,10 @@ namespace BubbleTeaShop
                     "cream_shortage" => "<color=#FF6666>• Cheese Foam & Egg Pudding Wholesale: +30%</color>\n<color=#F1C40F>• Customer Tips on Cream Drinks: +25%</color>",
                     "plant_based_craze" => "<color=#3498DB>• Customer Oat & Plant Milk Orders: +60%</color>",
                     "wellness_trend" => "<color=#2ECC71>• Grass Jelly Wholesale: -15% (Discount!)</color>\n<color=#3498DB>• Grass Jelly Orders: +50% (Low Sugar Preference)</color>",
-                    "summer_heatwave" => "<color=#FFA500>• Customer 100% Full Ice Orders: +70%</color>\n<color=#3498DB>• Increased Demand for Popping Boba</color>",
-                    "chilly_rain" => "<color=#3498DB>• Customer Preference: 0% Ice (No Ice)</color>\n<color=#3498DB>• Condensed Milk / Hot Comfort Drinks: +40%</color>",
+                    "summer_heatwave" => "<color=#FFA500>• Customer 100% Full Ice Orders: +70%</color>\n<color=#3498DB>• Secret: Heatwave customers demand 100% Full Ice!</color>",
+                    "chilly_rain" => "<color=#3498DB>• Customer Preference: 0% Ice (No Ice)</color>\n<color=#3498DB>• Secret: Freezing customers crave 0% No Ice!</color>",
                     "golden_harvest" => "<color=#F1C40F>• Foraging Expeditions Yield 2.0x DOUBLE HARVESTS!</color>",
+                    "stock_clearance" => "<color=#2ECC71>• ALL Wholesale Market Stock: -70% MEGA CLEARANCE!</color>\n<color=#F1C40F>• Best time to stock up at the Wholesale Supermarket!</color>",
                     _ => "<color=#80D8FF>• Special Market Conditions Active</color>"
                 };
             }
@@ -1573,8 +1580,13 @@ namespace BubbleTeaShop
             float minPrice = (float)(Math.Round((basePrice * 0.30f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
 
             bool hasLuckyCat = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat);
-            // Base tip 10% + Max speed tip 30% = 40% tip (multiplied by 1.30 if Lucky Cat upgrade is active)
-            float maxTipMultiplier = 0.40f * (hasLuckyCat ? 1.30f : 1.0f);
+            float marketTipMultiplier = 1.0f;
+            if (MarketEventManager.Instance != null && MarketEventManager.Instance.ActiveEvent?.eventId == "cream_shortage")
+            {
+                marketTipMultiplier = 1.25f;
+            }
+            // Base tip 10% + Max speed tip 30% = 40% tip (multiplied by Lucky Cat and market event multipliers)
+            float maxTipMultiplier = 0.40f * (hasLuckyCat ? 1.30f : 1.0f) * marketTipMultiplier;
             float maxTip = (float)(Math.Round((basePrice * maxTipMultiplier) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             float maxPrice = basePrice + maxTip;
 

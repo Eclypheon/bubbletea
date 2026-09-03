@@ -253,7 +253,7 @@ namespace BubbleTeaShop
                 return;
             }
 
-            string reactionLine = GetReactionLine(evaluation.stars);
+            string reactionLine = GetReactionLine(evaluation, activeOrder != null ? activeOrder.archetype : CustomerArchetype.Adhd);
             if (speechBubble != null)
             {
                 speechBubble.ShowReaction(reactionLine, evaluation.stars);
@@ -355,8 +355,65 @@ namespace BubbleTeaShop
             return lines[UnityEngine.Random.Range(0, lines.Length)];
         }
 
-        private string GetReactionLine(int stars)
+        private string GetReactionLine(EvaluationResult evaluation, CustomerArchetype archetype)
         {
+            if (evaluation.isHeatwaveIcePenaltyIncurred)
+            {
+                return archetype switch
+                {
+                    CustomerArchetype.Adhd => "Ahhh it's boiling hot out here! Actually, I really needed 100% full ice!",
+                    CustomerArchetype.Autism => "Logically, the outdoor temperature warrants 100% ice. I should have asked for more ice.",
+                    CustomerArchetype.Anxiety => "U-um, actually... it's so sweltering today, I kinda wish I asked for 100% ice...",
+                    CustomerArchetype.Tourettes => "IT'S A FURNACE OUTSIDE! *tic* SHOULD'VE GOTTEN 100% FULL ICE!",
+                    CustomerArchetype.Dyscalculia => "I miscalculated the temperature outside! It's so hot, I really needed 100% ice!",
+                    CustomerArchetype.Dyslexia => "I read the weather report wrong! It's scorching, I should've asked for full 100% ice!",
+                    _ => "Actually, it's so hot out right now... I really would have preferred more ice!"
+                };
+            }
+
+            if (evaluation.isHeatwaveIceSecretSatisfied)
+            {
+                return archetype switch
+                {
+                    CustomerArchetype.Adhd => "YES! 100% brain freeze ice! Ah, I really needed a super cool drink!",
+                    CustomerArchetype.Autism => "100% ice effectively stabilizes my core temperature against the heatwave. Excellent.",
+                    CustomerArchetype.Anxiety => "Phew... this 100% ice is so cooling... ah, I really needed this...",
+                    CustomerArchetype.Tourettes => "ICE COLD! *tic* ABSOLUTELY SAVED MY LIFE IN THIS HEAT!",
+                    CustomerArchetype.Dyscalculia => "100% ice! That's the maximum amount of cool cubes! So refreshing!",
+                    CustomerArchetype.Dyslexia => "Ah, maximum cool ice! Just what I needed to beat this heatwave!",
+                    _ => "Ah, I really needed a cool drink in this heat! Perfection!"
+                };
+            }
+
+            if (evaluation.isChillyRainIcePenaltyIncurred)
+            {
+                return archetype switch
+                {
+                    CustomerArchetype.Adhd => "Brrr! My teeth are chattering! Actually, I'm pretty cold, I should have ordered 0% ice!",
+                    CustomerArchetype.Autism => "The ambient cold makes ice unpalatable today. Zero ice would have been optimal.",
+                    CustomerArchetype.Anxiety => "S-sorry, I'm shivering so much... I really shouldn't have gotten any ice...",
+                    CustomerArchetype.Tourettes => "FREEZING RAIN! *tic* TOO MUCH ICE, MY HANDS ARE FROZEN!",
+                    CustomerArchetype.Dyscalculia => "I counted zero warm layers on me today! I should have ordered zero ice instead!",
+                    CustomerArchetype.Dyslexia => "I misread the forecast... this rain is freezing, I shouldn't have gotten ice!",
+                    _ => "Actually, I'm pretty cold... I should have ordered less ice!"
+                };
+            }
+
+            if (evaluation.isChillyRainIceSecretSatisfied)
+            {
+                return archetype switch
+                {
+                    CustomerArchetype.Adhd => "Ooh no ice! Warms me up so fast, thank you!",
+                    CustomerArchetype.Autism => "Zero ice was the correct thermodynamic choice for this rain. Thank you.",
+                    CustomerArchetype.Anxiety => "Ah... no ice is so comforting in this gloomy rain... thank you...",
+                    CustomerArchetype.Tourettes => "NO ICE! *tic* PERFECT FOR THIS FREEZING DOWNPOUR!",
+                    CustomerArchetype.Dyscalculia => "Zero ice! Exactly zero shivers now, thank you so much!",
+                    CustomerArchetype.Dyslexia => "No ice is so soothing in this cold rainy weather, thank you!",
+                    _ => "Ah, no ice is so comforting in this chilly weather! Thank you!"
+                };
+            }
+
+            int stars = evaluation.stars;
             if (stars >= 5) return "Absolutely sublime! Exactly what I needed!";
             if (stars >= 4) return "Mmm, delicious! Great job!";
             if (stars >= 3) return "Pretty good, thanks!";
