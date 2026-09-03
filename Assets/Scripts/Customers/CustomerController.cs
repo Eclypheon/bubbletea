@@ -823,8 +823,9 @@ namespace BubbleTeaShop
 
         private string[] activeChubiLines = new string[]
         {
-            "H-hey! Look at you, all proud now that you own the shop...",
-            "You know... you should treat me a drink for being such a good landlady to you!",
+            "H-hey! Look at you, all proud now that you bought out the deed and own the shop...",
+            "D-don't think you're totally rid of me though! I hereby appoint myself as your Honorary Chairwoman & Global Brand Godmother!",
+            "Since I'm heading off on luxury world vacations, you should treat your Chairwoman to a drink before I go!",
             "Hmm how about Oolong Tea with Fresh Milk, as sweet as possible and less ice. Oh I also want Tapioca Pearls."
         };
         private int currentChubiLineIndex = 0;
@@ -932,7 +933,7 @@ namespace BubbleTeaShop
                 {
                     if (speechBubble != null)
                     {
-                        speechBubble.ShowMessage("Mmm...! W-wait, this is actually amazing... Hmph, if only you gave me that drink earlier, I may have reduced your rent!");
+                        speechBubble.ShowMessage("Mmm...! W-wait, this is actually amazing... Fine, you have your Chairwoman's official blessing! I'll be off on my luxury vacation now... Keep working hard, baka!");
                     }
                     HUDController.Instance?.ShowNotification("Chubi loved her drink! (Provided for free out of goodwill)", 4.5f);
                     StartCoroutine(DismissEndlessLandlordAfterDelay(4.0f));
@@ -1079,7 +1080,11 @@ namespace BubbleTeaShop
         private IEnumerator TriggerEvictionGameOver(float delay)
         {
             yield return new WaitForSeconds(delay);
-            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the Landlady.");
+            bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+            string reason = isEndless
+                ? "Repossessed: Chairwoman Chubi seized the shop due to unpaid vacation royalties."
+                : "Evicted: Failed to pay overdue rent to the Landlady.";
+            GameManager.Instance?.TriggerGameOver(reason);
         }
     }
 }

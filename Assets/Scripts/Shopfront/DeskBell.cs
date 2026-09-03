@@ -118,7 +118,8 @@ namespace BubbleTeaShop
                 }
                 else
                 {
-                    HUDController.Instance?.ShowNotification("The Landlady is waiting! Deal with her first!");
+                    bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+                    HUDController.Instance?.ShowNotification(isEndless ? "Chairwoman Chubi is waiting! Settle her royalties first!" : "The Landlady is waiting! Deal with her first!");
                 }
                 return;
             }

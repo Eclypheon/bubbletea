@@ -730,7 +730,9 @@ namespace BubbleTeaShop
             {
                 int daysLeft = EconomyManager.Instance.GetDaysUntilRent(day);
                 float rentAmount = EconomyManager.Instance.GetTotalRentDue(day);
-                rentTimerText.text = daysLeft == 0 ? $"Rent Due: TONIGHT (${rentAmount:F0})" : $"Rent in: {daysLeft}d (${rentAmount:F0})";
+                bool isEndless = EconomyManager.Instance.IsEndlessMode;
+                string label = isEndless ? "Royalty" : "Rent";
+                rentTimerText.text = daysLeft == 0 ? $"{label} Due: TONIGHT (${rentAmount:F0})" : $"{label} in: {daysLeft}d (${rentAmount:F0})";
             }
         }
 
@@ -1031,7 +1033,8 @@ namespace BubbleTeaShop
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
-                statusHintText.text = "The Landlady has arrived!";
+                bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+                statusHintText.text = isEndless ? "Chairwoman Chubi has arrived!" : "The Landlady has arrived!";
             }
             else if (GameManager.Instance != null)
             {
@@ -1659,7 +1662,8 @@ namespace BubbleTeaShop
 
             if (CustomerManager.Instance != null && CustomerManager.Instance.CustomerController != null && CustomerManager.Instance.CustomerController.IsLandlordActive)
             {
-                statusHintText.text = "The Landlady has arrived!";
+                bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+                statusHintText.text = isEndless ? "Chairwoman Chubi has arrived!" : "The Landlady has arrived!";
                 return;
             }
 

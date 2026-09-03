@@ -133,6 +133,15 @@ namespace BubbleTeaShop
             }
         }
 
+        private static readonly string[] EndlessTsundereGreetings = new string[]
+        {
+            "\"I-It's not like I flew all the way back from Paris just to see how you were doing! I just came to collect my weekly Chairwoman royalty of ${0:F2}! Hand it over!\"",
+            "\"I just landed from a luxury hot spring resort in Kyoto! Hand over this week's Chairwoman royalty of ${0:F2} before my next flight to the Alps!\"",
+            "\"Do you have any idea how much a private beach cabana in Hawaii costs?! Pay up this week's Chairwoman royalty of ${0:F2}, b-baka!\"",
+            "\"H-Hmph! Don't look at me like that! Chairwoman duties require me to inspect the store in person! ...And collect my ${0:F2} vacation dividend, of course!\"",
+            "\"I took a quick helicopter ride back from Monaco just for this! Your weekly Chairwoman royalty of ${0:F2} is due right now!\""
+        };
+
         public void TriggerRentEncounter(int dayNumber, Action onComplete)
         {
             currentDayNumber = dayNumber;
@@ -157,10 +166,12 @@ namespace BubbleTeaShop
                 if (landlordSprite != null) landlordImage.sprite = landlordSprite;
             }
 
+            bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+
             if (collectorNameText != null)
             {
                 collectorNameText.gameObject.SetActive(true);
-                collectorNameText.text = "Landlady Chubi";
+                collectorNameText.text = isEndless ? "Chairwoman Chubi" : "Landlady Chubi";
             }
 
             float totalRent = EconomyManager.Instance.GetTotalRentDue(dayNumber);
@@ -171,7 +182,9 @@ namespace BubbleTeaShop
             if (rentAmountText != null)
             {
                 rentAmountText.gameObject.SetActive(true);
-                rentAmountText.text = $"Total Rent Due: <color=#FFD700>${totalRent:F2}</color>";
+                rentAmountText.text = isEndless
+                    ? $"Weekly Royalty Due: <color=#FFD700>${totalRent:F2}</color>"
+                    : $"Total Rent Due: <color=#FFD700>${totalRent:F2}</color>";
             }
 
             if (dialogueText != null)
@@ -179,12 +192,28 @@ namespace BubbleTeaShop
                 dialogueText.gameObject.SetActive(true);
                 if (skipsUsed > 0)
                 {
-                    dialogueText.text = $"\"You're on thin ice! You owe last week's rent PLUS this week's: ${totalRent:F2}. Pay up now or you're evicted!\"";
+                    if (isEndless)
+                    {
+                        dialogueText.text = $"\"H-Hey! You owe last week's vacation royalty PLUS this week's: ${totalRent:F2}! I put my cruise spa on credit because of you! Pay up right now or I'm repossessing this entire shop, b-baka!\"";
+                    }
+                    else
+                    {
+                        dialogueText.text = $"\"You're on thin ice! You owe last week's rent PLUS this week's: ${totalRent:F2}. Pay up now or you're evicted!\"";
+                    }
                 }
                 else
                 {
-                    int week = Mathf.CeilToInt((float)dayNumber / EconomyManager.Instance.RentCycleDays);
-                    dialogueText.text = $"\"Greetings. Week {week} has ended. Your rent of ${totalRent:F2} is due right now before you close up.\"";
+                    if (isEndless)
+                    {
+                        int cycleDays = EconomyManager.Instance.RentCycleDays > 0 ? EconomyManager.Instance.RentCycleDays : 7;
+                        int idx = Mathf.Abs((dayNumber / cycleDays)) % EndlessTsundereGreetings.Length;
+                        dialogueText.text = string.Format(EndlessTsundereGreetings[idx], totalRent);
+                    }
+                    else
+                    {
+                        int week = Mathf.CeilToInt((float)dayNumber / EconomyManager.Instance.RentCycleDays);
+                        dialogueText.text = $"\"Greetings. Week {week} has ended. Your rent of ${totalRent:F2} is due right now before you close up.\"";
+                    }
                 }
             }
 
@@ -195,7 +224,8 @@ namespace BubbleTeaShop
                 payRentButton.interactable = canAfford;
                 if (payRentButtonText != null)
                 {
-                    payRentButtonText.text = canAfford ? $"Pay Rent (${totalRent:F2})" : $"Can't Afford (${totalRent:F2})";
+                    string actionText = isEndless ? "Pay Royalty" : "Pay Rent";
+                    payRentButtonText.text = canAfford ? $"{actionText} (${totalRent:F2})" : $"Can't Afford (${totalRent:F2})";
                 }
             }
 
@@ -206,7 +236,8 @@ namespace BubbleTeaShop
                 skipRentButton.interactable = true;
                 if (skipRentButtonText != null)
                 {
-                    skipRentButtonText.text = canSkip ? "Ask for Extension (1 left)" : "Can't Pay (Face Eviction)";
+                    string penaltyText = isEndless ? "Face Repossession" : "Face Eviction";
+                    skipRentButtonText.text = canSkip ? "Ask for Extension (1 left)" : $"Can't Pay ({penaltyText})";
                 }
             }
 
@@ -217,7 +248,7 @@ namespace BubbleTeaShop
                 canvasGroup.blocksRaycasts = true;
             }
 
-            HUDController.Instance?.ShowNotification("The Landlady has arrived!", 3.5f);
+            HUDController.Instance?.ShowNotification(isEndless ? "Chairwoman Chubi has arrived from her travels!" : "The Landlady has arrived!", 3.5f);
             if (arriveSound != null) AudioManager.Instance?.PlaySFX(arriveSound);
 
             if (fadeRoutine != null) StopCoroutine(fadeRoutine);
@@ -229,15 +260,18 @@ namespace BubbleTeaShop
             if (payRentButton != null) payRentButton.interactable = false;
             if (skipRentButton != null) skipRentButton.interactable = false;
 
+            bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
             bool success = EconomyManager.Instance.PayTotalRent(currentDayNumber);
             if (success)
             {
                 if (paySound != null) AudioManager.Instance?.PlaySFX(paySound);
                 if (dialogueText != null)
                 {
-                    dialogueText.text = "\"Payment accepted in full. Keep the shop running well, and I will see you next week.\"";
+                    dialogueText.text = isEndless
+                        ? "\"H-Hmph, fine! Payment accepted in full. Now I can book that luxury suite in Switzerland... Keep working hard, okay?!\""
+                        : "\"Payment accepted in full. Keep the shop running well, and I will see you next week.\"";
                 }
-                HUDController.Instance?.ShowNotification("Rent paid successfully!", 2.5f);
+                HUDController.Instance?.ShowNotification(isEndless ? "Vacation royalty paid successfully!" : "Rent paid successfully!", 2.5f);
                 StartCoroutine(DismissCollectorAfterDelay(2.5f));
             }
             else
@@ -256,6 +290,7 @@ namespace BubbleTeaShop
             if (payRentButton != null) payRentButton.interactable = false;
             if (skipRentButton != null) skipRentButton.interactable = false;
 
+            bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
             if (EconomyManager.Instance.CanSkipRent())
             {
                 // Use the 1 skip grace
@@ -263,9 +298,11 @@ namespace BubbleTeaShop
                 if (angerSound != null) AudioManager.Instance?.PlaySFX(angerSound);
                 if (dialogueText != null)
                 {
-                    dialogueText.text = "\"Hmph! I'll give you ONE extension. Next week you MUST pay the accumulated amount or get evicted on the spot!\"";
+                    dialogueText.text = isEndless
+                        ? "\"H-Hmph! Don't get the wrong idea, I'm only giving you ONE extension because I'm busy catching my flight! Next week you pay double or I'll repossess this entire shop and make you my personal boba maid!\""
+                        : "\"Hmph! I'll give you ONE extension. Next week you MUST pay the accumulated amount or get evicted on the spot!\"";
                 }
-                HUDController.Instance?.ShowNotification("Rent skipped! 1 extension used.", 3.5f);
+                HUDController.Instance?.ShowNotification(isEndless ? "Royalty extension granted! 1 extension used." : "Rent skipped! 1 extension used.", 3.5f);
                 StartCoroutine(DismissCollectorAfterDelay(3.0f));
             }
             else
@@ -274,7 +311,9 @@ namespace BubbleTeaShop
                 if (angerSound != null) AudioManager.Instance?.PlaySFX(angerSound);
                 if (dialogueText != null)
                 {
-                    dialogueText.text = "\"You already used your ONE extension! Pack your things, you are EVICTED!\"";
+                    dialogueText.text = isEndless
+                        ? "\"That was your last chance! You ruined my vacation budget! I'm repossessing this shop RIGHT NOW!\""
+                        : "\"You already used your ONE extension! Pack your things, you are EVICTED!\"";
                 }
                 StartCoroutine(TriggerEvictionGameOver(2.5f));
             }
@@ -292,7 +331,11 @@ namespace BubbleTeaShop
         private IEnumerator TriggerEvictionGameOver(float delay)
         {
             yield return new WaitForSeconds(delay);
-            GameManager.Instance?.TriggerGameOver("Evicted: Failed to pay overdue rent to the Landlady.");
+            bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
+            string reason = isEndless
+                ? "Repossessed: Chairwoman Chubi seized the shop due to unpaid vacation royalties."
+                : "Evicted: Failed to pay overdue rent to the Landlady.";
+            GameManager.Instance?.TriggerGameOver(reason);
         }
 
         private IEnumerator FadeCanvasGroup(float start, float target, float duration)

@@ -40,7 +40,7 @@ namespace BubbleTeaShop
         [Header("Version & Info UI")]
         [Tooltip("Text component displaying the version number on the Title Screen.")]
         [SerializeField] private TextMeshProUGUI versionText;
-        [SerializeField] private string gameVersion = "v1.5.0";
+        [SerializeField] private string gameVersion = "v1.6.0";
 
         [Header("Options / Audio Settings UI")]
         [Tooltip("Container GameObject for Options sliders & labels. Auto-created if unassigned.")]
@@ -49,38 +49,39 @@ namespace BubbleTeaShop
         [SerializeField] private Slider sfxVolumeSlider;
         [SerializeField] private TextMeshProUGUI musicVolumeValueText;
         [SerializeField] private TextMeshProUGUI sfxVolumeValueText;
-        [SerializeField] private Button testSFXButton;
         [SerializeField] private Button fullscreenToggleButton;
         [SerializeField] private TextMeshProUGUI fullscreenToggleText;
         [SerializeField] private Button difficultyToggleButton;
         [SerializeField] private TextMeshProUGUI difficultyToggleText;
+        [SerializeField] private Button testSFXButton;
+        [SerializeField] private AudioClip testSFXClip;
+        [SerializeField] private Button optionsBackButton;
 
         [Header("Credits UI")]
         [Tooltip("Container GameObject for Credits text. Auto-created if unassigned.")]
         [SerializeField] private GameObject creditsContainer;
         [SerializeField] private TextMeshProUGUI creditsText;
+        [SerializeField] private Button creditsBackButton;
 
         [Header("Changelog UI")]
         [Tooltip("Container GameObject for Changelog text. Auto-created if unassigned.")]
         [SerializeField] private GameObject changelogContainer;
-        [SerializeField] private TextMeshProUGUI changelogContentText;
-        [Tooltip("Full text displayed in the Changelog modal. Pre-populated from CHANGELOG.md and easily editable here.")]
-        [TextArea(15, 60)]
-        [SerializeField] private string changelogText = DEFAULT_CHANGELOG_TEXT;
+        [SerializeField] private TextMeshProUGUI changelogTextComponent;
+        [SerializeField] private Button changelogBackButton;
+        [TextArea(10, 30)]
+        [SerializeField] private string changelogText;
 
-        [Header("Audio SFX (Optional)")]
-        [SerializeField] private AudioClip buttonClickSound;
-        [SerializeField] private AudioClip startChimeSound;
-        [SerializeField] private AudioClip testSFXClip;
-
-        public GameObject OptionsContainer => optionsContainer;
-        public GameObject CreditsContainer => creditsContainer;
-        public GameObject ChangelogContainer => changelogContainer;
+        public Button NewGameButton => newGameButton;
+        public Button ContinueGameButton => continueGameButton;
+        public Button OptionsButton => optionsButton;
+        public Button CreditsButton => creditsButton;
         public Button ChangelogButton => changelogButton;
+        public Button NormalModeButton => normalModeButton;
+        public Button BlitzModeButton => blitzModeButton;
+        public Button BackButton => backButton;
         public TextMeshProUGUI VersionText => versionText;
         public Slider MusicVolumeSlider => musicVolumeSlider;
-        public Slider SFXVolumeSlider => sfxVolumeSlider;
-        public Button TestSFXButton => testSFXButton;
+        public Slider SfxVolumeSlider => sfxVolumeSlider;
         public Button FullscreenToggleButton => fullscreenToggleButton;
         public Button DifficultyToggleButton => difficultyToggleButton;
 
@@ -108,7 +109,7 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
-            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.5.0]"))
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.6.0]"))
             {
                 changelogText = DEFAULT_CHANGELOG_TEXT;
             }
@@ -123,7 +124,7 @@ namespace BubbleTeaShop
 
         private void OnValidate()
         {
-            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.5.0]"))
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.6.0]"))
             {
                 changelogText = DEFAULT_CHANGELOG_TEXT;
             }
@@ -1003,6 +1004,13 @@ namespace BubbleTeaShop
         }
 
         private const string DEFAULT_CHANGELOG_TEXT =
+            "<color=#FF66CC><b>[v1.6.0] - 2026-09-03</b></color>\n\n" +
+            "<b>Chairwoman Chubi & Sabbatical Vacation Royalties:</b>\n" +
+            "• <b>Honorary Chairwoman Lore Transition:</b> After buying out the shop deed and unlocking Endless Mode, Landlady Chubi officially declares herself your 'Honorary Chairwoman & Global Brand Godmother' before embarking on world luxury travels.\n" +
+            "• <b>Vacation Royalty Collection:</b> Weekly payments in Endless Mode are transformed from rent into 'Weekly Vacation Royalties' funding Chubi's international vacations.\n" +
+            "• <b>In-Person Tsundere Dialogues:</b> Chubi visits in person between luxury trips (Paris, Kyoto, Hawaii, Switzerland, Monaco) with customized comical tsundere greetings.\n" +
+            "• <b>Repossession Stakes:</b> Missing royalty payments prompts tsundere warnings and a customized 'Shop Repossessed' game over sequence.\n" +
+            "• <b>Dynamic HUD & Menu Strings:</b> HUD countdown timers, status hints, and buttons dynamically switch between 'Rent' (pre-buyout) and 'Royalty' (post-buyout).\n\n" +
             "<color=#00E5FF><b>[v1.5.0] - 2026-09-03</b></color>\n\n" +
             "<b>Title Screen Overhaul & Options:</b>\n" +
             "• <b>Title Screen & Mode Selection:</b> Comprehensive Title Screen featuring New Game, Options, Credits, and Changelog panels, alongside Game Mode selection (Normal vs Blitz Mode).\n" +
