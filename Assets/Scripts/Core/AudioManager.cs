@@ -77,6 +77,7 @@ namespace BubbleTeaShop
 
         private void Start()
         {
+            UnlockMobileAudio();
             if (autoPlayMusicOnStart && backgroundMusic != null)
             {
                 PlayMusic(backgroundMusic, musicVolume);
@@ -85,10 +86,45 @@ namespace BubbleTeaShop
 
         private void Update()
         {
-            if (!hasUnlockedMobileAudio && (Input.GetMouseButtonDown(0) || Input.touchCount > 0))
+            if (!hasUnlockedMobileAudio)
             {
-                hasUnlockedMobileAudio = true;
-                UnlockMobileAudio();
+                bool pressed = false;
+#if ENABLE_INPUT_SYSTEM
+                if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
+                {
+                    pressed = true;
+                }
+                else if (UnityEngine.InputSystem.Mouse.current != null && UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame)
+                {
+                    pressed = true;
+                }
+                else if (UnityEngine.InputSystem.Touchscreen.current != null && UnityEngine.InputSystem.Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+                {
+                    pressed = true;
+                }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+                if (Input.GetMouseButtonDown(0) || Input.touchCount > 0)
+                {
+                    pressed = true;
+                }
+#else
+                try
+                {
+                    if (UnityEngine.InputSystem.Pointer.current != null && UnityEngine.InputSystem.Pointer.current.press.wasPressedThisFrame)
+                    {
+                        pressed = true;
+                    }
+                }
+                catch
+                {
+                    // Fallback
+                }
+#endif
+                if (pressed)
+                {
+                    hasUnlockedMobileAudio = true;
+                    UnlockMobileAudio();
+                }
             }
         }
 
