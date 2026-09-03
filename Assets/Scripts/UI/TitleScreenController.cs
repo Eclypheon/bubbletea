@@ -57,6 +57,10 @@ namespace BubbleTeaShop
         [SerializeField] private AudioClip testSFXClip;
         [SerializeField] private Button optionsBackButton;
 
+        [Header("Title Screen Audio")]
+        [SerializeField] private AudioClip buttonClickSound;
+        [SerializeField] private AudioClip startChimeSound;
+
         [Header("Credits UI")]
         [Tooltip("Container GameObject for Credits text. Auto-created if unassigned.")]
         [SerializeField] private GameObject creditsContainer;
@@ -66,10 +70,12 @@ namespace BubbleTeaShop
         [Header("Changelog UI")]
         [Tooltip("Container GameObject for Changelog text. Auto-created if unassigned.")]
         [SerializeField] private GameObject changelogContainer;
-        [SerializeField] private TextMeshProUGUI changelogTextComponent;
+        [SerializeField] private TextMeshProUGUI changelogContentText;
         [SerializeField] private Button changelogBackButton;
         [TextArea(10, 30)]
         [SerializeField] private string changelogText;
+
+        public TextMeshProUGUI ChangelogTextComponent => changelogContentText;
 
         public Button NewGameButton => newGameButton;
         public Button ContinueGameButton => continueGameButton;

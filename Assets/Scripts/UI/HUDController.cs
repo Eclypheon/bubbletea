@@ -1095,7 +1095,7 @@ namespace BubbleTeaShop
                         payoutIndicatorText.fontSize = 36;
                         payoutIndicatorText.fontStyle = FontStyles.Bold;
                         payoutIndicatorText.alignment = TextAlignmentOptions.Center;
-                        payoutIndicatorText.enableWordWrapping = false;
+                        payoutIndicatorText.textWrappingMode = TextWrappingModes.NoWrap;
                         payoutIndicatorText.raycastTarget = false;
                     }
                 }
@@ -1136,7 +1136,7 @@ namespace BubbleTeaShop
                     payoutIndicatorText.fontSize = 36;
                     payoutIndicatorText.fontStyle = FontStyles.Bold;
                     payoutIndicatorText.alignment = TextAlignmentOptions.Center;
-                    payoutIndicatorText.enableWordWrapping = false;
+                    payoutIndicatorText.textWrappingMode = TextWrappingModes.NoWrap;
                     payoutIndicatorText.raycastTarget = false;
                 }
                 else
@@ -1177,7 +1177,7 @@ namespace BubbleTeaShop
             payoutIndicatorText.fontSize = 36;
             payoutIndicatorText.fontStyle = FontStyles.Bold;
             payoutIndicatorText.alignment = TextAlignmentOptions.Center;
-            payoutIndicatorText.enableWordWrapping = false;
+            payoutIndicatorText.textWrappingMode = TextWrappingModes.NoWrap;
             payoutIndicatorText.raycastTarget = false;
 
             payoutIndicatorPanel.SetActive(false);
