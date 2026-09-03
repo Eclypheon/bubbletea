@@ -646,13 +646,10 @@ namespace BubbleTeaShop
             switch (ev.eventId)
             {
                 case "chilly_rain":
-                    marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
-                    break;
-
                 case "dairy_surplus":
                 case "tropical_coconut":
                 case "stock_clearance":
-                    marketEventTrendText.text = "<color=#2ECC71><b>▼</b></color>";
+                    marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
                     break;
 
                 case "tapioca_delay":
