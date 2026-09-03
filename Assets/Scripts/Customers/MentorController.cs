@@ -284,21 +284,64 @@ namespace BubbleTeaShop
             }
         }
 
-        private string GetMarketEventMentorHint(string eventId)
+        private string[] GetMarketEventMentorHints(string eventId)
         {
             return eventId switch
             {
-                "stock_clearance" => "I hear the wholesale market is running a massive clearance sale right now! All ingredients and milks are 70% cheaper, so you should definitely stock up while prices are low this period!",
-                "summer_heatwave" => "Phew, the weather is scorching hot right now! Here's a pro tip: in this intense heatwave, I bet customers would love 100% Full Ice to cool off, even if they didn't ask for it this period!",
-                "chilly_rain" => "Brrr, this freezing rainy cold front is brutal! I bet shivering customers would really appreciate 0% No Ice to stay warm this period, even if they forgot to ask for no ice!",
-                "golden_harvest" => "The wilderness is flourishing right now! If you go foraging during this period, you'll bag 2.0x double harvests across all expedition zones!",
-                "tapioca_delay" => "Harbor shipping delays mean tapioca wholesale prices are up, but customer boba cravings are surging this period! Make sure you have enough pearls ready!",
-                "dairy_surplus" => "Local pastures produced a massive surplus of milk! Fresh Milk and Oat Milk are discounted by 30% at the wholesale market, but customers are somewhat saturated and ordering less milk tea this period!",
-                "tropical_coconut" => "A massive tropical coconut harvest flooded the market! Coconut Milk and Coconut Jelly are 35% off, but customer coconut orders will be lower this period!",
-                "cream_shortage" => "Gourmet cream costs are up, but wealthy customers are tipping an extra +25% on rich drinks with Cheese Foam and Egg Pudding! Take advantage of those generous tips this period!",
-                "plant_based_craze" => "A viral wellness article is sweeping town! Expect a huge surge of customers asking for Barista Oat Milk and Organic Coconut Milk this period!",
-                "wellness_trend" => "Health and wellness are trending! Customers are favoring refreshing Herbal Grass Jelly and low or zero sweetness levels this period!",
-                _ => "Keep a close eye on the market badge on your counter to stay ahead of customer trends this period!"
+                "stock_clearance" => new string[]
+                {
+                    "The wholesale market is running a massive flash clearance sale!",
+                    "All stock is 70% off for 3 days, so stock up while prices are low this period!"
+                },
+                "summer_heatwave" => new string[]
+                {
+                    "Phew, it is scorching hot out right now!",
+                    "In this intense heat, customers will love 100% Full Ice even if they forgot to ask!"
+                },
+                "chilly_rain" => new string[]
+                {
+                    "Brrr, this freezing rainy cold front is brutal!",
+                    "Shivering customers will really appreciate 0% No Ice to stay warm this period!"
+                },
+                "golden_harvest" => new string[]
+                {
+                    "The wilderness is flourishing right now!",
+                    "If you go foraging this period, you will bag 2.0x double harvests across all zones!"
+                },
+                "tapioca_delay" => new string[]
+                {
+                    "Harbor shipping delays mean tapioca wholesale prices are up!",
+                    "Customer boba cravings are surging, so make sure you have enough pearls ready!"
+                },
+                "dairy_surplus" => new string[]
+                {
+                    "Pastures produced a huge milk surplus, dropping wholesale milk prices by 30%!",
+                    "However, saturated customers will order less milk tea this period."
+                },
+                "tropical_coconut" => new string[]
+                {
+                    "A massive coconut harvest flooded the market, dropping coconut prices by 35%!",
+                    "Expect customers to order fewer coconut drinks this period."
+                },
+                "cream_shortage" => new string[]
+                {
+                    "Gourmet cream costs are up, but wealthy customers are tipping +25% on rich drinks!",
+                    "Take advantage of those generous Cheese Foam and Egg Pudding tips this period!"
+                },
+                "plant_based_craze" => new string[]
+                {
+                    "A viral wellness article is sweeping town!",
+                    "Expect a huge surge in Oat Milk and Coconut Milk orders this period!"
+                },
+                "wellness_trend" => new string[]
+                {
+                    "Health and wellness are trending right now!",
+                    "Customers are favoring Herbal Grass Jelly and low sweetness this period!"
+                },
+                _ => new string[]
+                {
+                    "Keep a close eye on the market badge on your counter to stay ahead of trends!"
+                }
             };
         }
 
@@ -311,20 +354,25 @@ namespace BubbleTeaShop
             }
 
             string title = !string.IsNullOrEmpty(marketEvent.title) ? marketEvent.title : "Special Market Conditions";
-            string desc = !string.IsNullOrEmpty(marketEvent.description) ? marketEvent.description : "Special market supply and demand conditions are now active!";
-            string mentorHint = GetMarketEventMentorHint(marketEvent.eventId);
+            string desc = !string.IsNullOrEmpty(marketEvent.description) ? marketEvent.description : "Special market conditions are now active!";
+            string[] mentorHints = GetMarketEventMentorHints(marketEvent.eventId);
 
-            string[] briefingLines = new string[]
+            System.Collections.Generic.List<string> lines = new System.Collections.Generic.List<string>
             {
-                $"Good morning! There's breaking market news today: {title}!",
-                desc,
-                mentorHint,
-                "This market condition will last for the next 3 days, so plan your stock and preparations accordingly!",
-                "Ring the desk bell whenever you're ready to serve your first customer!"
+                $"Good morning! Breaking market news: {title}!",
+                desc
             };
 
+            if (mentorHints != null)
+            {
+                lines.AddRange(mentorHints);
+            }
+
+            lines.Add("This condition will last for 3 days, so plan your preparations accordingly!");
+            lines.Add("Ring the desk bell whenever you're ready to serve your first customer!");
+
             customerController.SpawnMentorSequence(
-                briefingLines,
+                lines.ToArray(),
                 3.5f,
                 mentorSprite,
                 () =>

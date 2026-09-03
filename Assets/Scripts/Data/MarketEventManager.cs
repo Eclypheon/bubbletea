@@ -180,7 +180,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "tapioca_delay",
                     title = "Tapioca Pearl Shortage",
-                    description = "Harbor shipping delays cause pearl wholesale prices to rise (+40%), and eager customers crave classic Boba (+50% demand)!",
+                    description = "Shipping delays at the harbor! Tapioca wholesale prices +40%, customer boba demand +50%.",
                     affectedKey = "Topping_TapiocaPearls",
                     priceMultiplier = 1.40f,
                     demandMultiplier = 1.50f,
@@ -191,7 +191,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "dairy_surplus",
                     title = "Local Dairy Surplus",
-                    description = "Local pastures produced a massive surplus of milk! Fresh Milk & Oat Milk wholesale packs are discounted by 30%, but market saturation leads to lower customer milk demand (-35% milk orders)!",
+                    description = "Local pastures produced a massive surplus of milk! Fresh Milk & Oat Milk wholesale prices -30%, customer milk demand -35%.",
                     affectedKey = "Milk_FreshMilk",
                     priceMultiplier = 0.70f,
                     demandMultiplier = 0.65f,
@@ -202,7 +202,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "tropical_coconut",
                     title = "Tropical Coconut Harvest",
-                    description = "A massive harvest flooded the markets! Coconut Milk & Coconut Jelly wholesale prices drop by 35%, but market saturation causes lower customer coconut demand (-40% coconut orders)!",
+                    description = "Massive harvest flooded the market! Coconut Milk & Jelly wholesale prices -35%, customer coconut demand -40%.",
                     affectedKey = "Milk_CoconutMilk",
                     priceMultiplier = 0.65f,
                     demandMultiplier = 0.60f,
@@ -213,7 +213,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "cream_shortage",
                     title = "Gourmet Cream Shortage",
-                    description = "Egg Pudding and Cheese Foam wholesale prices rise (+30%), but customers are tipping generously (+25% tips) on rich drinks!",
+                    description = "Gourmet cream supply is tight! Cheese Foam & Egg Pudding wholesale prices +30%, customer tips on rich drinks +25%.",
                     affectedKey = "Topping_CheeseFoam",
                     priceMultiplier = 1.30f,
                     demandMultiplier = 1.25f,
@@ -224,7 +224,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "plant_based_craze",
                     title = "Plant-Based Milk Craze",
-                    description = "A viral wellness article surges customer demand for Barista Oat Milk and Organic Coconut Milk (+60% orders)!",
+                    description = "A viral wellness article is trending! Customer demand for Oat Milk and Coconut Milk +60%.",
                     affectedKey = "Milk_OatMilk",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 1.60f,
@@ -235,7 +235,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "wellness_trend",
                     title = "Herbal Wellness Trend",
-                    description = "Customers favor low/zero sweetness and refreshing Herbal Grass Jelly toppings (+50% Grass Jelly orders)!",
+                    description = "Herbal wellness is in style! Grass Jelly wholesale prices -15%, Grass Jelly demand +50%, low/zero sugar preferred.",
                     affectedKey = "Topping_GrassJelly",
                     priceMultiplier = 0.85f,
                     demandMultiplier = 1.50f,
@@ -246,7 +246,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "summer_heatwave",
                     title = "Summer Heatwave",
-                    description = "Scorching sunny weather hits town! Customers heavily prefer 100% Full Ice (+70% ice demand) and fruity Popping Boba!",
+                    description = "Scorching heat hits town! Customers crave 100% Full Ice (+70% demand) and refreshing Popping Boba.",
                     affectedKey = "Ice",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 1.70f,
@@ -257,7 +257,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "chilly_rain",
                     title = "Chilly Monsoon Rain",
-                    description = "A rainy cold front sweeps across the city! Customers prefer 0% Ice (No Ice) and rich, creamy comfort milks!",
+                    description = "Freezing rainy cold front sweeps through! Customers prefer 0% No Ice and rich Condensed Milk (+40% demand).",
                     affectedKey = "Milk_CondensedMilk",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 1.40f,
@@ -268,7 +268,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "golden_harvest",
                     title = "Bountiful Foraging Season",
-                    description = "Bamboo groves and honey meadows are flourishing! Foraging expeditions yield double harvests for the next 3 days!",
+                    description = "Wild foraging regions are flourishing! Foraging expeditions yield 2.0x double harvests across all zones.",
                     affectedKey = "Foraging",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 2.0f,
@@ -279,7 +279,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "stock_clearance",
                     title = "Wholesale Stock Clearance",
-                    description = "The central wholesale market is running a massive flash clearance sale! ALL ingredients, milks, and toppings are 70% cheaper for the next 3 days!",
+                    description = "Flash clearance at the wholesale market! ALL ingredients, milks, and toppings are 70% cheaper (-70% off).",
                     affectedKey = "All_Stock",
                     priceMultiplier = 0.30f,
                     demandMultiplier = 1.0f,
