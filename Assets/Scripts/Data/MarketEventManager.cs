@@ -224,9 +224,9 @@ namespace BubbleTeaShop
                 {
                     eventId = "plant_based_craze",
                     title = "Plant-Based Milk Craze",
-                    description = "A viral wellness article is trending! Customer demand for Oat Milk and Coconut Milk +60%.",
+                    description = "A viral wellness article is trending! Oat Milk & Coconut Milk wholesale prices +30%, demand +60%.",
                     affectedKey = "Milk_OatMilk",
-                    priceMultiplier = 1.0f,
+                    priceMultiplier = 1.30f,
                     demandMultiplier = 1.60f,
                     totalDurationDays = 3,
                     daysRemaining = 3
@@ -235,9 +235,9 @@ namespace BubbleTeaShop
                 {
                     eventId = "wellness_trend",
                     title = "Herbal Wellness Trend",
-                    description = "Herbal wellness is in style! Grass Jelly wholesale prices -15%, Grass Jelly demand +50%, low/zero sugar preferred.",
+                    description = "Herbal wellness is in style! Grass Jelly wholesale prices +30%, Grass Jelly demand +50%, low/zero sugar preferred.",
                     affectedKey = "Topping_GrassJelly",
-                    priceMultiplier = 0.85f,
+                    priceMultiplier = 1.30f,
                     demandMultiplier = 1.50f,
                     totalDurationDays = 3,
                     daysRemaining = 3
@@ -246,7 +246,7 @@ namespace BubbleTeaShop
                 {
                     eventId = "summer_heatwave",
                     title = "Summer Heatwave",
-                    description = "Scorching heat hits town! Customers crave 100% Full Ice (+70% demand) and refreshing Popping Boba.",
+                    description = "Scorching heat hits town! Customers crave 100% Full Ice (+70% ice demand).",
                     affectedKey = "Ice",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 1.70f,
@@ -257,8 +257,8 @@ namespace BubbleTeaShop
                 {
                     eventId = "chilly_rain",
                     title = "Chilly Monsoon Rain",
-                    description = "Freezing rainy cold front sweeps through! Customers prefer 0% No Ice and rich Condensed Milk (+40% demand).",
-                    affectedKey = "Milk_CondensedMilk",
+                    description = "Freezing rainy cold front sweeps through! Customers crave 0% No Ice (hot comfort drinks).",
+                    affectedKey = "Ice",
                     priceMultiplier = 1.0f,
                     demandMultiplier = 1.40f,
                     totalDurationDays = 3,
@@ -292,7 +292,7 @@ namespace BubbleTeaShop
 
         private MarketEvent GenerateRandomEvent(int dayNumber)
         {
-            // Week 1 Pool (Basic ingredients available on Days 1–4, Day 4 3-day duration reaches Day 5/6 foraging, plus Wholesale clearance)
+            // Week 1 Pool (Basic ingredients available on Days 1–4, Day 4 3-day duration reaches Day 5/6 foraging, plus Wholesale clearance & Weather)
             List<MarketEventType> pool = new List<MarketEventType>
             {
                 MarketEventType.TapiocaPearlShortage,
@@ -300,7 +300,8 @@ namespace BubbleTeaShop
                 MarketEventType.SummerHeatwave,
                 MarketEventType.HerbalWellnessTrend,
                 MarketEventType.BountifulForagingSeason,
-                MarketEventType.WholesaleStockClearance
+                MarketEventType.WholesaleStockClearance,
+                MarketEventType.ChillyMonsoonRain
             };
 
             // Week 2+ (Day 8+): Coconut Milk & Coconut Jelly unlocked at Wholesale Market
@@ -310,10 +311,9 @@ namespace BubbleTeaShop
                 pool.Add(MarketEventType.PlantBasedMilkCraze);
             }
 
-            // Week 3+ (Day 15+): Condensed Milk, Cheese Foam & Egg Pudding unlocked at Wholesale Market
+            // Week 3+ (Day 15+): Cheese Foam & Egg Pudding unlocked at Wholesale Market
             if (dayNumber >= 15)
             {
-                pool.Add(MarketEventType.ChillyMonsoonRain);
                 pool.Add(MarketEventType.GourmetCreamShortage);
             }
 
@@ -346,6 +346,14 @@ namespace BubbleTeaShop
                 return 0.65f;
             }
             if (activeEvent.eventId == "cream_shortage" && (stockKey == "Topping_CheeseFoam" || stockKey == "Topping_EggPudding"))
+            {
+                return 1.30f;
+            }
+            if (activeEvent.eventId == "plant_based_craze" && (stockKey == "Milk_OatMilk" || stockKey == "Milk_CoconutMilk"))
+            {
+                return 1.30f;
+            }
+            if (activeEvent.eventId == "wellness_trend" && stockKey == "Topping_GrassJelly")
             {
                 return 1.30f;
             }

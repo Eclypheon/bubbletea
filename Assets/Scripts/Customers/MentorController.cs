@@ -330,12 +330,12 @@ namespace BubbleTeaShop
                 },
                 "plant_based_craze" => new string[]
                 {
-                    "A viral wellness article is sweeping town!",
+                    "A viral wellness article surges plant milk wholesale costs by 30%!",
                     "Expect a huge surge in Oat Milk and Coconut Milk orders this period!"
                 },
                 "wellness_trend" => new string[]
                 {
-                    "Health and wellness are trending right now!",
+                    "Herbal wellness is trending, raising Grass Jelly wholesale costs by 30%!",
                     "Customers are favoring Herbal Grass Jelly and low sweetness this period!"
                 },
                 _ => new string[]

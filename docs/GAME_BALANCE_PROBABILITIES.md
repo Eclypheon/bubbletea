@@ -83,17 +83,17 @@ Market events last for **3 full days** and alter ingredient wholesale prices, cu
 
 | Market Event | Affected Mechanics & Ingredients | Week 1 (Days 4–7) | Week 2 (Days 8–14) | Weeks 3–4 & Endless (Days 15+) |
 | :--- | :--- | :---: | :---: | :---: |
-| **Tapioca Pearl Shortage** | Tapioca Pearls wholesale +40%, Pearl customer demand +50% | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Local Dairy Surplus** | Fresh Milk & Oat Milk wholesale -30%, Milk customer demand **-35%** (Surplus Saturation) | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Summer Heatwave** | 100% Full Ice demand +70%, Fruity Popping Boba demand; **Weather Secret:** Must give 100% Ice for full tips | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Herbal Wellness Trend** | Grass Jelly wholesale -15%, Grass Jelly demand +50%, Low/Zero sugar preference | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Bountiful Foraging Season** | Foraging expeditions yield 2.0x double harvests across all unlocked zones | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Wholesale Stock Clearance** | **ALL** Wholesale Market goods, milks & toppings are **70% cheaper (-70% flash sale)** | **16.67%** (1/6) | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Tropical Coconut Harvest** | Coconut Milk & Coconut Jelly wholesale -35%, Coconut customer demand **-40%** (Harvest Saturation) | — | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Plant-Based Milk Craze** | Barista Oat Milk & Organic Coconut Milk demand +60% | — | **12.50%** (1/8) | **10.00%** (1/10) |
-| **Chilly Monsoon Rain** | 0% Ice preference, Condensed Milk demand +40%; **Weather Secret:** Must give 0% Ice (No Ice) for full tips | — | — | **10.00%** (1/10) |
+| **Tapioca Pearl Shortage** | Tapioca Pearls wholesale +40%, Pearl customer demand +50% | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Local Dairy Surplus** | Fresh Milk & Oat Milk wholesale -30%, Milk customer demand **-35%** (Surplus Saturation) | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Summer Heatwave** | 100% Full Ice demand +70%; **Weather Secret:** Must give 100% Ice for full tips | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Herbal Wellness Trend** | Grass Jelly wholesale **+30%**, Grass Jelly demand +50%, Low/Zero sugar preference | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Bountiful Foraging Season** | Foraging expeditions yield 2.0x double harvests across all unlocked zones | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Wholesale Stock Clearance** | **ALL** Wholesale Market goods, milks & toppings are **70% cheaper (-70% flash sale)** | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Chilly Monsoon Rain** | 0% Ice preference; **Weather Secret:** Must give 0% Ice (No Ice) for full tips | **14.29%** (1/7) | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Tropical Coconut Harvest** | Coconut Milk & Coconut Jelly wholesale -35%, Coconut customer demand **-40%** (Harvest Saturation) | — | **11.11%** (1/9) | **10.00%** (1/10) |
+| **Plant-Based Milk Craze** | Barista Oat Milk & Organic Coconut Milk wholesale **+30%**, plant milk demand +60% | — | **11.11%** (1/9) | **10.00%** (1/10) |
 | **Gourmet Cream Shortage** | Egg Pudding & Cheese Foam wholesale +30%, Customer tips on cream drinks **+25%** | — | — | **10.00%** (1/10) |
-| **Total Active Pool Size** | | **6 Events** | **8 Events** | **10 Events** |
+| **Total Active Pool Size** | | **7 Events** | **9 Events** | **10 Events** |
 
 ---
 

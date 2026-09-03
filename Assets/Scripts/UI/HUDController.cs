@@ -584,22 +584,22 @@ namespace BubbleTeaShop
                     break;
 
                 case "summer_heatwave":
-                    primary = GetIngredientSprite("Topping_PoppingBoba");
-                    secondary = GetIceSprite();
+                    primary = GetIceSprite();
                     break;
 
                 case "chilly_rain":
-                    primary = GetIngredientSprite("Milk_CondensedMilk");
+                    primary = GetIceSprite();
                     break;
 
                 case "golden_harvest":
                     primary = GetBabyYippeeSprite();
                     if (primary == null) primary = GetIngredientSprite("Topping_GoldenHoneyPearls");
+                    secondary = SpriteManager.Instance != null ? SpriteManager.Instance.RawGoldenDewSprite : GetIngredientSprite("Raw_GoldenDew");
                     break;
 
                 case "stock_clearance":
-                    primary = GetIngredientSprite("Tea_BlackTea");
-                    secondary = GetIngredientSprite("Topping_TapiocaPearls");
+                    primary = GetIngredientSprite("Topping_TapiocaPearls");
+                    secondary = GetIngredientSprite("Milk_FreshMilk");
                     break;
             }
 
@@ -645,6 +645,10 @@ namespace BubbleTeaShop
 
             switch (ev.eventId)
             {
+                case "chilly_rain":
+                    marketEventTrendText.text = "<color=#FF4D4D><b>▼</b></color>";
+                    break;
+
                 case "dairy_surplus":
                 case "tropical_coconut":
                 case "stock_clearance":
@@ -656,7 +660,6 @@ namespace BubbleTeaShop
                 case "plant_based_craze":
                 case "wellness_trend":
                 case "summer_heatwave":
-                case "chilly_rain":
                 case "golden_harvest":
                 default:
                     marketEventTrendText.text = "<color=#2ECC71><b>▲</b></color>";
@@ -682,9 +685,9 @@ namespace BubbleTeaShop
                     "dairy_surplus" => "<color=#2ECC71>• Fresh & Oat Milk Wholesale: -30% (Discount!)</color>\n<color=#FF6666>• Customer Milk Drink Demand: -35% (Surplus Saturation)</color>",
                     "tropical_coconut" => "<color=#2ECC71>• Coconut Milk & Jelly Wholesale: -35% (Discount!)</color>\n<color=#FF6666>• Customer Coconut Demand: -40% (Harvest Saturation)</color>",
                     "cream_shortage" => "<color=#FF6666>• Cheese Foam & Egg Pudding Wholesale: +30%</color>\n<color=#F1C40F>• Customer Tips on Cream Drinks: +25%</color>",
-                    "plant_based_craze" => "<color=#3498DB>• Customer Oat & Plant Milk Orders: +60%</color>",
-                    "wellness_trend" => "<color=#2ECC71>• Grass Jelly Wholesale: -15% (Discount!)</color>\n<color=#3498DB>• Grass Jelly Orders: +50% (Low Sugar Preference)</color>",
-                    "summer_heatwave" => "<color=#FFA500>• Customer 100% Full Ice Orders: +70%</color>\n<color=#3498DB>• Secret: Heatwave customers demand 100% Full Ice!</color>",
+                    "plant_based_craze" => "<color=#FF6666>• Oat & Coconut Milk Wholesale: +30%</color>\n<color=#3498DB>• Customer Plant Milk Orders: +60%</color>",
+                    "wellness_trend" => "<color=#FF6666>• Grass Jelly Wholesale: +30%</color>\n<color=#3498DB>• Grass Jelly Orders: +50% (Low Sugar Preference)</color>",
+                    "summer_heatwave" => "<color=#FFA500>• Customer 100% Full Ice Demand: +70%</color>\n<color=#3498DB>• Secret: Heatwave customers crave 100% Full Ice!</color>",
                     "chilly_rain" => "<color=#3498DB>• Customer Preference: 0% Ice (No Ice)</color>\n<color=#3498DB>• Secret: Freezing customers crave 0% No Ice!</color>",
                     "golden_harvest" => "<color=#F1C40F>• Foraging Expeditions Yield 2.0x DOUBLE HARVESTS!</color>",
                     "stock_clearance" => "<color=#2ECC71>• ALL Wholesale Market Stock: -70% MEGA CLEARANCE!</color>\n<color=#F1C40F>• Best time to stock up at the Wholesale Supermarket!</color>",
