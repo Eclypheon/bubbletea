@@ -171,10 +171,25 @@ namespace BubbleTeaShop
                 float speedFactor = (patienceRemainingPercent >= 0.90f) ? 1.0f : Mathf.Clamp01(patienceRemainingPercent / 0.90f);
                 float speedBonus = speedFactor * 0.30f;
 
-                // Tips rewarded on well-made drinks (4 or 5 stars)
-                if (result.stars >= 4)
+                // Tips: Full tip on perfect 5-star drinks (10% base + up to 30% speed).
+                // 4-star drinks (1 mistake, such as missed ingredient or weather ice penalty) receive a 50% partial tip.
+                // 3 stars or lower receive $0 tip.
+                if (result.stars == 5)
                 {
                     result.tip = order.basePrice * (0.10f + speedBonus);
+                    if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat))
+                    {
+                        result.tip *= 1.30f;
+                    }
+                    if (activeMarketEv != null && activeMarketEv.eventId == "cream_shortage")
+                    {
+                        result.tip *= 1.25f;
+                    }
+                    result.tip = (float)(Math.Round(result.tip * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+                }
+                else if (result.stars == 4)
+                {
+                    result.tip = order.basePrice * ((0.10f + speedBonus) * 0.50f);
                     if (UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.LuckyCat))
                     {
                         result.tip *= 1.30f;
