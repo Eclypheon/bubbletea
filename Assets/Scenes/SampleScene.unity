@@ -21318,22 +21318,40 @@ MonoBehaviour:
   blitzModeButton: {fileID: 2110731070}
   backButton: {fileID: 1828085622}
   versionText: {fileID: 2123237562}
-  gameVersion: v1.5.0
+  gameVersion: v1.6.0
   optionsContainer: {fileID: 0}
   musicVolumeSlider: {fileID: 0}
   sfxVolumeSlider: {fileID: 0}
   musicVolumeValueText: {fileID: 0}
   sfxVolumeValueText: {fileID: 0}
-  testSFXButton: {fileID: 0}
   fullscreenToggleButton: {fileID: 0}
   fullscreenToggleText: {fileID: 0}
   difficultyToggleButton: {fileID: 0}
   difficultyToggleText: {fileID: 0}
+  testSFXButton: {fileID: 0}
+  testSFXClip: {fileID: 8300000, guid: 15862d1cad7e749189addeca7a8d2a61, type: 3}
+  optionsBackButton: {fileID: 0}
+  buttonClickSound: {fileID: 8300000, guid: 9718d9fb0a05b4c3a81c825e01f5e63b, type: 3}
+  startChimeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
   creditsContainer: {fileID: 0}
   creditsText: {fileID: 0}
+  creditsBackButton: {fileID: 0}
   changelogContainer: {fileID: 0}
   changelogContentText: {fileID: 0}
-  changelogText: "<color=#00E5FF><b>[v1.5.0] - 2026-09-03</b></color>\n\n<b>Title
+  changelogBackButton: {fileID: 0}
+  changelogText: "<color=#FF66CC><b>[v1.6.0] - 2026-09-03</b></color>\n\n<b>Chairwoman
+    Chubi & Sabbatical Vacation Royalties:</b>\n\u2022 <b>Honorary Chairwoman Lore
+    Transition:</b> After buying out the shop deed and unlocking Endless Mode, Landlady
+    Chubi officially declares herself your 'Honorary Chairwoman & Global Brand Godmother'
+    before embarking on world luxury travels.\n\u2022 <b>Vacation Royalty Collection:</b>
+    Weekly payments in Endless Mode are transformed from rent into 'Weekly Vacation
+    Royalties' funding Chubi's international vacations.\n\u2022 <b>In-Person Tsundere
+    Dialogues:</b> Chubi visits in person between luxury trips (Paris, Kyoto, Hawaii,
+    Switzerland, Monaco) with customized comical tsundere greetings.\n\u2022 <b>Repossession
+    Stakes:</b> Missing royalty payments prompts tsundere warnings and a customized
+    'Shop Repossessed' game over sequence.\n\u2022 <b>Dynamic HUD & Menu Strings:</b>
+    HUD countdown timers, status hints, and buttons dynamically switch between 'Rent'
+    (pre-buyout) and 'Royalty' (post-buyout).\n\n<color=#00E5FF><b>[v1.5.0] - 2026-09-03</b></color>\n\n<b>Title
     Screen Overhaul & Options:</b>\n\u2022 <b>Title Screen & Mode Selection:</b>
     Comprehensive Title Screen featuring New Game, Options, Credits, and Changelog
     panels, alongside Game Mode selection (Normal vs Blitz Mode).\n\u2022 <b>Persistent
@@ -21371,7 +21389,8 @@ MonoBehaviour:
     (+35% compounding per week past Week 4: e.g., $405 in Week 5, $547 in Week 6,
     $738 in Week 7, $996 in Week 8).\n\u2022 <b>Landlady Chubi Friendly Morning Visit:</b>
     On the first morning after activating Endless Mode, Landlady Chubi pays a goodwill
-    visit asking for her favourite drink for free!\n\u2022 <b>Multi-Line Dialogue
+    visit asking for her favourite drink (Oolong Tea with Fresh Milk, 100% Sugar,
+    Less/Regular Ice, and Tapioca Pearls) for free!\n\u2022 <b>Multi-Line Dialogue
     Navigation:</b> Equipped Chubi's visit with an interactive multi-line navigation
     panel (Next / Got it! / Skip) jumping directly to the recipe line.\n\u2022 <b>Victory
     Fanfare & Physics Confetti:</b> Celebrated shop buyout with immediate victory
@@ -21435,9 +21454,6 @@ MonoBehaviour:
     Tourettes, Dyscalculia, Dyslexia) with unique quirks and patience mechanics.\n\u2022
     <b>Daily Loop:</b> Day shift service, drink rating evaluations, tips, weekly
     rent cycle, and shop closing ledger."
-  buttonClickSound: {fileID: 8300000, guid: 9718d9fb0a05b4c3a81c825e01f5e63b, type: 3}
-  startChimeSound: {fileID: 8300000, guid: 3b83c6543b4844bd8b5b510b4bdba16f, type: 3}
-  testSFXClip: {fileID: 8300000, guid: 15862d1cad7e749189addeca7a8d2a61, type: 3}
 --- !u!1 &1940947563
 GameObject:
   m_ObjectHideFlags: 0
@@ -22458,7 +22474,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: v1.5.0
+  m_text: v1.6.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
