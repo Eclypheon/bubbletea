@@ -711,7 +711,7 @@ namespace BubbleTeaShop
         {
             if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
             {
-                if (cashText != null) cashText.text = "<color=#2ECC71><b>Cash: ∞</b></color>";
+                if (cashText != null) cashText.text = "<color=#2ECC71><b>Cash: Unlimited</b></color>";
                 return;
             }
             if (cashText != null) cashText.text = $"${cash:F2}";
@@ -739,7 +739,7 @@ namespace BubbleTeaShop
             if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
             {
                 if (dayText != null) dayText.text = "<color=#00E5FF><b>Casual</b></color>";
-                if (rentTimerText != null) rentTimerText.text = "<color=#F1C40F><b>No Rush 🌸</b></color>";
+                if (rentTimerText != null) rentTimerText.text = "<color=#F1C40F><b>No Rush</b></color>";
                 return;
             }
 
@@ -1596,13 +1596,12 @@ namespace BubbleTeaShop
                     if (c != null && c.hasCup)
                     {
                         var eval = c.Evaluate(activeDisplayedOrder, 1.0f);
-                        string starStr = new string('★', eval.stars) + new string('☆', 5 - eval.stars);
                         string starCol = eval.stars >= 4 ? "2ECC71" : (eval.stars == 3 ? "FFD700" : "FF6B6B");
-                        payoutIndicatorText.text = $"<color=#BDC3C7>Drink Preview:</color>  <color=#{starCol}><b>{starStr} ({eval.stars}/5)</b></color>  <color=#7F8C8D>•</color>  <color=#00E5FF>Casual Brewing</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Take Your Time</color>";
+                        payoutIndicatorText.text = $"<color=#BDC3C7>Drink Preview:</color>  <color=#{starCol}><b>Quality: {eval.stars}/5 Stars</b></color>  <color=#7F8C8D>|</color>  <color=#00E5FF>Casual Brewing</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>Take Your Time</color>";
                     }
                     else
                     {
-                        payoutIndicatorText.text = "<color=#BDC3C7>Order Preview:</color>  <color=#00E5FF>Ready to Brew</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>No Time Limits</color>  <color=#7F8C8D>•</color>  <color=#F1C40F>Enjoy at Your Pace</color>";
+                        payoutIndicatorText.text = "<color=#BDC3C7>Order Preview:</color>  <color=#00E5FF>Ready to Brew</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>No Time Limits</color>  <color=#7F8C8D>|</color>  <color=#F1C40F>Enjoy at Your Pace</color>";
                     }
                 }
 
@@ -1646,7 +1645,7 @@ namespace BubbleTeaShop
             if (payoutIndicatorText != null)
             {
                 string currentColorHex = GetPayoutColorHex(currentPayout, minPrice, maxPrice);
-                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>•</color>  <color=#{currentColorHex}>Current: ${currentPayout:F2}</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
+                payoutIndicatorText.text = $"<color=#BDC3C7>Payout:</color>  <color=#FF6B6B>Min: ${minPrice:F2}</color>  <color=#7F8C8D>|</color>  <color=#{currentColorHex}>Current: ${currentPayout:F2}</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>Max: ${maxPrice:F2}</color>";
             }
 
             if (payoutIndicatorPanel != null && !payoutIndicatorPanel.activeSelf)

@@ -1037,7 +1037,7 @@ namespace BubbleTeaShop
             "<color=#00E5FF><b>[v1.7.0] - 2026-09-04</b></color>\n\n" +
             "<b>Endless Casual Mode:</b>\n" +
             "• <b>Zen & Cozy Game Mode:</b> Added a dedicated Casual Mode alongside Normal and Blitz for a relaxing, pressure-free bubble tea brewing experience.\n" +
-            "• <b>No Patience Pressure:</b> Customers have unlimited patience and the patience bar is hidden—brew each drink at your own relaxed pace.\n" +
+            "• <b>No Patience Pressure:</b> Customers have unlimited patience and the patience bar is hidden - brew each drink at your own relaxed pace.\n" +
             "• <b>Endless Customer Flow:</b> Continuous stream of patrons visiting your shop with immediate queue replenishment and zero day limits.\n" +
             "• <b>Infinite Ingredients & Stock:</b> Unlimited cups, teas, milks, and toppings with no inventory depletion and no financial barrier.\n" +
             "• <b>Gourmet Week 4+ Recipes:</b> Full access to gourmet order distributions including triple-topping recipes, premium milks, and artisanal combinations.\n" +
