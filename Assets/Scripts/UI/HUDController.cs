@@ -711,7 +711,7 @@ namespace BubbleTeaShop
         {
             if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
             {
-                if (cashText != null) cashText.text = "<color=#2ECC71><b>Cash: Unlimited</b></color>";
+                if (cashText != null) cashText.text = "<color=#2ECC71><b>Cash: ∞</b></color>";
                 return;
             }
             if (cashText != null) cashText.text = $"${cash:F2}";
@@ -1601,7 +1601,7 @@ namespace BubbleTeaShop
                     }
                     else
                     {
-                        payoutIndicatorText.text = "<color=#BDC3C7>Order Preview:</color>  <color=#00E5FF>Ready to Brew</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>No Time Limits</color>  <color=#7F8C8D>|</color>  <color=#F1C40F>Enjoy at Your Pace</color>";
+                        payoutIndicatorText.text = "<color=#00E5FF>Ready to Brew</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>No Time Limits</color>  <color=#7F8C8D>|</color>  <color=#F1C40F>Enjoy at Your Pace</color>";
                     }
                 }
 
