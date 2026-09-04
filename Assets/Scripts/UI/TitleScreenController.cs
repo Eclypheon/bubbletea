@@ -35,12 +35,13 @@ namespace BubbleTeaShop
         [Header("Game Mode Selection Buttons")]
         [SerializeField] private Button normalModeButton;
         [SerializeField] private Button blitzModeButton;
+        [SerializeField] private Button casualModeButton;
         [SerializeField] private Button backButton;
 
         [Header("Version & Info UI")]
         [Tooltip("Text component displaying the version number on the Title Screen.")]
         [SerializeField] private TextMeshProUGUI versionText;
-        [SerializeField] private string gameVersion = "v1.6.0";
+        [SerializeField] private string gameVersion = "v1.7.0";
 
         [Header("Options / Audio Settings UI")]
         [Tooltip("Container GameObject for Options sliders & labels. Auto-created if unassigned.")]
@@ -84,6 +85,7 @@ namespace BubbleTeaShop
         public Button ChangelogButton => changelogButton;
         public Button NormalModeButton => normalModeButton;
         public Button BlitzModeButton => blitzModeButton;
+        public Button CasualModeButton => casualModeButton;
         public Button BackButton => backButton;
         public TextMeshProUGUI VersionText => versionText;
         public Slider MusicVolumeSlider => musicVolumeSlider;
@@ -115,7 +117,7 @@ namespace BubbleTeaShop
             }
             Instance = this;
 
-            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.6.0]"))
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.7.0]"))
             {
                 changelogText = DEFAULT_CHANGELOG_TEXT;
             }
@@ -130,7 +132,7 @@ namespace BubbleTeaShop
 
         private void OnValidate()
         {
-            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.6.0]"))
+            if (string.IsNullOrEmpty(changelogText) || !changelogText.Contains("[v1.7.0]"))
             {
                 changelogText = DEFAULT_CHANGELOG_TEXT;
             }
@@ -226,6 +228,22 @@ namespace BubbleTeaShop
 
             if (normalModeButton == null) normalModeButton = FindButtonByName("NormalModeButton", "NormalBtn", "BtnNormal", "Normal");
             if (blitzModeButton == null) blitzModeButton = FindButtonByName("BlitzModeButton", "BlitzBtn", "BtnBlitz", "Blitz");
+            if (casualModeButton == null) casualModeButton = FindButtonByName("CasualModeButton", "CasualBtn", "BtnCasual", "Casual", "CasualMode", "Casual Mode");
+            if (casualModeButton == null && blitzModeButton != null)
+            {
+                var go = Instantiate(blitzModeButton.gameObject, blitzModeButton.transform.parent);
+                go.name = "Casual Mode";
+                if (go.TryGetComponent<RectTransform>(out var rt) && blitzModeButton.TryGetComponent<RectTransform>(out var blitzRt))
+                {
+                    rt.anchoredPosition = new Vector2(blitzRt.anchoredPosition.x, blitzRt.anchoredPosition.y - 100f);
+                }
+                var tmp = go.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    tmp.text = "Casual Mode";
+                }
+                casualModeButton = go.GetComponent<Button>();
+            }
             if (backButton == null) backButton = FindButtonByName("BackButton", "BackBtn", "ModeSelectBackButton", "ModeBackButton", "BackToMenuBtn");
 
             // Auto-discover version text if unassigned
@@ -342,6 +360,12 @@ namespace BubbleTeaShop
             {
                 blitzModeButton.onClick.RemoveListener(StartBlitzGame);
                 blitzModeButton.onClick.AddListener(StartBlitzGame);
+            }
+
+            if (casualModeButton != null)
+            {
+                casualModeButton.onClick.RemoveListener(StartCasualGame);
+                casualModeButton.onClick.AddListener(StartCasualGame);
             }
 
             if (backButton != null)
@@ -1010,6 +1034,15 @@ namespace BubbleTeaShop
         }
 
         private const string DEFAULT_CHANGELOG_TEXT =
+            "<color=#00E5FF><b>[v1.7.0] - 2026-09-04</b></color>\n\n" +
+            "<b>Endless Casual Mode:</b>\n" +
+            "• <b>Zen & Cozy Game Mode:</b> Added a dedicated Casual Mode alongside Normal and Blitz for a relaxing, pressure-free bubble tea brewing experience.\n" +
+            "• <b>No Patience Pressure:</b> Customers have unlimited patience and the patience bar is hidden—brew each drink at your own relaxed pace.\n" +
+            "• <b>Endless Customer Flow:</b> Continuous stream of patrons visiting your shop with immediate queue replenishment and zero day limits.\n" +
+            "• <b>Infinite Ingredients & Stock:</b> Unlimited cups, teas, milks, and toppings with no inventory depletion and no financial barrier.\n" +
+            "• <b>Gourmet Week 4+ Recipes:</b> Full access to gourmet order distributions including triple-topping recipes, premium milks, and artisanal combinations.\n" +
+            "• <b>Peaceful Atmosphere:</b> No rent deadlines, no landlady visits, no mentor interruptions, and no market event swings.\n" +
+            "• <b>Calibrated Zen HUD:</b> HUD text and counters updated for casual play, with instant Quit to Title support whenever you're done brewing.\n\n" +
             "<color=#FF66CC><b>[v1.6.0] - 2026-09-03</b></color>\n\n" +
             "<b>Market Events Overhaul & Impactful Economics:</b>\n" +
             "• <b>Impactful Market Events:</b> Made market events more impactful to players with dynamic supply & demand economics, 75% trigger rate, and realistic price swings.\n" +
@@ -1120,6 +1153,7 @@ namespace BubbleTeaShop
             // Hide Game Mode selection buttons & Back button
             SetButtonVisible(normalModeButton, false);
             SetButtonVisible(blitzModeButton, false);
+            SetButtonVisible(casualModeButton, false);
             SetButtonVisible(backButton, false);
 
             UpdateContinueButtonState();
@@ -1144,6 +1178,7 @@ namespace BubbleTeaShop
             // Show Game Mode selection buttons & Back button
             SetButtonVisible(normalModeButton, true);
             SetButtonVisible(blitzModeButton, true);
+            SetButtonVisible(casualModeButton, true);
             SetButtonVisible(backButton, true);
         }
 
@@ -1166,6 +1201,7 @@ namespace BubbleTeaShop
             // Hide Game Mode selection buttons
             SetButtonVisible(normalModeButton, false);
             SetButtonVisible(blitzModeButton, false);
+            SetButtonVisible(casualModeButton, false);
 
             // Show Options & Back Button
             if (optionsContainer != null) optionsContainer.SetActive(true);
@@ -1234,6 +1270,7 @@ namespace BubbleTeaShop
             // Hide Game Mode selection buttons
             SetButtonVisible(normalModeButton, false);
             SetButtonVisible(blitzModeButton, false);
+            SetButtonVisible(casualModeButton, false);
 
             // Show Credits & Back Button
             if (creditsContainer != null) creditsContainer.SetActive(true);
@@ -1264,6 +1301,7 @@ namespace BubbleTeaShop
             // Hide Game Mode selection buttons
             SetButtonVisible(normalModeButton, false);
             SetButtonVisible(blitzModeButton, false);
+            SetButtonVisible(casualModeButton, false);
 
             // Show Changelog & Back Button
             if (changelogContainer != null)
@@ -1303,6 +1341,14 @@ namespace BubbleTeaShop
             HideTitleScreen();
             OnGameStarted?.Invoke(GameMode.Blitz);
             GameManager.Instance?.StartGame(GameMode.Blitz);
+        }
+
+        public void StartCasualGame()
+        {
+            PlayStartSound();
+            HideTitleScreen();
+            OnGameStarted?.Invoke(GameMode.Casual);
+            GameManager.Instance?.StartGame(GameMode.Casual);
         }
 
         public void ContinueGame()

@@ -71,7 +71,7 @@ namespace BubbleTeaShop
         public bool IsUpgradesUnlocked()
         {
             if (bypassDayRequirementForTesting) return true;
-            if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) return false;
+            if (GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode)) return false;
             int day = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             return day >= 8;
         }

@@ -17,8 +17,8 @@ namespace BubbleTeaShop
 
         private void CheckVisibility()
         {
-            bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
-            bool isVisible = isBlitz || (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser) || (DayManager.Instance != null && DayManager.Instance.CurrentDay > 2);
+            bool isBlitzOrCasual = GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode);
+            bool isVisible = isBlitzOrCasual || (InventoryManager.Instance != null && InventoryManager.Instance.HasPremiumMilkDispenser) || (DayManager.Instance != null && DayManager.Instance.CurrentDay > 2);
 
             var graphics = GetComponentsInChildren<Graphic>(true);
             foreach (var g in graphics)

@@ -5,7 +5,8 @@ namespace BubbleTeaShop
     public enum GameMode
     {
         Normal,
-        Blitz
+        Blitz,
+        Casual
     }
 
     public enum GameDifficulty

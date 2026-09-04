@@ -709,6 +709,11 @@ namespace BubbleTeaShop
 
         private void UpdateCashDisplay(float cash)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                if (cashText != null) cashText.text = "<color=#2ECC71><b>Cash: ∞</b></color>";
+                return;
+            }
             if (cashText != null) cashText.text = $"${cash:F2}";
         }
 
@@ -731,6 +736,13 @@ namespace BubbleTeaShop
 
         public void UpdateDayDisplay(int day)
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                if (dayText != null) dayText.text = "<color=#00E5FF><b>Casual</b></color>";
+                if (rentTimerText != null) rentTimerText.text = "<color=#F1C40F><b>No Rush 🌸</b></color>";
+                return;
+            }
+
             if (dayText != null) dayText.text = $"Day {day}";
             
             if (rentTimerText != null && EconomyManager.Instance != null)
@@ -747,7 +759,7 @@ namespace BubbleTeaShop
         {
             if (customerCountText != null)
             {
-                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                if (GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode))
                 {
                     int served = DayManager.Instance != null ? DayManager.Instance.CustomersServedToday : 0;
                     customerCountText.text = $"Served: {served}";
@@ -1234,7 +1246,7 @@ namespace BubbleTeaShop
 
         public void ShowFloatingCashGain(float amount)
         {
-            if (amount <= 0) return;
+            if (amount <= 0 || (GameManager.Instance != null && GameManager.Instance.IsCasualMode)) return;
 
             EnsureCashGainUI();
             if (cashGainDeltaText == null) return;
@@ -1576,6 +1588,32 @@ namespace BubbleTeaShop
 
             EnsurePayoutIndicatorUI();
 
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                if (payoutIndicatorText != null)
+                {
+                    BubbleTeaCup c = CupStation.Instance != null ? CupStation.Instance.CurrentCup : null;
+                    if (c != null && c.hasCup)
+                    {
+                        var eval = c.Evaluate(activeDisplayedOrder, 1.0f);
+                        string starStr = new string('★', eval.stars) + new string('☆', 5 - eval.stars);
+                        string starCol = eval.stars >= 4 ? "2ECC71" : (eval.stars == 3 ? "FFD700" : "FF6B6B");
+                        payoutIndicatorText.text = $"<color=#BDC3C7>Drink Preview:</color>  <color=#{starCol}><b>{starStr} ({eval.stars}/5)</b></color>  <color=#7F8C8D>•</color>  <color=#00E5FF>Casual Brewing</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>Take Your Time</color>";
+                    }
+                    else
+                    {
+                        payoutIndicatorText.text = "<color=#BDC3C7>Order Preview:</color>  <color=#00E5FF>Ready to Brew</color>  <color=#7F8C8D>•</color>  <color=#2ECC71>No Time Limits</color>  <color=#7F8C8D>•</color>  <color=#F1C40F>Enjoy at Your Pace</color>";
+                    }
+                }
+
+                if (payoutIndicatorPanel != null && !payoutIndicatorPanel.activeSelf)
+                {
+                    payoutIndicatorPanel.SetActive(true);
+                    payoutIndicatorPanel.transform.SetAsLastSibling();
+                }
+                return;
+            }
+
             float basePrice = (float)(Math.Round(activeDisplayedOrder.basePrice * 10.0, MidpointRounding.AwayFromZero) / 10.0);
             float minPrice = (float)(Math.Round((basePrice * 0.30f) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
 
@@ -1676,6 +1714,19 @@ namespace BubbleTeaShop
             {
                 bool isEndless = EconomyManager.Instance != null && EconomyManager.Instance.IsEndlessMode;
                 statusHintText.text = isEndless ? "Chairwoman Chubi has arrived!" : "The Landlady has arrived!";
+                return;
+            }
+
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                statusHintText.text = state switch
+                {
+                    GameState.MorningPrep => "Open the shutters to begin brewing!",
+                    GameState.ShopOpen => "Ring the bell to call the next customer.",
+                    GameState.CustomerWaiting => "Prepare the customer's order at your own pace!",
+                    GameState.CustomerReacting => "Customer is enjoying their drink!",
+                    _ => "Casual Mode: Endless brewing, zero pressure."
+                };
                 return;
             }
 

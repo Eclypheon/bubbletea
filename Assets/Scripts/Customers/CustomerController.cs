@@ -52,7 +52,7 @@ namespace BubbleTeaShop
         private Coroutine leaveRoutine;
 
         public DrinkOrder ActiveOrder => activeOrder;
-        public float PatiencePercent => Mathf.Clamp01(currentPatience / maxPatience);
+        public float PatiencePercent => (GameManager.Instance != null && GameManager.Instance.IsCasualMode) ? 1.0f : Mathf.Clamp01(currentPatience / maxPatience);
         public bool IsActive => isWaiting || isLandlordActive;
         public bool IsWaitingDrink => isWaiting;
         public bool IsLandlordActive => isLandlordActive;
@@ -94,8 +94,9 @@ namespace BubbleTeaShop
             if (!isWaiting) return;
 
             bool hasInfiniteAmbience = UpgradeManager.Instance != null && UpgradeManager.Instance.HasUpgrade(UpgradeType.ImproveStoreAmbience);
+            bool isCasual = GameManager.Instance != null && GameManager.Instance.IsCasualMode;
 
-            if (hasInfiniteAmbience)
+            if (hasInfiniteAmbience || isCasual)
             {
                 // Hide patience bar entirely
                 if (patienceFillImage != null && patienceFillImage.transform.parent != null)
@@ -168,21 +169,34 @@ namespace BubbleTeaShop
 
             transform.SetAsLastSibling();
 
+            bool isCasual = GameManager.Instance != null && GameManager.Instance.IsCasualMode;
+
             if (patienceFillImage != null)
             {
-                if (patienceFillImage.sprite == null)
+                if (!isCasual)
                 {
-                    Texture2D whiteTex = Texture2D.whiteTexture;
-                    patienceFillImage.sprite = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+                    if (patienceFillImage.sprite == null)
+                    {
+                        Texture2D whiteTex = Texture2D.whiteTexture;
+                        patienceFillImage.sprite = Sprite.Create(whiteTex, new Rect(0, 0, whiteTex.width, whiteTex.height), new Vector2(0.5f, 0.5f));
+                    }
+                    if (patienceFillImage.transform.parent != null)
+                    {
+                        patienceFillImage.transform.parent.gameObject.SetActive(true);
+                        patienceFillImage.transform.parent.SetAsLastSibling();
+                    }
+                    patienceFillImage.gameObject.SetActive(true);
+                    patienceFillImage.fillAmount = 1f;
+                    patienceFillImage.color = Color.green;
                 }
-                if (patienceFillImage.transform.parent != null)
+                else
                 {
-                    patienceFillImage.transform.parent.gameObject.SetActive(true);
-                    patienceFillImage.transform.parent.SetAsLastSibling();
+                    if (patienceFillImage.transform.parent != null)
+                    {
+                        patienceFillImage.transform.parent.gameObject.SetActive(false);
+                    }
+                    patienceFillImage.gameObject.SetActive(false);
                 }
-                patienceFillImage.gameObject.SetActive(true);
-                patienceFillImage.fillAmount = 1f;
-                patienceFillImage.color = Color.green;
             }
 
             UpdateCustomerSprite(order.archetype);
@@ -230,17 +244,22 @@ namespace BubbleTeaShop
             if (leaveRoutine != null) StopCoroutine(leaveRoutine);
 
             EvaluationResult evaluation = cup.Evaluate(activeOrder, PatiencePercent);
-            float totalEarned = (float)(Math.Round((evaluation.earnedMoney + evaluation.tip) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
-            if (totalEarned > 0)
-            {
-                HUDController.Instance?.ShowFloatingCashGain(totalEarned);
-            }
+            bool isCasual = GameManager.Instance != null && GameManager.Instance.IsCasualMode;
 
-            EconomyManager.Instance?.AddCash(evaluation.earnedMoney, $"Drink Sale ({activeOrder.archetype})");
-            
-            if (evaluation.tip > 0)
+            if (!isCasual)
             {
-                EconomyManager.Instance?.AddCash(evaluation.tip, "Customer Tip");
+                float totalEarned = (float)(Math.Round((evaluation.earnedMoney + evaluation.tip) * 10.0, MidpointRounding.AwayFromZero) / 10.0);
+                if (totalEarned > 0)
+                {
+                    HUDController.Instance?.ShowFloatingCashGain(totalEarned);
+                }
+
+                EconomyManager.Instance?.AddCash(evaluation.earnedMoney, $"Drink Sale ({activeOrder.archetype})");
+                
+                if (evaluation.tip > 0)
+                {
+                    EconomyManager.Instance?.AddCash(evaluation.tip, "Customer Tip");
+                }
             }
 
             DayManager.Instance?.RecordCustomerServed(evaluation.earnedMoney, evaluation.tip);

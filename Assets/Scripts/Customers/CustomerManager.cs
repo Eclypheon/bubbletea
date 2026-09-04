@@ -101,10 +101,17 @@ namespace BubbleTeaShop
         {
             if (state == GameState.ShopOpen)
             {
-                // In Blitz mode, skip mentor briefings and landlady cutscenes
-                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                // In Blitz and Casual modes, skip mentor briefings and landlady cutscenes
+                if (GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode))
                 {
-                    HUDController.Instance?.SetStatusHint("BLITZ MODE: Serve as many drinks as possible before time runs out!");
+                    if (GameManager.Instance.IsCasualMode)
+                    {
+                        HUDController.Instance?.SetStatusHint("CASUAL MODE: Endless customers, no hurry, infinite ingredients. Enjoy brewing!");
+                    }
+                    else
+                    {
+                        HUDController.Instance?.SetStatusHint("BLITZ MODE: Serve as many drinks as possible before time runs out!");
+                    }
                     return;
                 }
 
@@ -146,7 +153,7 @@ namespace BubbleTeaShop
             rentEncounterTriggeredToday = false;
             hasTriggeredDay4EventBriefing = false;
 
-            int count = (GameManager.Instance != null && GameManager.Instance.IsBlitzMode) ? 100 : (DayManager.Instance != null ? DayManager.Instance.TotalCustomersToday : 5);
+            int count = (GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode)) ? 100 : (DayManager.Instance != null ? DayManager.Instance.TotalCustomersToday : 5);
 
             for (int i = 0; i < count; i++)
             {
@@ -219,8 +226,8 @@ namespace BubbleTeaShop
             awaitingDismissalConfirmation = false;
             if (dailyCustomerQueue.Count == 0)
             {
-                // In Blitz mode, replenish queue continuously so customers never run out
-                if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode)
+                // In Blitz and Casual modes, replenish queue continuously so customers never run out
+                if (GameManager.Instance != null && (GameManager.Instance.IsBlitzMode || GameManager.Instance.IsCasualMode))
                 {
                     for (int i = 0; i < 20; i++)
                     {
@@ -276,12 +283,26 @@ namespace BubbleTeaShop
                 return;
             }
 
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                customerController?.DismissCustomer();
+                SpawnNextInQueue();
+                return;
+            }
+
             CheckRemainingCustomers();
         }
 
         private void HandleCustomerFinishedAngry(CustomerController customer)
         {
             if (GameManager.Instance != null && GameManager.Instance.IsBlitzMode && GameManager.Instance.BlitzTimeRemaining > 0f)
+            {
+                customerController?.DismissCustomer();
+                SpawnNextInQueue();
+                return;
+            }
+
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
             {
                 customerController?.DismissCustomer();
                 SpawnNextInQueue();
@@ -512,7 +533,8 @@ namespace BubbleTeaShop
 
             int currentDay = DayManager.Instance != null ? DayManager.Instance.CurrentDay : 1;
             bool isBlitz = GameManager.Instance != null && GameManager.Instance.IsBlitzMode;
-            if (isBlitz)
+            bool isCasual = GameManager.Instance != null && GameManager.Instance.IsCasualMode;
+            if (isBlitz || isCasual)
             {
                 currentDay = 22; // Always follow Week 4 gourmet order distribution
             }

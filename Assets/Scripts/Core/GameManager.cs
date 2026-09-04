@@ -25,6 +25,7 @@ namespace BubbleTeaShop
         public GameDifficulty CurrentDifficulty => currentDifficulty;
         public GameState CurrentState => currentState;
         public bool IsBlitzMode => currentGameMode == GameMode.Blitz;
+        public bool IsCasualMode => currentGameMode == GameMode.Casual;
         public bool IsGameStarted => isGameStarted;
         public float BlitzTimeRemaining => blitzTimeRemaining;
 
@@ -143,8 +144,11 @@ namespace BubbleTeaShop
             isGameStarted = true;
             blitzTimeRemaining = DefaultBlitzDayDuration;
 
-            // Clear previous save data for a fresh run
-            SaveManager.Instance?.ClearSave();
+            // Clear previous save data for a fresh run (unless in casual mode to avoid wiping story save)
+            if (mode != GameMode.Casual)
+            {
+                SaveManager.Instance?.ClearSave();
+            }
             DayManager.Instance?.ResetDays();
             EconomyManager.Instance?.ResetToStartingEconomy();
             InventoryManager.Instance?.ResetToStartingInventory();
@@ -152,11 +156,15 @@ namespace BubbleTeaShop
 
             if (mode == GameMode.Blitz)
             {
-                Debug.Log("[GameManager] Starting BLITZ MODE: 30s timer, infinite ingredients, perfect ambience, endless progression.");
+                Debug.Log("[GameManager] Starting BLITZ MODE: 60s timer, infinite ingredients, perfect ambience, endless progression.");
                 if (EconomyManager.Instance != null)
                 {
                     EconomyManager.Instance.SetEndlessMode(true);
                 }
+            }
+            else if (mode == GameMode.Casual)
+            {
+                Debug.Log("[GameManager] Starting CASUAL MODE: Endless customers, no timer, infinite ingredients, pure relaxation.");
             }
             else
             {
@@ -164,12 +172,18 @@ namespace BubbleTeaShop
             }
 
             StartNewDaySequence();
-            SaveManager.Instance?.SaveGame();
+            if (mode != GameMode.Casual)
+            {
+                SaveManager.Instance?.SaveGame();
+            }
 
             blitzTimeRemaining = DefaultBlitzDayDuration;
             OnBlitzTimerUpdated?.Invoke(blitzTimeRemaining);
             HUDController.Instance?.UpdateBlitzTimer(blitzTimeRemaining);
-            HUDController.Instance?.SetStatusHint("Open the shutter to start the day!");
+            HUDController.Instance?.RefreshHUDDisplay();
+            HUDController.Instance?.SetStatusHint(mode == GameMode.Casual
+                ? "Welcome to Casual Mode! Open the shutter to start brewing."
+                : "Open the shutter to start the day!");
         }
 
         public bool HasSavedProgress()
@@ -246,13 +260,16 @@ namespace BubbleTeaShop
             {
                 SetState(GameState.ShopOpen);
 
-                if (IsBlitzMode)
+                if (IsBlitzMode || IsCasualMode)
                 {
-                    blitzTimeRemaining = DefaultBlitzDayDuration;
-                    OnBlitzTimerUpdated?.Invoke(blitzTimeRemaining);
-                    HUDController.Instance?.UpdateBlitzTimer(blitzTimeRemaining);
+                    if (IsBlitzMode)
+                    {
+                        blitzTimeRemaining = DefaultBlitzDayDuration;
+                        OnBlitzTimerUpdated?.Invoke(blitzTimeRemaining);
+                        HUDController.Instance?.UpdateBlitzTimer(blitzTimeRemaining);
+                    }
 
-                    // Immediately spawn the first customer in Blitz mode
+                    // Immediately spawn the first customer in Blitz and Casual modes
                     CustomerManager.Instance?.TryCallNextCustomer();
                 }
             }

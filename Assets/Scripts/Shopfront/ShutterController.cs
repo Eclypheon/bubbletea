@@ -164,7 +164,13 @@ namespace BubbleTeaShop
                     return;
                 }
 
-                // 3. Normal / Blitz closing condition
+                // 3. Normal / Blitz / Casual closing condition
+                if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+                {
+                    HUDController.Instance?.ShowNotification("Casual mode is endless! Click Quit when you're done brewing.", 3.5f);
+                    return;
+                }
+
                 bool isBlitzFinished = GameManager.Instance != null && GameManager.Instance.IsBlitzMode && (GameManager.Instance.BlitzTimeRemaining <= 0f || DayManager.Instance.IsDayFinished);
 
                 if (DayManager.Instance.IsDayFinished || GameManager.Instance.CurrentState == GameState.ShopClosing || isBlitzFinished)

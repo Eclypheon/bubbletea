@@ -30,8 +30,8 @@ namespace BubbleTeaShop
         [Tooltip("Select any market event from this dropdown to preview its icon and test its mechanics in-game.")]
         [SerializeField] private MarketEventType testEventSelection = MarketEventType.None;
 
-        public MarketEvent ActiveEvent => (activeEvent != null && !string.IsNullOrEmpty(activeEvent.eventId) && !string.IsNullOrEmpty(activeEvent.title)) ? activeEvent : null;
-        public bool HasNewEventToday => hasNewEventToday && ActiveEvent != null;
+        public MarketEvent ActiveEvent => (GameManager.Instance != null && GameManager.Instance.IsCasualMode) ? null : ((activeEvent != null && !string.IsNullOrEmpty(activeEvent.eventId) && !string.IsNullOrEmpty(activeEvent.title)) ? activeEvent : null);
+        public bool HasNewEventToday => (GameManager.Instance != null && GameManager.Instance.IsCasualMode) ? false : (hasNewEventToday && ActiveEvent != null);
         public MarketEventType TestEventSelection => testEventSelection;
 
         public event Action<MarketEvent> OnMarketEventTriggered;
@@ -120,6 +120,12 @@ namespace BubbleTeaShop
         public void EvaluateDailyEvent(int dayNumber)
         {
             hasNewEventToday = false;
+
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                activeEvent = null;
+                return;
+            }
 
             if (activeEvent != null && (string.IsNullOrEmpty(activeEvent.eventId) || string.IsNullOrEmpty(activeEvent.title)))
             {

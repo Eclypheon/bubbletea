@@ -33,7 +33,7 @@ namespace BubbleTeaShop
         public float DailySalesTotal => dailySalesTotal;
         public float DailyTipsTotal => dailyTipsTotal;
         public bool HadNightActivityLastNight => hadNightActivityLastNight;
-        public bool IsDayFinished => ProcessedCustomersToday >= totalCustomersToday;
+        public bool IsDayFinished => (GameManager.Instance != null && GameManager.Instance.IsCasualMode) ? false : (ProcessedCustomersToday >= totalCustomersToday);
 
         public event Action<int> OnDayStarted;
         public event Action<int, float, float> OnDayCompleted; // day, sales, tips

@@ -110,6 +110,12 @@ namespace BubbleTeaShop
 
         public void SaveGame()
         {
+            if (GameManager.Instance != null && GameManager.Instance.IsCasualMode)
+            {
+                // Casual mode is an endless no-stakes session; do not overwrite persistent story save
+                return;
+            }
+
             try
             {
                 GameSaveData data = new GameSaveData
