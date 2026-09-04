@@ -1,0 +1,19 @@
+{
+  "name": "Yippee Bubble Tea Shop Simulator",
+  "short_name": "Yippee Tea",
+  "description": "Brew teas, manage stock, and run your cozy bubble tea shop!",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#12141c",
+  "theme_color": "#12141c",
+  "icons": [
+    {
+      "src": "TemplateData/icon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
