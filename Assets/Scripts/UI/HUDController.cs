@@ -1597,7 +1597,7 @@ namespace BubbleTeaShop
                     {
                         var eval = c.Evaluate(activeDisplayedOrder, 1.0f);
                         string starCol = eval.stars >= 4 ? "2ECC71" : (eval.stars == 3 ? "FFD700" : "FF6B6B");
-                        payoutIndicatorText.text = $"<color=#BDC3C7>Drink Preview:</color>  <color=#{starCol}><b>Quality: {eval.stars}/5 Stars</b></color>  <color=#7F8C8D>|</color>  <color=#00E5FF>Casual Brewing</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>Take Your Time</color>";
+                        payoutIndicatorText.text = $"<color=#{starCol}><b>Quality: {eval.stars}/5 Stars</b></color>  <color=#7F8C8D>|</color>  <color=#00E5FF>Casual Brewing</color>  <color=#7F8C8D>|</color>  <color=#2ECC71>Take Your Time</color>";
                     }
                     else
                     {
