@@ -187,6 +187,28 @@
 
     <script src="unmute.js"></script>
     <script>
+      // Resilient WebAssembly instantiation wrapper for Mobile Safari & environments
+      // where streaming compilation fails due to Content-Encoding, CDN compression, or memory limits.
+      if (typeof WebAssembly !== 'undefined' && typeof WebAssembly.instantiateStreaming === 'function') {
+        var origInstantiateStreaming = WebAssembly.instantiateStreaming;
+        WebAssembly.instantiateStreaming = async function(responsePromise, importObject) {
+          try {
+            var response = await responsePromise;
+            var cloned = (response && typeof response.clone === 'function') ? response.clone() : null;
+            return await origInstantiateStreaming(response, importObject).catch(async function(streamErr) {
+              console.warn('WebAssembly.instantiateStreaming failed, gracefully compiling via ArrayBuffer fallback:', streamErr);
+              if (cloned) {
+                var bytes = await cloned.arrayBuffer();
+                return await WebAssembly.instantiate(bytes, importObject);
+              }
+              throw streamErr;
+            });
+          } catch (e) {
+            return origInstantiateStreaming(responsePromise, importObject);
+          }
+        };
+      }
+
       // Automatically bind unmute.js to AudioContext instances for iOS silent mode support
       var origAudioContext = window.AudioContext || window.webkitAudioContext;
       if (origAudioContext) {
@@ -332,6 +354,11 @@
       }
 
       function unityShowBanner(msg, type) {
+        // Suppress non-fatal WebAssembly streaming compilation warning (fallback handles instantiation cleanly)
+        if (type === 'warning' && typeof msg === 'string' && msg.indexOf('WebAssembly streaming compilation failed') !== -1) {
+          console.warn(msg);
+          return;
+        }
         var warningBanner = document.querySelector("#unity-warning");
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
