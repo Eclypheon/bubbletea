@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "com.neokester.gametoolkit": {
+      "version": "file:/Users/neokester/UnityPackages/com.neokester.gametoolkit",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "13.0.5",
       "depth": 0,
